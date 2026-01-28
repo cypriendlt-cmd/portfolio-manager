@@ -924,318 +924,276 @@
         </section>
     </div>
 
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
-        <script src="https://apis.google.com/js/api.js" async defer></script>
-    <script>
-        // Global State
-        let portfolio = {
-            crypto: [],
-            pea: [],
-            fundraising: []
-        };
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
 
-        let priceCache = {};
-        let charts = {};
-        let tokenClient = null;
-        let accessToken = null;
-        let driveFileId = null;
-        let isGoogleDriveConnected = false;
+<script>
+  // =========================
+  // Global State
+  // =========================
+  let portfolio = { crypto: [], pea: [], fundraising: [] };
+  let priceCache = {};
+  let charts = {};
 
-        // Google Drive Configuration
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
-        const FILENAME = 'portfolio-data.json';
+  // Google
+  let tokenClient = null;
+  let accessToken = null;
+  let driveFileId = null;
+  let isGoogleDriveConnected = false;
 
-        // Initialize
-document.addEventListener('DOMContentLoaded', () => {
-  loadData();
-  updateDashboard();
-  updateMarketIndicators();
+  // Google Drive Configuration
+  const SCOPES = "https://www.googleapis.com/auth/drive.file";
+  const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+  const FILENAME = "portfolio-data.json";
 
-  // Attendre que gapi soit chargé
-  waitForGapiThenInit();
-
-  setInterval(() => {
-    if (isGoogleDriveConnected) syncData();
+  // =========================
+  // Init app
+  // =========================
+  document.addEventListener("DOMContentLoaded", () => {
+    loadData();
     updateDashboard();
-  }, 300000);
+    updateMarketIndicators();
 
-  setInterval(updateMarketIndicators, 300000);
-});
+    // init Google (when gapi is ready)
+    waitForGapiThenInit();
 
-function waitForGapiThenInit() {
-  const t = setInterval(() => {
-    if (window.gapi && gapi.load) {
-      clearInterval(t);
-      checkGoogleDriveConnection(); // ton init Google démarre ici
+    // Auto-sync every 5 min
+    setInterval(() => {
+      if (isGoogleDriveConnected) syncData();
+      updateDashboard();
+    }, 300000);
+
+    // Update market indicators every 5 min
+    setInterval(updateMarketIndicators, 300000);
+  });
+
+  function waitForGapiThenInit() {
+    const t = setInterval(() => {
+      if (window.gapi && gapi.load) {
+        clearInterval(t);
+        checkGoogleDriveConnection();
+      }
+    }, 50);
+  }
+
+  // =========================
+  // Navigation (FIX: no implicit event)
+  // =========================
+  function showSection(sectionName, btnEl) {
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+
+    const section = document.getElementById(sectionName);
+    if (section) section.classList.add("active");
+    if (btnEl) btnEl.classList.add("active");
+
+    if (sectionName === "dashboard") updateDashboard();
+  }
+
+  // IMPORTANT: update your HTML buttons like:
+  // onclick="showSection('dashboard', this)"
+  // onclick="showSection('crypto', this)" etc.
+
+  // =========================
+  // Google Drive (GIS + gapi client only)
+  // =========================
+  function saveClientId() {
+    const clientId = document.getElementById("clientId").value.trim();
+    if (!clientId) {
+      alert("Veuillez entrer un Client ID valide");
+      return;
     }
-  }, 50);
-} 
-// Auto-sync every 5 minutes if connected
-            setInterval(() => {
-                if (isGoogleDriveConnected) {
-                    syncData();
-                }
-                updateDashboard();
-            }, 300000);
-            
-            // Update market indicators every 5 minutes
-            setInterval(updateMarketIndicators, 300000);
+
+    localStorage.setItem("googleClientId", clientId);
+    document.getElementById("connectBtn").disabled = false;
+    showStatus("Client ID enregistré avec succès !", "success");
+
+    initGoogle(); // prepare gapi client + token client
+  }
+
+  function checkGoogleDriveConnection() {
+    const clientId = localStorage.getItem("googleClientId");
+    if (clientId) {
+      const input = document.getElementById("clientId");
+      if (input) input.value = clientId;
+      document.getElementById("connectBtn").disabled = false;
+      initGoogle();
+    }
+  }
+
+  function initGoogle() {
+    const clientId =
+      localStorage.getItem("googleClientId") ||
+      document.getElementById("clientId")?.value?.trim();
+
+    if (!clientId) return;
+
+    // 1) Init gapi client (Drive API) WITHOUT auth2
+    gapi.load("client", async () => {
+      try {
+        await gapi.client.init({ discoveryDocs: DISCOVERY_DOCS });
+        console.log("gapi client init OK (no auth2)");
+        showStatus('API Google prête. Cliquez sur "Se connecter à Google Drive".', "success");
+      } catch (e) {
+        console.error("gapi init error:", e);
+        showStatus("Erreur init Google API (gapi).", "error");
+      }
+    });
+
+    // 2) Init GIS token client
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: SCOPES,
+      callback: (resp) => {
+        if (resp.error) {
+          console.error("Token error:", resp);
+          showStatus("Erreur d'authentification : " + resp.error, "error");
+          return;
+        }
+        accessToken = resp.access_token;
+        gapi.client.setToken({ access_token: accessToken }); //  critical
+        handleAuthSuccess();
+      }
+    });
+  }
+
+  function connectGoogleDrive() {
+    if (!tokenClient) {
+      showStatus("Client OAuth non initialisé. Cliquez sur 'Enregistrer le Client ID'.", "error");
+      return;
+    }
+    // First time => consent prompt
+    tokenClient.requestAccessToken({ prompt: "consent" });
+  }
+
+  function handleAuthSuccess() {
+    isGoogleDriveConnected = true;
+
+    document.getElementById("syncIndicator").classList.add("connected");
+    document.getElementById("syncStatus").textContent = "Synchronisé avec Google Drive";
+    document.getElementById("connectBtn").style.display = "none";
+    document.getElementById("disconnectBtn").style.display = "inline-block";
+
+    showStatus("Connecté à Google Drive avec succès !", "success");
+    loadFromDrive();
+  }
+
+  function disconnectGoogleDrive() {
+    if (accessToken) {
+      google.accounts.oauth2.revoke(accessToken, () => console.log("Token revoked"));
+    }
+    accessToken = null;
+    driveFileId = null;
+    isGoogleDriveConnected = false;
+
+    document.getElementById("syncIndicator").classList.remove("connected");
+    document.getElementById("syncStatus").textContent = "Non synchronisé";
+    document.getElementById("connectBtn").style.display = "inline-block";
+    document.getElementById("disconnectBtn").style.display = "none";
+
+    showStatus("Déconnecté de Google Drive", "success");
+  }
+
+  async function syncData() {
+    if (!isGoogleDriveConnected) {
+      showStatus("Non connecté à Google Drive", "error");
+      return;
+    }
+    try {
+      await saveToDrive();
+      showStatus("Données synchronisées avec succès !", "success");
+    } catch (e) {
+      console.error("Sync error:", e);
+      showStatus("Erreur de synchronisation : " + (e.message || ""), "error");
+    }
+  }
+
+  async function saveToDrive() {
+    if (!accessToken) throw new Error("Pas de token OAuth");
+
+    const data = JSON.stringify(portfolio, null, 2);
+    const metadata = { name: FILENAME, mimeType: "application/json" };
+
+    const form = new FormData();
+    form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+    form.append("file", new Blob([data], { type: "application/json" }));
+
+    let url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
+    if (driveFileId) url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`;
+
+    const res = await fetch(url, {
+      method: driveFileId ? "PATCH" : "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: form
+    });
+
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const result = await res.json();
+
+    if (!driveFileId) {
+      driveFileId = result.id;
+      localStorage.setItem("driveFileId", driveFileId);
+    }
+  }
+
+  async function loadFromDrive() {
+    if (!accessToken) return;
+
+    try {
+      const savedFileId = localStorage.getItem("driveFileId");
+      if (savedFileId) driveFileId = savedFileId;
+
+      gapi.client.setToken({ access_token: accessToken });
+
+      const listRes = await gapi.client.drive.files.list({
+        q: `name='${FILENAME}' and trashed=false`,
+        fields: "files(id, name)",
+        spaces: "drive"
+      });
+
+      if (listRes.result.files && listRes.result.files.length > 0) {
+        driveFileId = listRes.result.files[0].id;
+        localStorage.setItem("driveFileId", driveFileId);
+
+        const fileRes = await gapi.client.drive.files.get({
+          fileId: driveFileId,
+          alt: "media"
         });
 
-        // Navigation
-        function showSection(sectionName) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById(sectionName).classList.add('active');
-            event.target.classList.add('active');
-            
-            if (sectionName === 'dashboard') {
-                updateDashboard();
-            }
-        }
+        portfolio = JSON.parse(fileRes.body);
+        saveData();
+        updateDashboard();
+        showStatus("Données chargées depuis Google Drive", "success");
+      } else {
+        await saveToDrive();
+        showStatus("Nouveau fichier créé sur Google Drive", "success");
+      }
+    } catch (e) {
+      console.error("Load from Drive error:", e);
+      showStatus("Erreur de chargement Drive : " + (e.message || ""), "error");
+    }
+  }
 
-        // Navigation
-        function showSection(sectionName) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById(sectionName).classList.add('active');
-            event.target.classList.add('active');
-            
-            if (sectionName === 'dashboard') {
-                updateDashboard();
-            }
-        }
+  function showStatus(message, type) {
+    const statusDiv = document.getElementById("connectionStatus");
+    if (!statusDiv) return;
+    statusDiv.innerHTML =
+      `<div class="alert alert-${type === "success" ? "success" : type === "error" ? "warning" : "info"}">${message}</div>`;
+    setTimeout(() => (statusDiv.innerHTML = ""), 5000);
+  }
 
-        // Google Drive Functions
-        function saveClientId() {
-            const clientId = document.getElementById('clientId').value.trim();
-            if (!clientId) {
-                alert('Veuillez entrer un Client ID valide');
-                return;
-            }
-            
-            localStorage.setItem('googleClientId', clientId);
-            document.getElementById('connectBtn').disabled = false;
-            showStatus('Client ID enregistré avec succès!', 'success');
-            
-            // Initialize Google Identity Services
-            initializeGIS();
-        }
+  // =========================
+  // Data persistence
+  // =========================
+  function saveData() {
+    localStorage.setItem("portfolioData", JSON.stringify(portfolio));
+  }
 
-        function initializeGIS() {
-            const clientId = localStorage.getItem('googleClientId');
-            if (!clientId) return;
-
-            // Initialize the Google API client
-            gapi.load('client', async () => {
-                try {
-                    await gapi.client.init({
-                        discoveryDocs: DISCOVERY_DOCS,
-                    });
-                    
-                    showStatus('API Google chargée avec succès. Prêt à se connecter.', 'success');
-                } catch (error) {
-                    console.error('Error loading GAPI client:', error);
-                    showStatus('Erreur de chargement de l\'API Google: ' + error.message, 'error');
-                }
-            });
-
-            // Initialize Google Identity Services token client
-            try {
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: clientId,
-                    scope: SCOPES,
-                    callback: (response) => {
-                        if (response.error) {
-                            console.error('Token error:', response);
-                            showStatus('Erreur d\'authentification: ' + response.error, 'error');
-                            return;
-                        }
-                        
-                        accessToken = response.access_token;
-                        handleAuthSuccess();
-                    },
-                });
-                
-                showStatus('Client OAuth initialisé avec succès!', 'success');
-            } catch (error) {
-                console.error('Error initializing GIS:', error);
-                let errorMessage = 'Erreur d\'initialisation OAuth. ';
-                
-                if (error.message && error.message.includes('origin')) {
-                    errorMessage += 'Vérifiez que votre URL actuelle est dans les "Authorized JavaScript origins" de Google Cloud.';
-                } else {
-                    errorMessage += 'Vérifiez votre configuration Google Cloud.';
-                }
-                
-                showStatus(errorMessage, 'error');
-            }
-        }
-
-        function connectGoogleDrive() {
-            if (!tokenClient) {
-                showStatus('Client OAuth non initialisé. Veuillez enregistrer votre Client ID.', 'error');
-                return;
-            }
-
-            // Request access token
-            tokenClient.requestAccessToken({ prompt: '' });
-        }
-
-        function handleAuthSuccess() {
-            isGoogleDriveConnected = true;
-            document.getElementById('syncIndicator').classList.add('connected');
-            document.getElementById('syncStatus').textContent = 'Synchronisé avec Google Drive';
-            document.getElementById('connectBtn').style.display = 'none';
-            document.getElementById('disconnectBtn').style.display = 'inline-block';
-            
-            showStatus('Connecté à Google Drive avec succès!', 'success');
-            
-            // Load data from Drive
-            loadFromDrive();
-        }
-
-        function disconnectGoogleDrive() {
-            if (accessToken) {
-                // Revoke the access token
-                google.accounts.oauth2.revoke(accessToken, () => {
-                    console.log('Token revoked');
-                });
-                
-                accessToken = null;
-                isGoogleDriveConnected = false;
-                driveFileId = null;
-                
-                document.getElementById('syncIndicator').classList.remove('connected');
-                document.getElementById('syncStatus').textContent = 'Non synchronisé';
-                document.getElementById('connectBtn').style.display = 'inline-block';
-                document.getElementById('disconnectBtn').style.display = 'none';
-                
-                showStatus('Déconnecté de Google Drive', 'success');
-            }
-        }
-
-        async function syncData() {
-            if (!isGoogleDriveConnected) {
-                showStatus('Non connecté à Google Drive', 'error');
-                return;
-            }
-
-            try {
-                await saveToDrive();
-                showStatus('Données synchronisées avec succès!', 'success');
-            } catch (error) {
-                console.error('Sync error:', error);
-                showStatus('Erreur de synchronisation', 'error');
-            }
-        }
-
-        async function saveToDrive() {
-            if (!accessToken) {
-                throw new Error('No access token available');
-            }
-
-            const data = JSON.stringify(portfolio, null, 2);
-            const metadata = {
-                name: FILENAME,
-                mimeType: 'application/json'
-            };
-
-            const form = new FormData();
-            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', new Blob([data], { type: 'application/json' }));
-            
-            let url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-            if (driveFileId) {
-                url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`;
-            }
-
-            const response = await fetch(url, {
-                method: driveFileId ? 'PATCH' : 'POST',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                },
-                body: form
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            if (!driveFileId) {
-                driveFileId = result.id;
-                localStorage.setItem('driveFileId', driveFileId);
-            }
-        }
-
-        async function loadFromDrive() {
-            if (!accessToken) {
-                showStatus('Non connecté à Google Drive', 'error');
-                return;
-            }
-
-            try {
-                const savedFileId = localStorage.getItem('driveFileId');
-                if (savedFileId) {
-                    driveFileId = savedFileId;
-                }
-
-                // Set the access token for gapi.client
-                gapi.client.setToken({ access_token: accessToken });
-
-                // Search for the file
-                const response = await gapi.client.drive.files.list({
-                    q: `name='${FILENAME}' and trashed=false`,
-                    fields: 'files(id, name)',
-                    spaces: 'drive'
-                });
-
-                if (response.result.files && response.result.files.length > 0) {
-                    driveFileId = response.result.files[0].id;
-                    localStorage.setItem('driveFileId', driveFileId);
-
-                    // Download file content
-                    const fileResponse = await gapi.client.drive.files.get({
-                        fileId: driveFileId,
-                        alt: 'media'
-                    });
-
-                    portfolio = JSON.parse(fileResponse.body);
-                    saveData(); // Also save locally
-                    updateDashboard();
-                    showStatus('Données chargées depuis Google Drive', 'success');
-                } else {
-                    // File doesn't exist, create it
-                    await saveToDrive();
-                    showStatus('Nouveau fichier créé sur Google Drive', 'success');
-                }
-            } catch (error) {
-                console.error('Error loading from Drive:', error);
-                showStatus('Erreur de chargement depuis Google Drive: ' + error.message, 'error');
-            }
-        }
-
-        function checkGoogleDriveConnection() {
-            const clientId = localStorage.getItem('googleClientId');
-            if (clientId) {
-                document.getElementById('clientId').value = clientId;
-                document.getElementById('connectBtn').disabled = false;
-                initializeGIS();
-            }
-        }
-
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('connectionStatus');
-            statusDiv.innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : type === 'error' ? 'warning' : 'info'}">${message}</div>`;
-            setTimeout(() => {
-                statusDiv.innerHTML = '';
-            }, 5000);
-        }
-
+  function loadData() {
+    const saved = localStorage.getItem("portfolioData");
+    if (saved) portfolio = JSON.parse(saved);
+  }
+ </script>  
         // Crypto Functions
         async function addCryptoPosition(event) {
             event.preventDefault();
