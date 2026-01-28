@@ -1162,7 +1162,7 @@
 
         portfolio = JSON.parse(fileRes.body);
         saveData();
-        updateDashboard();
+        refreshUI();
         showStatus("Données chargées depuis Google Drive", "success");
       } else {
         await saveToDrive();
