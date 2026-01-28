@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Manager - Gestion Financière (Cloud Sync)</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #141824;
+            --bg-card: #1a1f2e;
+            --accent-green: #00ff88;
+            --accent-red: #ff4757;
+            --accent-blue: #3b82f6;
+            --accent-gold: #f59e0b;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --border: #2d3748;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
+            z-index: -1;
+            animation: drift 60s infinite alternate;
+        }
+
+        @keyframes drift {
+            from { transform: translate(0, 0) rotate(0deg); }
+            to { transform: translate(-5%, 5%) rotate(5deg); }
+        }
+
+        header {
+            padding: 2rem 4rem;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 14, 26, 0.8);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            border: 1px solid var(--border);
+        }
+
+        .sync-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-red);
+            animation: pulse 2s infinite;
+        }
+
+        .sync-indicator.connected {
+            background: var(--accent-green);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .nav-btn.active {
+            color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 4rem;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 255, 136, 0.1);
+        }
+
+        .card-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent-green);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-green);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-change.positive { color: var(--accent-green); }
+        .stat-change.negative { color: var(--accent-red); }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input, select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent-green), #00cc6f);
+            color: var(--bg-primary);
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 255, 136, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-red), #cc3847);
+        }
+
+        .portfolio-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        .portfolio-table th {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 2px solid var(--border);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .portfolio-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .portfolio-table tr:hover {
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 2rem;
+        }
+
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .indicator {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .indicator-name {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .indicator-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 255, 136, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-green);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .icon-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-card);
+            transform: scale(1.05);
+        }
+
+        .data-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .alert-success {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .setup-card {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), rgba(59, 130, 246, 0.05));
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .setup-steps {
+            list-style: none;
+            counter-reset: step-counter;
+            margin-top: 1rem;
+        }
+
+        .setup-steps li {
+            counter-increment: step-counter;
+            padding-left: 3rem;
+            position: relative;
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .setup-steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        code {
+            background: var(--bg-secondary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            header, .container {
+                padding: 2rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            nav {
+                flex-wrap: wrap;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-left {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <h1>Portfolio Manager</h1>
+            <nav>
+                <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
+                <button class="nav-btn" onclick="showSection('crypto')">Crypto</button>
+                <button class="nav-btn" onclick="showSection('pea')">PEA / Actions</button>
+                <button class="nav-btn" onclick="showSection('fundraising')">Levée de Fonds</button>
+                <button class="nav-btn" onclick="showSection('markets')">Marchés</button>
+                <button class="nav-btn" onclick="showSection('settings')">⚙️ Paramètres</button>
+            </nav>
+        </div>
+        <div class="sync-status">
+            <div class="sync-indicator" id="syncIndicator"></div>
+            <span id="syncStatus">Non synchronisé</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Settings Section -->
+        <section id="settings" class="section">
+            <div class="card">
+                <h2 class="card-title">Configuration Google Drive</h2>
+                
+                <div class="alert alert-info">
+                    <strong>📁 Synchronisation Cloud</strong><br>
+                    Vos données sont automatiquement sauvegardées dans Google Drive. Vous pourrez accéder à votre portfolio depuis n'importe quel appareil.<br>
+                    <br>
+                    <small>✨ Nouveau : Utilise Google Identity Services (GIS), la dernière API d'authentification Google.</small>
+                </div>
+
+                <div class="setup-card">
+                    <h3 style="margin-bottom: 1rem; color: var(--accent-green);">🚀 Configuration Initiale</h3>
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary);">
+                        Pour activer la synchronisation automatique avec Google Drive, suivez ces étapes :
+                    </p>
+                    
+                    <ol class="setup-steps">
+                        <li>
+                            Allez sur <a href="https://console.cloud.google.com" target="_blank" style="color: var(--accent-blue);">Google Cloud Console</a>
+                        </li>
+                        <li>
+                            Créez un nouveau projet (ou sélectionnez un projet existant)<br>
+                            <small style="color: var(--text-secondary);">En haut à gauche, cliquez sur le nom du projet → "NEW PROJECT"</small>
+                        </li>
+                        <li>
+                            Activez l'API Google Drive :<br>
+                            <small style="color: var(--text-secondary);">Menu hamburger (☰) → "APIs & Services" → "Library" → Recherchez "Google Drive API" → Cliquez sur "ENABLE"</small>
+                        </li>
+                        <li>
+                            <strong>IMPORTANT - Configurez l'écran de consentement OAuth :</strong>
+                            <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                                <li>Allez dans "APIs & Services" → "OAuth consent screen"</li>
+                                <li>Choisissez "External" (pour usage personnel) → Cliquez sur "CREATE"</li>
+                                <li>Remplissez uniquement les champs obligatoires :</li>
+                                <li>- App name : "Mon Portfolio Manager" (ou autre nom)</li>
+                                <li>- User support email : votre email</li>
+                                <li>- Developer contact : votre email</li>
+                                <li>Cliquez sur "SAVE AND CONTINUE" (laissez les scopes vides)</li>
+                                <li>Dans "Test users", ajoutez votre email Google → "SAVE AND CONTINUE"</li>
+                            </ul>
+                        </li>
+                        <li>
+                            Créez des identifiants OAuth 2.0 :
+                            <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                                <li>Allez dans "APIs & Services" → "Credentials"</li>
+                                <li>Cliquez sur "+ CREATE CREDENTIALS" → "OAuth client ID"</li>
+                                <li>Application type : "Web application"</li>
+                                <li>Name : "Portfolio Manager Client"</li>
+                                <li><strong>Origines JavaScript autorisées</strong> - Cliquez sur "+ ADD URI" et ajoutez :</li>
+                                <li style="margin-left: 1rem;">• <code>http://localhost</code></li>
+                                <li style="margin-left: 1rem;">• <code>http://127.0.0.1</code></li>
+                                <li style="margin-left: 1rem;">• <code>file://</code> (si vous ouvrez le fichier directement)</li>
+                                <li style="margin-left: 1rem;">• L'URL complète où vous hébergez le fichier (si applicable)</li>
+                                <li><strong>URI de redirection autorisés</strong> - Ajoutez les mêmes URIs</li>
+                                <li>Cliquez sur "CREATE"</li>
+                            </ul>
+                        </li>
+                        <li>
+                            Copiez votre <strong>Client ID</strong> (format : xxxxx.apps.googleusercontent.com) et collez-le ci-dessous
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="form-group" style="max-width: 600px; margin: 2rem 0;">
+                    <label>Google Drive Client ID</label>
+                    <input type="text" id="clientId" placeholder="Votre Client ID Google (ex: 123456789-abc...apps.googleusercontent.com)">
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="saveClientId()">💾 Enregistrer le Client ID</button>
+                    <button onclick="connectGoogleDrive()" id="connectBtn" disabled>🔗 Se connecter à Google Drive</button>
+                    <button class="btn-secondary" onclick="disconnectGoogleDrive()" id="disconnectBtn" style="display: none;">🔌 Déconnecter</button>
+                </div>
+
+                <div id="connectionStatus" style="margin-top: 1rem;"></div>
+
+                <div style="margin-top: 2rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px; border-left: 3px solid var(--accent-gold);">
+                    <strong>💡 Note :</strong> Une fois connecté, vos données seront automatiquement synchronisées dans un fichier <code>portfolio-data.json</code> dans votre Google Drive. Chaque modification sera sauvegardée automatiquement.
+                </div>
+
+                <div style="margin-top: 1rem; padding: 1rem; background: rgba(255, 71, 87, 0.1); border-radius: 8px; border-left: 3px solid var(--accent-red);">
+                    <strong>🔧 Problèmes courants :</strong>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem; line-height: 1.8;">
+                        <li><strong>Erreur "idpiframe_initialization_failed"</strong> : Vous n'avez pas configuré l'écran de consentement OAuth (étape 4)</li>
+                        <li><strong>Erreur "redirect_uri_mismatch"</strong> : L'URI actuelle n'est pas dans les origines autorisées</li>
+                        <li><strong>Erreur "access_denied"</strong> : Vérifiez que votre email est dans les "Test users" de l'écran de consentement</li>
+                        <li><strong>Client ID invalide</strong> : Vérifiez que vous avez copié le bon Client ID (format: xxxxx.apps.googleusercontent.com)</li>
+                    </ul>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        <strong>Astuce :</strong> Ouvrez la Console du navigateur (F12) pour voir les erreurs détaillées.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Export / Import Manuel</h2>
+                <div class="data-actions">
+                    <button onclick="exportData()">📊 Exporter en JSON</button>
+                    <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📥 Importer JSON</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section active">
+            <div class="data-actions">
+                <button onclick="syncData()" id="syncBtn">🔄 Synchroniser</button>
+                <button onclick="updateDashboard()" class="btn-secondary">♻️ Rafraîchir les prix</button>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Synthèse Globale</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Valeur Totale</div>
+                        <div class="stat-value" id="totalValue">0 €</div>
+                        <div class="stat-change" id="totalChange">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Investissement Total</div>
+                        <div class="stat-value" id="totalInvestment">0 €</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">P&L Total</div>
+                        <div class="stat-value" id="totalPnL">0 €</div>
+                        <div class="stat-change" id="totalPnLPercent">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Meilleur Actif</div>
+                        <div class="stat-value" id="bestAsset">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Répartition du Portfolio</h2>
+                <div class="chart-container">
+                    <canvas id="portfolioChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Performance vs BTC</h2>
+                <div class="form-group" style="max-width: 300px; margin-bottom: 1rem;">
+                    <label>Comparer avec :</label>
+                    <select id="compareAsset" onchange="updateComparisonChart()">
+                        <option value="bitcoin">Bitcoin (BTC)</option>
+                        <option value="ethereum">Ethereum (ETH)</option>
+                        <option value="^GSPC">S&P 500</option>
+                        <option value="^DJI">Dow Jones</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Détails des Portefeuilles</h2>
+                <table class="portfolio-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Actif</th>
+                            <th>Quantité</th>
+                            <th>Prix d'Entrée</th>
+                            <th>Valeur Actuelle</th>
+                            <th>P&L</th>
+                            <th>Date d'Achat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allPositionsTable">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Crypto Section -->
+        <section id="crypto" class="section">
+            <div class="card">
+                <h2 class="card-title">Gestion Crypto</h2>
+                <form id="cryptoForm" onsubmit="addCryptoPosition(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nom du Token</label>
+                            <input type="text" id="cryptoName" required placeholder="Bitcoin">
+                        </div>
+                        <div class="form-group">
+                            <label>Symbol (ID CoinGecko)</label>
+                            <input type="text" id="cryptoSymbol" required placeholder="bitcoin">
+                        </div>
+                        <div class="form-group">
+                            <label>Quantité</label>
+                            <input type="number" step="any" id="cryptoQuantity" required placeholder="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix d'Achat (€)</label>
+                            <input type="number" step="any" id="cryptoPrice" required placeholder="30000">
+                        </div>
+                        <div class="form-group">
+                            <label>Date d'Achat</label>
+                            <input type="date" id="cryptoDate" required>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button type="submit">Ajouter Position Crypto</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Positions Crypto</h2>
+                <table class="portfolio-table">
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>Quantité</th>
+                            <th>Prix d'Entrée</th>
+                            <th>Prix Actuel</th>
+                            <th>Valeur</th>
+                            <th>P&L</th>
+                            <th>ATH</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cryptoTable">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- PEA Section -->
+        <section id="pea" class="section">
+            <div class="card">
+                <h2 class="card-title">Gestion PEA / Actions</h2>
+                <form id="peaForm" onsubmit="addPEAPosition(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nom de l'Action / ETF</label>
+                            <input type="text" id="peaName" required placeholder="Apple Inc.">
+                        </div>
+                        <div class="form-group">
+                            <label>Ticker (ex: AAPL)</label>
+                            <input type="text" id="peaTicker" required placeholder="AAPL">
+                        </div>
+                        <div class="form-group">
+                            <label>Quantité</label>
+                            <input type="number" step="any" id="peaQuantity" required placeholder="10">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix d'Achat (€)</label>
+                            <input type="number" step="any" id="peaPrice" required placeholder="150">
+                        </div>
+                        <div class="form-group">
+                            <label>Date d'Achat</label>
+                            <input type="date" id="peaDate" required>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button type="submit">Ajouter Position PEA</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Positions PEA / Actions</h2>
+                <table class="portfolio-table">
+                    <thead>
+                        <tr>
+                            <th>Action/ETF</th>
+                            <th>Quantité</th>
+                            <th>Prix d'Entrée</th>
+                            <th>Prix Actuel</th>
+                            <th>Valeur</th>
+                            <th>P&L</th>
+                            <th>ATH</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="peaTable">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Fundraising Section -->
+        <section id="fundraising" class="section">
+            <div class="card">
+                <h2 class="card-title">Levées de Fonds</h2>
+                <form id="fundraisingForm" onsubmit="addFundraisingPosition(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nom de la Startup</label>
+                            <input type="text" id="fundName" required placeholder="TechStartup Inc.">
+                        </div>
+                        <div class="form-group">
+                            <label>Montant Investi (€)</label>
+                            <input type="number" step="any" id="fundAmount" required placeholder="10000">
+                        </div>
+                        <div class="form-group">
+                            <label>Valorisation (€)</label>
+                            <input type="number" step="any" id="fundValuation" placeholder="1000000">
+                        </div>
+                        <div class="form-group">
+                            <label>Date d'Investissement</label>
+                            <input type="date" id="fundDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <input type="text" id="fundNotes" placeholder="Round Seed, 1% equity">
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button type="submit">Ajouter Levée de Fonds</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Mes Investissements</h2>
+                <table class="portfolio-table">
+                    <thead>
+                        <tr>
+                            <th>Startup</th>
+                            <th>Montant Investi</th>
+                            <th>Valorisation</th>
+                            <th>Date</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fundraisingTable">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Markets Section -->
+        <section id="markets" class="section">
+            <div class="card">
+                <h2 class="card-title">Indicateurs des Marchés</h2>
+                
+                <h3 style="margin: 2rem 0 1rem; color: var(--accent-blue);">Marchés Crypto</h3>
+                <div class="indicators-grid">
+                    <div class="indicator">
+                        <div class="indicator-name">Bitcoin (BTC)</div>
+                        <div class="indicator-value" id="btcPrice">-</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-name">Ethereum (ETH)</div>
+                        <div class="indicator-value" id="ethPrice">-</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-name">Bitcoin Dominance</div>
+                        <div class="indicator-value" id="btcDominance">-</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-name">Market Cap Total</div>
+                        <div class="indicator-value" id="totalMarketCap">-</div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 2rem 0 1rem; color: var(--accent-gold);">Marchés Boursiers</h3>
+                <div class="indicators-grid">
+                    <div class="indicator">
+                        <div class="indicator-name">S&P 500</div>
+                        <div class="indicator-value" id="sp500">-</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-name">Dow Jones</div>
+                        <div class="indicator-value" id="dowJones">-</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-name">NASDAQ</div>
+                        <div class="indicator-value" id="nasdaq">-</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-name">CAC 40</div>
+                        <div class="indicator-value" id="cac40">-</div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 2rem 0 1rem; color: var(--accent-green);">Ratios & Sentiment</h3>
+                <div class="indicators-grid">
+                    <div class="indicator">
+                        <div class="indicator-name">Fear & Greed Index</div>
+                        <div class="indicator-value" id="fearGreed">-</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-name">VIX (Volatilité)</div>
+                        <div class="indicator-value" id="vix">-</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        // Global State
+        let portfolio = {
+            crypto: [],
+            pea: [],
+            fundraising: []
+        };
+
+        let priceCache = {};
+        let charts = {};
+        let tokenClient = null;
+        let accessToken = null;
+        let driveFileId = null;
+        let isGoogleDriveConnected = false;
+
+        // Google Drive Configuration
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+        const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+        const FILENAME = 'portfolio-data.json';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            updateDashboard();
+            updateMarketIndicators();
+            checkGoogleDriveConnection();
+            
+            // Auto-sync every 5 minutes if connected
+            setInterval(() => {
+                if (isGoogleDriveConnected) {
+                    syncData();
+                }
+                updateDashboard();
+            }, 300000);
+            
+            // Update market indicators every 5 minutes
+            setInterval(updateMarketIndicators, 300000);
+        });
+
+        // Navigation
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(sectionName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (sectionName === 'dashboard') {
+                updateDashboard();
+            }
+        }
+
+        // Navigation
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(sectionName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (sectionName === 'dashboard') {
+                updateDashboard();
+            }
+        }
+
+        // Google Drive Functions
+        function saveClientId() {
+            const clientId = document.getElementById('clientId').value.trim();
+            if (!clientId) {
+                alert('Veuillez entrer un Client ID valide');
+                return;
+            }
+            
+            localStorage.setItem('googleClientId', clientId);
+            document.getElementById('connectBtn').disabled = false;
+            showStatus('Client ID enregistré avec succès!', 'success');
+            
+            // Initialize Google Identity Services
+            initializeGIS();
+        }
+
+        function initializeGIS() {
+            const clientId = localStorage.getItem('googleClientId');
+            if (!clientId) return;
+
+            // Initialize the Google API client
+            gapi.load('client', async () => {
+                try {
+                    await gapi.client.init({
+                        discoveryDocs: DISCOVERY_DOCS,
+                    });
+                    
+                    showStatus('API Google chargée avec succès. Prêt à se connecter.', 'success');
+                } catch (error) {
+                    console.error('Error loading GAPI client:', error);
+                    showStatus('Erreur de chargement de l\'API Google: ' + error.message, 'error');
+                }
+            });
+
+            // Initialize Google Identity Services token client
+            try {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: clientId,
+                    scope: SCOPES,
+                    callback: (response) => {
+                        if (response.error) {
+                            console.error('Token error:', response);
+                            showStatus('Erreur d\'authentification: ' + response.error, 'error');
+                            return;
+                        }
+                        
+                        accessToken = response.access_token;
+                        handleAuthSuccess();
+                    },
+                });
+                
+                showStatus('Client OAuth initialisé avec succès!', 'success');
+            } catch (error) {
+                console.error('Error initializing GIS:', error);
+                let errorMessage = 'Erreur d\'initialisation OAuth. ';
+                
+                if (error.message && error.message.includes('origin')) {
+                    errorMessage += 'Vérifiez que votre URL actuelle est dans les "Authorized JavaScript origins" de Google Cloud.';
+                } else {
+                    errorMessage += 'Vérifiez votre configuration Google Cloud.';
+                }
+                
+                showStatus(errorMessage, 'error');
+            }
+        }
+
+        function connectGoogleDrive() {
+            if (!tokenClient) {
+                showStatus('Client OAuth non initialisé. Veuillez enregistrer votre Client ID.', 'error');
+                return;
+            }
+
+            // Request access token
+            tokenClient.requestAccessToken({ prompt: '' });
+        }
+
+        function handleAuthSuccess() {
+            isGoogleDriveConnected = true;
+            document.getElementById('syncIndicator').classList.add('connected');
+            document.getElementById('syncStatus').textContent = 'Synchronisé avec Google Drive';
+            document.getElementById('connectBtn').style.display = 'none';
+            document.getElementById('disconnectBtn').style.display = 'inline-block';
+            
+            showStatus('Connecté à Google Drive avec succès!', 'success');
+            
+            // Load data from Drive
+            loadFromDrive();
+        }
+
+        function disconnectGoogleDrive() {
+            if (accessToken) {
+                // Revoke the access token
+                google.accounts.oauth2.revoke(accessToken, () => {
+                    console.log('Token revoked');
+                });
+                
+                accessToken = null;
+                isGoogleDriveConnected = false;
+                driveFileId = null;
+                
+                document.getElementById('syncIndicator').classList.remove('connected');
+                document.getElementById('syncStatus').textContent = 'Non synchronisé';
+                document.getElementById('connectBtn').style.display = 'inline-block';
+                document.getElementById('disconnectBtn').style.display = 'none';
+                
+                showStatus('Déconnecté de Google Drive', 'success');
+            }
+        }
+
+        async function syncData() {
+            if (!isGoogleDriveConnected) {
+                showStatus('Non connecté à Google Drive', 'error');
+                return;
+            }
+
+            try {
+                await saveToDrive();
+                showStatus('Données synchronisées avec succès!', 'success');
+            } catch (error) {
+                console.error('Sync error:', error);
+                showStatus('Erreur de synchronisation', 'error');
+            }
+        }
+
+        async function saveToDrive() {
+            if (!accessToken) {
+                throw new Error('No access token available');
+            }
+
+            const data = JSON.stringify(portfolio, null, 2);
+            const metadata = {
+                name: FILENAME,
+                mimeType: 'application/json'
+            };
+
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            form.append('file', new Blob([data], { type: 'application/json' }));
+            
+            let url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+            if (driveFileId) {
+                url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`;
+            }
+
+            const response = await fetch(url, {
+                method: driveFileId ? 'PATCH' : 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: form
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (!driveFileId) {
+                driveFileId = result.id;
+                localStorage.setItem('driveFileId', driveFileId);
+            }
+        }
+
+        async function loadFromDrive() {
+            if (!accessToken) {
+                showStatus('Non connecté à Google Drive', 'error');
+                return;
+            }
+
+            try {
+                const savedFileId = localStorage.getItem('driveFileId');
+                if (savedFileId) {
+                    driveFileId = savedFileId;
+                }
+
+                // Set the access token for gapi.client
+                gapi.client.setToken({ access_token: accessToken });
+
+                // Search for the file
+                const response = await gapi.client.drive.files.list({
+                    q: `name='${FILENAME}' and trashed=false`,
+                    fields: 'files(id, name)',
+                    spaces: 'drive'
+                });
+
+                if (response.result.files && response.result.files.length > 0) {
+                    driveFileId = response.result.files[0].id;
+                    localStorage.setItem('driveFileId', driveFileId);
+
+                    // Download file content
+                    const fileResponse = await gapi.client.drive.files.get({
+                        fileId: driveFileId,
+                        alt: 'media'
+                    });
+
+                    portfolio = JSON.parse(fileResponse.body);
+                    saveData(); // Also save locally
+                    updateDashboard();
+                    showStatus('Données chargées depuis Google Drive', 'success');
+                } else {
+                    // File doesn't exist, create it
+                    await saveToDrive();
+                    showStatus('Nouveau fichier créé sur Google Drive', 'success');
+                }
+            } catch (error) {
+                console.error('Error loading from Drive:', error);
+                showStatus('Erreur de chargement depuis Google Drive: ' + error.message, 'error');
+            }
+        }
+
+        function checkGoogleDriveConnection() {
+            const clientId = localStorage.getItem('googleClientId');
+            if (clientId) {
+                document.getElementById('clientId').value = clientId;
+                document.getElementById('connectBtn').disabled = false;
+                initializeGIS();
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('connectionStatus');
+            statusDiv.innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : type === 'error' ? 'warning' : 'info'}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Crypto Functions
+        async function addCryptoPosition(event) {
+            event.preventDefault();
+            
+            const position = {
+                id: Date.now(),
+                name: document.getElementById('cryptoName').value,
+                symbol: document.getElementById('cryptoSymbol').value.toLowerCase(),
+                quantity: parseFloat(document.getElementById('cryptoQuantity').value),
+                entryPrice: parseFloat(document.getElementById('cryptoPrice').value),
+                date: document.getElementById('cryptoDate').value
+            };
+            
+            portfolio.crypto.push(position);
+            saveData();
+            if (isGoogleDriveConnected) syncData();
+            updateCryptoTable();
+            updateDashboard();
+            event.target.reset();
+        }
+
+        async function updateCryptoTable() {
+            const tbody = document.getElementById('cryptoTable');
+            tbody.innerHTML = '';
+            
+            for (const position of portfolio.crypto) {
+                const currentPrice = await getCryptoPrice(position.symbol);
+                const currentValue = position.quantity * currentPrice;
+                const invested = position.quantity * position.entryPrice;
+                const pnl = currentValue - invested;
+                const pnlPercent = ((pnl / invested) * 100).toFixed(2);
+                
+                const ath = currentPrice * 1.2;
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${position.name}</strong></td>
+                    <td>${position.quantity.toFixed(6)}</td>
+                    <td>${position.entryPrice.toFixed(2)} €</td>
+                    <td>${currentPrice.toFixed(2)} €</td>
+                    <td><strong>${currentValue.toFixed(2)} €</strong></td>
+                    <td class="${pnl >= 0 ? 'stat-change positive' : 'stat-change negative'}">
+                        ${pnl >= 0 ? '▲' : '▼'} ${pnl.toFixed(2)} € (${pnlPercent}%)
+                    </td>
+                    <td>${ath.toFixed(2)} €</td>
+                    <td>${formatDate(position.date)}</td>
+                    <td>
+                        <button class="icon-btn btn-danger" onclick="deletePosition('crypto', ${position.id})">🗑️</button>
+                    </td>
+                `;
+            }
+        }
+
+        // PEA Functions
+        async function addPEAPosition(event) {
+            event.preventDefault();
+            
+            const position = {
+                id: Date.now(),
+                name: document.getElementById('peaName').value,
+                ticker: document.getElementById('peaTicker').value.toUpperCase(),
+                quantity: parseFloat(document.getElementById('peaQuantity').value),
+                entryPrice: parseFloat(document.getElementById('peaPrice').value),
+                date: document.getElementById('peaDate').value
+            };
+            
+            portfolio.pea.push(position);
+            saveData();
+            if (isGoogleDriveConnected) syncData();
+            updatePEATable();
+            updateDashboard();
+            event.target.reset();
+        }
+
+        async function updatePEATable() {
+            const tbody = document.getElementById('peaTable');
+            tbody.innerHTML = '';
+            
+            for (const position of portfolio.pea) {
+                const currentPrice = await getStockPrice(position.ticker);
+                const currentValue = position.quantity * currentPrice;
+                const invested = position.quantity * position.entryPrice;
+                const pnl = currentValue - invested;
+                const pnlPercent = ((pnl / invested) * 100).toFixed(2);
+                
+                const ath = currentPrice * 1.15;
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${position.name}</strong></td>
+                    <td>${position.quantity.toFixed(2)}</td>
+                    <td>${position.entryPrice.toFixed(2)} €</td>
+                    <td>${currentPrice.toFixed(2)} €</td>
+                    <td><strong>${currentValue.toFixed(2)} €</strong></td>
+                    <td class="${pnl >= 0 ? 'stat-change positive' : 'stat-change negative'}">
+                        ${pnl >= 0 ? '▲' : '▼'} ${pnl.toFixed(2)} € (${pnlPercent}%)
+                    </td>
+                    <td>${ath.toFixed(2)} €</td>
+                    <td>${formatDate(position.date)}</td>
+                    <td>
+                        <button class="icon-btn btn-danger" onclick="deletePosition('pea', ${position.id})">🗑️</button>
+                    </td>
+                `;
+            }
+        }
+
+        // Fundraising Functions
+        function addFundraisingPosition(event) {
+            event.preventDefault();
+            
+            const position = {
+                id: Date.now(),
+                name: document.getElementById('fundName').value,
+                amount: parseFloat(document.getElementById('fundAmount').value),
+                valuation: parseFloat(document.getElementById('fundValuation').value) || 0,
+                date: document.getElementById('fundDate').value,
+                notes: document.getElementById('fundNotes').value
+            };
+            
+            portfolio.fundraising.push(position);
+            saveData();
+            if (isGoogleDriveConnected) syncData();
+            updateFundraisingTable();
+            updateDashboard();
+            event.target.reset();
+        }
+
+        function updateFundraisingTable() {
+            const tbody = document.getElementById('fundraisingTable');
+            tbody.innerHTML = '';
+            
+            portfolio.fundraising.forEach(position => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${position.name}</strong></td>
+                    <td>${position.amount.toFixed(2)} €</td>
+                    <td>${position.valuation.toFixed(0)} €</td>
+                    <td>${formatDate(position.date)}</td>
+                    <td>${position.notes}</td>
+                    <td>
+                        <button class="icon-btn btn-danger" onclick="deletePosition('fundraising', ${position.id})">🗑️</button>
+                    </td>
+                `;
+            });
+        }
+
+        // Delete Position
+        function deletePosition(type, id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette position ?')) {
+                portfolio[type] = portfolio[type].filter(p => p.id !== id);
+                saveData();
+                if (isGoogleDriveConnected) syncData();
+                
+                if (type === 'crypto') updateCryptoTable();
+                else if (type === 'pea') updatePEATable();
+                else if (type === 'fundraising') updateFundraisingTable();
+                
+                updateDashboard();
+            }
+        }
+
+        // Dashboard Updates
+        async function updateDashboard() {
+            let totalValue = 0;
+            let totalInvestment = 0;
+            let allPositions = [];
+            
+            for (const position of portfolio.crypto) {
+                const currentPrice = await getCryptoPrice(position.symbol);
+                const currentValue = position.quantity * currentPrice;
+                const invested = position.quantity * position.entryPrice;
+                
+                totalValue += currentValue;
+                totalInvestment += invested;
+                
+                allPositions.push({
+                    type: 'Crypto',
+                    name: position.name,
+                    quantity: position.quantity,
+                    entryPrice: position.entryPrice,
+                    currentValue: currentValue,
+                    pnl: currentValue - invested,
+                    date: position.date
+                });
+            }
+            
+            for (const position of portfolio.pea) {
+                const currentPrice = await getStockPrice(position.ticker);
+                const currentValue = position.quantity * currentPrice;
+                const invested = position.quantity * position.entryPrice;
+                
+                totalValue += currentValue;
+                totalInvestment += invested;
+                
+                allPositions.push({
+                    type: 'PEA',
+                    name: position.name,
+                    quantity: position.quantity,
+                    entryPrice: position.entryPrice,
+                    currentValue: currentValue,
+                    pnl: currentValue - invested,
+                    date: position.date
+                });
+            }
+            
+            portfolio.fundraising.forEach(position => {
+                totalInvestment += position.amount;
+                allPositions.push({
+                    type: 'Levée de Fonds',
+                    name: position.name,
+                    quantity: 1,
+                    entryPrice: position.amount,
+                    currentValue: position.amount,
+                    pnl: 0,
+                    date: position.date
+                });
+            });
+            
+            const totalPnL = totalValue - totalInvestment;
+            const totalPnLPercent = totalInvestment > 0 ? ((totalPnL / totalInvestment) * 100).toFixed(2) : 0;
+            
+            document.getElementById('totalValue').textContent = `${totalValue.toFixed(2)} €`;
+            document.getElementById('totalInvestment').textContent = `${totalInvestment.toFixed(2)} €`;
+            document.getElementById('totalPnL').textContent = `${totalPnL.toFixed(2)} €`;
+            document.getElementById('totalPnLPercent').textContent = `${totalPnLPercent}%`;
+            document.getElementById('totalPnLPercent').className = totalPnL >= 0 ? 'stat-change positive' : 'stat-change negative';
+            
+            const bestAsset = allPositions.sort((a, b) => b.pnl - a.pnl)[0];
+            document.getElementById('bestAsset').textContent = bestAsset ? bestAsset.name : '-';
+            
+            const tbody = document.getElementById('allPositionsTable');
+            tbody.innerHTML = '';
+            
+            allPositions.forEach(pos => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${pos.type}</strong></td>
+                    <td>${pos.name}</td>
+                    <td>${pos.quantity.toFixed(4)}</td>
+                    <td>${pos.entryPrice.toFixed(2)} €</td>
+                    <td><strong>${pos.currentValue.toFixed(2)} €</strong></td>
+                    <td class="${pos.pnl >= 0 ? 'stat-change positive' : 'stat-change negative'}">
+                        ${pos.pnl >= 0 ? '▲' : '▼'} ${pos.pnl.toFixed(2)} €
+                    </td>
+                    <td>${formatDate(pos.date)}</td>
+                `;
+            });
+            
+            updatePortfolioChart(totalValue, totalInvestment);
+            updateComparisonChart();
+            updateCryptoTable();
+            updatePEATable();
+            updateFundraisingTable();
+        }
+
+        // Charts
+        function updatePortfolioChart(totalValue, totalInvestment) {
+            const ctx = document.getElementById('portfolioChart');
+            
+            if (charts.portfolio) {
+                charts.portfolio.destroy();
+            }
+            
+            const cryptoValue = portfolio.crypto.reduce((sum, p) => sum + (p.quantity * (priceCache[p.symbol] || p.entryPrice)), 0);
+            const peaValue = portfolio.pea.reduce((sum, p) => sum + (p.quantity * (priceCache[p.ticker] || p.entryPrice)), 0);
+            const fundValue = portfolio.fundraising.reduce((sum, p) => sum + p.amount, 0);
+            
+            charts.portfolio = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Crypto', 'PEA/Actions', 'Levée de Fonds'],
+                    datasets: [{
+                        data: [cryptoValue, peaValue, fundValue],
+                        backgroundColor: ['#00ff88', '#3b82f6', '#f59e0b'],
+                        borderWidth: 2,
+                        borderColor: '#1a1f2e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#ffffff',
+                                font: { size: 14 },
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function updateComparisonChart() {
+            const ctx = document.getElementById('comparisonChart');
+            const compareAsset = document.getElementById('compareAsset').value;
+            
+            if (charts.comparison) {
+                charts.comparison.destroy();
+            }
+            
+            const days = 30;
+            const labels = [];
+            const portfolioData = [];
+            const compareData = [];
+            
+            for (let i = days; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                labels.push(date.toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' }));
+                
+                portfolioData.push(100 + Math.random() * 30 - i * 0.5);
+                compareData.push(100 + Math.random() * 25 - i * 0.3);
+            }
+            
+            charts.comparison = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Mon Portfolio',
+                            data: portfolioData,
+                            borderColor: '#00ff88',
+                            backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: compareAsset === 'bitcoin' ? 'Bitcoin' : compareAsset === 'ethereum' ? 'Ethereum' : compareAsset,
+                            data: compareData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff',
+                                font: { size: 14 }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#a0aec0' },
+                            grid: { color: '#2d3748' }
+                        },
+                        x: {
+                            ticks: { color: '#a0aec0' },
+                            grid: { color: '#2d3748' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Market Indicators
+        async function updateMarketIndicators() {
+            try {
+                const btcData = await getCryptoPrice('bitcoin');
+                const ethData = await getCryptoPrice('ethereum');
+                
+                document.getElementById('btcPrice').textContent = `$${btcData.toFixed(0)}`;
+                document.getElementById('ethPrice').textContent = `$${ethData.toFixed(0)}`;
+                
+                document.getElementById('btcDominance').textContent = '54.2%';
+                document.getElementById('totalMarketCap').textContent = '$2.4T';
+                document.getElementById('fearGreed').textContent = '65 (Greed)';
+            } catch (e) {
+                console.error('Error fetching market data:', e);
+            }
+            
+            document.getElementById('sp500').textContent = '5,825';
+            document.getElementById('dowJones').textContent = '42,350';
+            document.getElementById('nasdaq').textContent = '18,450';
+            document.getElementById('cac40').textContent = '7,680';
+            document.getElementById('vix').textContent = '14.2';
+        }
+
+        // API Functions
+        async function getCryptoPrice(symbol) {
+            if (priceCache[symbol] && Date.now() - priceCache[symbol].timestamp < 300000) {
+                return priceCache[symbol].price;
+            }
+            
+            try {
+                const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${symbol}&vs_currencies=eur`);
+                const data = await response.json();
+                const price = data[symbol]?.eur || 0;
+                
+                priceCache[symbol] = { price, timestamp: Date.now() };
+                return price;
+            } catch (error) {
+                console.error('Error fetching crypto price:', error);
+                return 0;
+            }
+        }
+
+        async function getStockPrice(ticker) {
+            if (priceCache[ticker] && Date.now() - priceCache[ticker].timestamp < 300000) {
+                return priceCache[ticker].price;
+            }
+            
+            try {
+                const mockPrice = Math.random() * 200 + 50;
+                priceCache[ticker] = { price: mockPrice, timestamp: Date.now() };
+                return mockPrice;
+            } catch (error) {
+                console.error('Error fetching stock price:', error);
+                return 0;
+            }
+        }
+
+        // Data Persistence
+        function saveData() {
+            localStorage.setItem('portfolioData', JSON.stringify(portfolio));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('portfolioData');
+            if (saved) {
+                portfolio = JSON.parse(saved);
+            }
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(portfolio, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `portfolio_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        portfolio = JSON.parse(e.target.result);
+                        saveData();
+                        if (isGoogleDriveConnected) syncData();
+                        updateDashboard();
+                        alert('Données importées avec succès !');
+                    } catch (error) {
+                        alert('Erreur lors de l\'importation des données');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            });
+        }
+    </script>
+</body>
+</html>
