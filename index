@@ -924,8 +924,8 @@
         </section>
     </div>
 
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://apis.google.com/js/api.js"></script>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <script src="https://apis.google.com/js/api.js" async defer></script>
     <script>
         // Global State
         let portfolio = {
@@ -947,13 +947,31 @@
         const FILENAME = 'portfolio-data.json';
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            updateDashboard();
-            updateMarketIndicators();
-            checkGoogleDriveConnection();
-            
-            // Auto-sync every 5 minutes if connected
+document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  updateDashboard();
+  updateMarketIndicators();
+
+  // Attendre que gapi soit chargé
+  waitForGapiThenInit();
+
+  setInterval(() => {
+    if (isGoogleDriveConnected) syncData();
+    updateDashboard();
+  }, 300000);
+
+  setInterval(updateMarketIndicators, 300000);
+});
+
+function waitForGapiThenInit() {
+  const t = setInterval(() => {
+    if (window.gapi && gapi.load) {
+      clearInterval(t);
+      checkGoogleDriveConnection(); // ton init Google démarre ici
+    }
+  }, 50);
+} 
+// Auto-sync every 5 minutes if connected
             setInterval(() => {
                 if (isGoogleDriveConnected) {
                     syncData();
