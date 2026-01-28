@@ -946,6 +946,13 @@
   const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
   const FILENAME = "portfolio-data.json";
 
+function refreshUI() {
+  // Si tes fonctions existent, on les appelle
+  if (typeof updateCryptoTable === "function") updateCryptoTable();
+  if (typeof updatePEATable === "function") updatePEATable();
+  if (typeof updateFundraisingTable === "function") updateFundraisingTable();
+  if (typeof updateDashboard === "function") updateDashboard();
+}
   // =========================
   // Init app
   // =========================
