@@ -1442,52 +1442,59 @@
                 `;
             });
             
-            updatePortfolioChart(totalValue, totalInvestment);
-            updateComparisonChart();
-            updateCryptoTable();
-            updatePEATable();
-            updateFundraisingTable();
-        }
+          function getCachedPrice(key, fallback) {
+  const v = priceCache[key];
+  return (v && typeof v.price === "number") ? v.price : fallback;
+}
 
-        // Charts
-        function updatePortfolioChart(totalValue, totalInvestment) {
-            const ctx = document.getElementById('portfolioChart');
-            
-            if (charts.portfolio) {
-                charts.portfolio.destroy();
-            }
-            
-            const cryptoValue = portfolio.crypto.reduce((sum, p) => sum + (p.quantity * (priceCache[p.symbol] || p.entryPrice)), 0);
-            const peaValue = portfolio.pea.reduce((sum, p) => sum + (p.quantity * (priceCache[p.ticker] || p.entryPrice)), 0);
-            const fundValue = portfolio.fundraising.reduce((sum, p) => sum + p.amount, 0);
-            
-            charts.portfolio = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Crypto', 'PEA/Actions', 'Levée de Fonds'],
-                    datasets: [{
-                        data: [cryptoValue, peaValue, fundValue],
-                        backgroundColor: ['#00ff88', '#3b82f6', '#f59e0b'],
-                        borderWidth: 2,
-                        borderColor: '#1a1f2e'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#ffffff',
-                                font: { size: 14 },
-                                padding: 20
-                            }
-                        }
-                    }
-                }
-            });
+function updatePortfolioChart() {
+  const canvas = document.getElementById('portfolioChart');
+  if (!canvas) return;
+
+  if (charts.portfolio) {
+    charts.portfolio.destroy();
+  }
+
+  const cryptoValue = portfolio.crypto.reduce((sum, p) => {
+    const px = getCachedPrice(p.symbol, p.entryPrice);
+    return sum + (p.quantity * px);
+  }, 0);
+
+  const peaValue = portfolio.pea.reduce((sum, p) => {
+    const px = getCachedPrice(p.ticker, p.entryPrice);
+    return sum + (p.quantity * px);
+  }, 0);
+
+  const fundValue = portfolio.fundraising.reduce((sum, p) => sum + p.amount, 0);
+
+  charts.portfolio = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: ['Crypto', 'PEA/Actions', 'Levée de Fonds'],
+      datasets: [{
+        data: [cryptoValue, peaValue, fundValue],
+        backgroundColor: ['#00ff88', '#3b82f6', '#f59e0b'],
+        borderWidth: 2,
+        borderColor: '#1a1f2e'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#ffffff',
+            font: { size: 14 },
+            padding: 20
+          }
         }
+      }
+    }
+  });
+}
+
 
         async function updateComparisonChart() {
             const ctx = document.getElementById('comparisonChart');
