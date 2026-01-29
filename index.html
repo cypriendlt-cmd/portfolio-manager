@@ -507,30 +507,59 @@
             document.getElementById(section).classList.add('active');
         }
 
-        // AUTO-UPDATE - Récupération des prix via proxy CORS
+        // AUTO-UPDATE - Récupération du prix depuis Boursorama
         async function fetchPriceFromBoursorama(isin) {
             try {
-                console.log(`📊 Tentative Boursorama pour ISIN: ${isin}`);
+                console.log(`📊 Récupération prix Boursorama pour: ${isin}`);
                 const url = `https://www.boursorama.com/bourse/trackers/cours/${isin}/`;
                 const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
                 
-                const response = await fetch(proxyUrl, { timeout: 10000 });
-                if (!response.ok) return null;
+                const response = await fetch(proxyUrl, { 
+                    signal: AbortSignal.timeout(15000) 
+                });
+                
+                if (!response.ok) {
+                    console.log(`⚠️ Erreur HTTP ${response.status}`);
+                    return null;
+                }
                 
                 const data = await response.json();
                 const html = data.contents;
                 
-                // Parser le HTML pour extraire le prix (comme Power Query)
-                const priceMatch = html.match(/c-instrument--last[^>]*>([0-9,. ]+)</);
-                if (priceMatch) {
-                    const price = parseFloat(priceMatch[1].replace(',', '.').replace(' ', ''));
-                    console.log(`✅ Prix Boursorama trouvé: ${price}€`);
+                // Chercher le prix dans la classe c-instrument c-instrument--last
+                // Pattern: <span class="c-instrument c-instrument--last" ... data-ist-last="87.3700">87.3700</span>
+                
+                // Méthode 1: Chercher data-ist-last
+                const dataMatch = html.match(/data-ist-last="([0-9.,]+)"/);
+                if (dataMatch) {
+                    const price = parseFloat(dataMatch[1].replace(',', '.'));
+                    console.log(`✅ Prix trouvé (data-ist-last): ${price}€`);
                     return price;
                 }
+                
+                // Méthode 2: Chercher dans c-instrument--last
+                const priceMatch = html.match(/c-instrument--last[^>]*>([0-9.,\s]+)</);
+                if (priceMatch) {
+                    const price = parseFloat(priceMatch[1].replace(',', '.').trim());
+                    console.log(`✅ Prix trouvé (c-instrument--last): ${price}€`);
+                    return price;
+                }
+                
+                // Méthode 3: Chercher le span avec class contenant "c-faceplate__price"
+                const faceplateMatch = html.match(/c-faceplate__price[^>]*>([0-9.,\s]+)</);
+                if (faceplateMatch) {
+                    const price = parseFloat(faceplateMatch[1].replace(',', '.').trim());
+                    console.log(`✅ Prix trouvé (faceplate): ${price}€`);
+                    return price;
+                }
+                
+                console.log('❌ Prix non trouvé dans le HTML');
+                return null;
+                
             } catch (e) {
                 console.log(`⚠️ Erreur Boursorama: ${e.message}`);
+                return null;
             }
-            return null;
         }
 
         async function fetchPriceFromYahoo(ticker) {
