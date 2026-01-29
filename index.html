@@ -339,12 +339,11 @@
                 <strong style="color: #00ff88;">✅ ETF Europe :</strong> VUSA.AS (S&P 500 Amsterdam), IWDA.AS (MSCI World Amsterdam)<br>
                 <br>
                 <strong style="color: #ff4757;">❌ Tickers invalides :</strong><br>
-                • PUST.PA ❌ (n'existe pas sur Yahoo Finance)<br>
-                • PSP500 ❌ (n'existe pas, utilisez SPY ou VOO)<br>
-                • STELLANTIS ❌ (utilisez STLA ou STLAM.MI ou STLA.PA)<br>
+                • PUST.PA ❌ • PSP500 ❌ • STELLANTIS ❌ (utilisez STLA)<br>
                 <br>
-                🔍 <strong>Vérifier un ticker :</strong> <a href="https://finance.yahoo.com" target="_blank" style="color: #3498db;">finance.yahoo.com</a> → recherchez votre action<br>
-                📅 Les prix peuvent prendre 10-20 secondes à charger (API gratuite).
+                ⚠️ <strong>API gratuite limitations :</strong> Si "API indisponible" apparaît, les calculs utilisent votre dernier prix d'achat comme estimation (marqué avec *). Les données sont sauvegardées et vous pouvez rafraîchir la page plus tard pour obtenir les vrais prix.<br>
+                <br>
+                🔍 <strong>Vérifier un ticker :</strong> <a href="https://finance.yahoo.com" target="_blank" style="color: #3498db;">finance.yahoo.com</a>
             </div>
             
             <form id="peaForm" onsubmit="addPEA(event)">
@@ -736,8 +735,30 @@
                     
                     if (currentPrice === 0 || isNaN(currentPrice)) {
                         console.warn(`Prix invalide pour ${ticker}`);
-                        document.getElementById(`current-${ticker}`).textContent = 'Erreur';
-                        document.getElementById(`current-${ticker}`).className = 'asset-stat-value negative';
+                        document.getElementById(`current-${ticker}`).innerHTML = 
+                            '<span style="color: #f39c12;">API indisponible</span>';
+                        document.getElementById(`current-${ticker}`).className = 'asset-stat-value';
+                        
+                        // Utiliser le dernier prix d'achat comme estimation
+                        const lastPurchase = asset.purchases[asset.purchases.length - 1];
+                        const estimatedPrice = lastPurchase.price;
+                        
+                        const totalValue = totalQuantity * estimatedPrice;
+                        const pnl = totalValue - totalInvested;
+                        const pnlPercent = totalInvested > 0 ? (pnl / totalInvested) * 100 : 0;
+
+                        document.getElementById(`value-${ticker}`).textContent = totalValue.toFixed(2) + ' €*';
+                        document.getElementById(`value-${ticker}`).className = 'asset-stat-value';
+                        
+                        const pnlEl = document.getElementById(`pnl-${ticker}`);
+                        pnlEl.textContent = pnl.toFixed(2) + ' €*';
+                        pnlEl.className = 'asset-stat-value ' + (pnl >= 0 ? 'positive' : 'negative');
+                        
+                        const perfEl = document.getElementById(`perf-${ticker}`);
+                        perfEl.textContent = pnlPercent.toFixed(2) + '%*';
+                        perfEl.className = 'asset-stat-value ' + (pnlPercent >= 0 ? 'positive' : 'negative');
+                        
+                        console.log(`ℹ️ Utilisation du dernier prix d'achat comme estimation: ${estimatedPrice} €`);
                         return;
                     }
                     
@@ -760,7 +781,7 @@
                     perfEl.className = 'asset-stat-value ' + (pnlPercent >= 0 ? 'positive' : 'negative');
                 }).catch(err => {
                     console.error(`Erreur chargement prix ${ticker}:`, err);
-                    document.getElementById(`current-${ticker}`).textContent = 'Erreur';
+                    document.getElementById(`current-${ticker}`).textContent = 'Erreur API';
                     document.getElementById(`current-${ticker}`).className = 'asset-stat-value negative';
                 });
             }
@@ -939,60 +960,81 @@
             const cacheKey = `stock_${ticker}`;
             const cached = priceCache[cacheKey];
             if (cached && Date.now() - cached.ts < 60000) {
+                console.log(`📦 Cache hit pour ${ticker}: ${cached.price}`);
                 return cached.price;
             }
 
             console.log(`🔍 Recherche du prix pour: ${ticker}`);
 
-            // Liste des proxies CORS à essayer dans l'ordre
-            const proxies = [
-                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
-            ];
-
-            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
-
-            for (let i = 0; i < proxies.length; i++) {
-                try {
-                    console.log(`⏳ Tentative ${i + 1}/${proxies.length} pour ${ticker}...`);
-                    const proxyUrl = proxies[i](yahooUrl);
-                    
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-                    
-                    const r = await fetch(proxyUrl, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-                    
-                    if (!r.ok) {
-                        console.warn(`❌ Proxy ${i + 1} a échoué (status ${r.status})`);
-                        continue;
-                    }
-                    
+            // Méthode 1: Essayer directement Yahoo (peut fonctionner selon le navigateur)
+            try {
+                console.log(`⏳ Tentative directe Yahoo pour ${ticker}...`);
+                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+                
+                const r = await fetch(yahooUrl, { 
+                    signal: controller.signal,
+                    mode: 'cors'
+                });
+                clearTimeout(timeoutId);
+                
+                if (r.ok) {
                     const data = await r.json();
-                    
-                    if (data.chart && data.chart.result && data.chart.result[0]) {
-                        const result = data.chart.result[0];
-                        const price = result.meta.regularMarketPrice || 0;
-                        
-                        if (price > 0) {
-                            console.log(`✅ Prix trouvé pour ${ticker}: ${price} €`);
-                            priceCache[cacheKey] = { price, ts: Date.now() };
-                            return price;
-                        }
-                    }
-                    
-                    console.warn(`⚠️ Données invalides du proxy ${i + 1}`);
-                } catch (e) {
-                    if (e.name === 'AbortError') {
-                        console.warn(`⏱️ Timeout pour proxy ${i + 1}`);
-                    } else {
-                        console.warn(`❌ Erreur proxy ${i + 1}:`, e.message);
+                    if (data.chart?.result?.[0]?.meta?.regularMarketPrice) {
+                        const price = data.chart.result[0].meta.regularMarketPrice;
+                        console.log(`✅ Prix trouvé (direct) pour ${ticker}: ${price}`);
+                        priceCache[cacheKey] = { price, ts: Date.now() };
+                        return price;
                     }
                 }
+            } catch (e) {
+                console.log(`⚠️ Accès direct Yahoo bloqué pour ${ticker}: ${e.message}`);
             }
+
+            // Méthode 2: Utiliser allorigins avec gestion d'erreur améliorée
+            try {
+                console.log(`⏳ Tentative avec allorigins pour ${ticker}...`);
+                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+                
+                const r = await fetch(proxyUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                if (r.ok) {
+                    const proxyData = await r.json();
+                    if (proxyData.contents) {
+                        try {
+                            const data = JSON.parse(proxyData.contents);
+                            if (data.chart?.result?.[0]?.meta?.regularMarketPrice) {
+                                const price = data.chart.result[0].meta.regularMarketPrice;
+                                console.log(`✅ Prix trouvé (allorigins) pour ${ticker}: ${price}`);
+                                priceCache[cacheKey] = { price, ts: Date.now() };
+                                return price;
+                            }
+                        } catch (parseErr) {
+                            console.error(`❌ Erreur parsing JSON pour ${ticker}:`, parseErr.message);
+                        }
+                    }
+                }
+            } catch (e) {
+                if (e.name === 'AbortError') {
+                    console.warn(`⏱️ Timeout allorigins pour ${ticker}`);
+                } else {
+                    console.warn(`❌ Erreur allorigins pour ${ticker}:`, e.message);
+                }
+            }
+
+            // Méthode 3: API alternative - Yahoo Finance via rapidapi (nécessite clé gratuite)
+            // Pour l'instant, on retourne 0 si tout échoue
+            console.error(`❌ Impossible de récupérer le prix pour ${ticker} après toutes les tentatives`);
             
-            console.error(`❌ Impossible de récupérer le prix pour ${ticker} après ${proxies.length} tentatives`);
+            // Marquer dans le cache pour éviter de réessayer trop souvent
+            priceCache[cacheKey] = { price: 0, ts: Date.now() };
             return 0;
         }
 
