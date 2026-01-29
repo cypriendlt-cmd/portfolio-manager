@@ -487,7 +487,7 @@
                 <button onclick="connectGoogleDrive()">🔗 Connecter</button>
                 <button class="btn-danger" onclick="disconnectGoogleDrive()">❌ Déconnecter</button>
                 <button class="btn-secondary" onclick="loadFromDrive()">📥 Charger</button>
-                <button class="btn-secondary" onclick="syncData()">📤 Sauvegarder</button>
+                <button class="btn-secondary" onclick="syncDriveData()">📤 Sauvegarder</button>
             </div>
 
             <h3 style="margin-top: 30px;">⚠️ Zone dangereuse</h3>
@@ -1245,16 +1245,28 @@
         }
 
         async function syncDriveData() {
-            if (!isGoogleDriveConnected || !accessToken) return;
+            if (!isGoogleDriveConnected || !accessToken) {
+                console.log('⚠️ Google Drive non connecté, sauvegarde ignorée');
+                return;
+            }
             try {
                 const fid = localStorage.getItem('portfolioFileId');
                 const data = JSON.stringify(portfolio, null, 2);
                 if (fid) {
-                    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fid}?uploadType=media`, {
+                    const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fid}?uploadType=media`, {
                         method: 'PATCH',
                         headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
                         body: data
                     });
+                    if (response.ok) {
+                        console.log('✅ Sauvegardé sur Google Drive');
+                        // Only show alert if called manually (not automatic)
+                        if (event && event.type === 'click') {
+                            alert('✅ Sauvegardé sur Google Drive !');
+                        }
+                    } else {
+                        throw new Error('Erreur HTTP: ' + response.status);
+                    }
                 } else {
                     const meta = { name: 'portfolio.json', mimeType: 'application/json' };
                     const form = new FormData();
@@ -1268,10 +1280,17 @@
                     if (r.ok) {
                         const res = await r.json();
                         localStorage.setItem('portfolioFileId', res.id);
+                        console.log('✅ Fichier créé sur Google Drive:', res.id);
+                        if (event && event.type === 'click') {
+                            alert('✅ Fichier créé et sauvegardé sur Google Drive !');
+                        }
+                    } else {
+                        throw new Error('Erreur création: ' + r.status);
                     }
                 }
             } catch (e) {
-                console.error(e);
+                console.error('❌ Erreur sauvegarde Drive:', e);
+                alert('❌ Erreur lors de la sauvegarde sur Google Drive:\n' + e.message);
             }
         }
 
