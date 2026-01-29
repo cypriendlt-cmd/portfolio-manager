@@ -134,7 +134,22 @@
         }
         button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4); }
         .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #fff; }
+        .btn-primary { background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%); color: #1a1f2e; }
         .btn-danger { background: linear-gradient(135deg, #ff4757 0%, #cc3847 100%); color: #fff; }
+        
+        /* Edit mode styles */
+        td .edit-mode {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #fff;
+            border-radius: 4px;
+        }
+        td button {
+            padding: 8px 12px;
+            font-size: 0.9em;
+        }
         
         .asset-group {
             background: rgba(255, 255, 255, 0.03);
@@ -359,6 +374,10 @@
                         <input type="number" step="0.01" id="peaPrice" required min="0">
                     </div>
                     <div class="form-group">
+                        <label>Frais (€)</label>
+                        <input type="number" step="0.01" id="peaFees" value="0" min="0">
+                    </div>
+                    <div class="form-group">
                         <label>Date d'achat</label>
                         <input type="date" id="peaDate" required>
                     </div>
@@ -449,12 +468,13 @@
             </div>
 
             <h3 style="margin-top: 30px;">💾 Sauvegarde locale</h3>
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
                 <button onclick="exportData()">📥 Exporter</button>
                 <button class="btn-secondary">
                     <label for="importFile" style="cursor: pointer; margin: 0;">📤 Importer</label>
                     <input type="file" id="importFile" accept=".json" onchange="importData(event)" style="display: none;">
                 </button>
+                <button class="btn-secondary" onclick="console.log('Portfolio actuel:', portfolio); alert('Voir la console (F12) pour les détails');">🔍 Debug</button>
             </div>
 
             <h3 style="margin-top: 30px;">☁️ Synchronisation Google Drive</h3>
@@ -680,6 +700,7 @@
             const ticker = document.getElementById('peaTicker').value.toUpperCase();
             const quantity = parseFloat(document.getElementById('peaQuantity').value);
             const price = parseFloat(document.getElementById('peaPrice').value);
+            const fees = parseFloat(document.getElementById('peaFees').value) || 0;
             const date = document.getElementById('peaDate').value;
             
             if (!name || !ticker || isNaN(quantity) || isNaN(price) || !date) {
@@ -692,6 +713,7 @@
                 ticker: ticker,
                 quantity: quantity,
                 price: price,
+                fees: fees,
                 date: date
             };
             
@@ -718,6 +740,139 @@
                 updatePEAAssets();
                 updateDashboard();
             }
+        }
+
+        function editPEAPurchase(index) {
+            const row = document.getElementById(`row-${index}`);
+            if (!row) return;
+            
+            // Hide view mode, show edit mode
+            row.querySelectorAll('.view-mode').forEach(el => el.style.display = 'none');
+            row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'block');
+            
+            // Toggle buttons
+            row.querySelector('.edit-btn').style.display = 'none';
+            row.querySelector('.save-btn').style.display = 'inline-block';
+            row.querySelector('.cancel-btn').style.display = 'inline-block';
+        }
+
+        function savePEAPurchase(index) {
+            const row = document.getElementById(`row-${index}`);
+            if (!row) return;
+            
+            const inputs = row.querySelectorAll('.edit-mode');
+            const newDate = inputs[0].value;
+            const newQuantity = parseFloat(inputs[1].value);
+            const newPrice = parseFloat(inputs[2].value);
+            const newFees = parseFloat(inputs[3].value) || 0;
+            
+            if (!newDate || isNaN(newQuantity) || isNaN(newPrice)) {
+                alert('⚠️ Valeurs invalides');
+                return;
+            }
+            
+            // Update portfolio data
+            portfolio.pea[index].date = newDate;
+            portfolio.pea[index].quantity = newQuantity;
+            portfolio.pea[index].price = newPrice;
+            portfolio.pea[index].fees = newFees;
+            
+            saveData();
+            syncDriveData();
+            updatePEAAssets();
+            updateDashboard();
+        }
+
+        function cancelEditPEAPurchase(index) {
+            updatePEAAssets(); // Just refresh to cancel changes
+        }
+
+        function createAssetChart(ticker, purchases, currentPrice) {
+            const ctx = document.getElementById(`chart-${ticker}`);
+            if (!ctx) return;
+            
+            // Sort purchases by date
+            const sortedPurchases = [...purchases].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Calculate cumulative portfolio value over time
+            const chartData = [];
+            let cumulativeQuantity = 0;
+            let cumulativeInvested = 0;
+            
+            sortedPurchases.forEach(p => {
+                const fees = p.fees || 0;
+                cumulativeQuantity += p.quantity;
+                cumulativeInvested += (p.quantity * p.price) + fees;
+                
+                const avgPrice = cumulativeInvested / cumulativeQuantity;
+                const currentValue = cumulativeQuantity * currentPrice;
+                
+                chartData.push({
+                    date: new Date(p.date).toLocaleDateString('fr-FR'),
+                    invested: cumulativeInvested,
+                    value: currentValue,
+                    quantity: cumulativeQuantity
+                });
+            });
+            
+            // Create chart
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.map(d => d.date),
+                    datasets: [
+                        {
+                            label: 'Valeur actuelle',
+                            data: chartData.map(d => d.value),
+                            borderColor: '#00ff88',
+                            backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Montant investi',
+                            data: chartData.map(d => d.invested),
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: '#fff', font: { size: 10 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' €';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#a0aec0', font: { size: 9 } },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            ticks: { 
+                                color: '#a0aec0',
+                                font: { size: 9 },
+                                callback: function(value) {
+                                    return value.toFixed(0) + ' €';
+                                }
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
         }
 
         function toggleAsset(ticker) {
@@ -761,8 +916,9 @@
                 let totalInvested = 0;
                 
                 asset.purchases.forEach(p => {
+                    const fees = p.fees || 0;
                     totalQuantity += p.quantity;
-                    totalInvested += p.quantity * p.price;
+                    totalInvested += (p.quantity * p.price) + fees;
                 });
 
                 const avgPrice = totalQuantity > 0 ? totalInvested / totalQuantity : 0;
@@ -815,15 +971,21 @@
                     </div>
                     <div class="asset-details" id="details-${ticker}">
                         <div class="asset-purchases">
-                            <h4 style="margin-bottom: 15px; color: #a0aec0;">📊 Historique des achats</h4>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 20px;">
+                                <h4 style="margin: 0; color: #a0aec0;">📊 Historique des achats</h4>
+                                <div style="flex: 1; max-width: 500px; height: 150px;">
+                                    <canvas id="chart-${ticker}"></canvas>
+                                </div>
+                            </div>
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Date</th>
                                         <th>Quantité</th>
                                         <th>Prix d'achat</th>
+                                        <th>Frais</th>
                                         <th>Montant investi</th>
-                                        <th>Action</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="purchases-${ticker}"></tbody>
@@ -837,18 +999,43 @@
                 asset.purchases
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .forEach(p => {
-                        const invested = p.quantity * p.price;
+                        const fees = p.fees || 0;
+                        const invested = p.quantity * p.price + fees;
                         const dateStr = new Date(p.date).toLocaleDateString('fr-FR');
                         
                         const row = purchasesTable.insertRow();
+                        row.id = `row-${p.originalIndex}`;
                         row.innerHTML = `
-                            <td>${dateStr}</td>
-                            <td>${p.quantity.toFixed(2)}</td>
-                            <td>${p.price.toFixed(2)} €</td>
-                            <td>${invested.toFixed(2)} €</td>
-                            <td><button class="btn-danger" onclick="deletePEAPurchase(${p.originalIndex})">🗑️</button></td>
+                            <td>
+                                <span class="view-mode">${dateStr}</span>
+                                <input type="date" class="edit-mode" value="${p.date}" style="display: none;">
+                            </td>
+                            <td>
+                                <span class="view-mode">${p.quantity.toFixed(2)}</span>
+                                <input type="number" class="edit-mode" value="${p.quantity}" step="0.01" style="display: none;">
+                            </td>
+                            <td>
+                                <span class="view-mode">${p.price.toFixed(2)} €</span>
+                                <input type="number" class="edit-mode" value="${p.price}" step="0.01" style="display: none;">
+                            </td>
+                            <td>
+                                <span class="view-mode">${fees.toFixed(2)} €</span>
+                                <input type="number" class="edit-mode" value="${fees}" step="0.01" style="display: none;">
+                            </td>
+                            <td>
+                                <span class="view-mode">${invested.toFixed(2)} €</span>
+                            </td>
+                            <td>
+                                <button class="btn-secondary edit-btn" onclick="editPEAPurchase(${p.originalIndex})" style="margin-right: 5px;">✏️</button>
+                                <button class="btn-primary save-btn" onclick="savePEAPurchase(${p.originalIndex})" style="display: none; margin-right: 5px;">💾</button>
+                                <button class="btn-secondary cancel-btn" onclick="cancelEditPEAPurchase(${p.originalIndex})" style="display: none; margin-right: 5px;">❌</button>
+                                <button class="btn-danger" onclick="deletePEAPurchase(${p.originalIndex})">🗑️</button>
+                            </td>
                         `;
                     });
+                
+                // Create chart for this asset
+                createAssetChart(ticker, asset.purchases, currentPrice);
             }
         }
 
@@ -914,11 +1101,12 @@
 
             const peaByTicker = {};
             portfolio.pea.forEach(p => {
+                const fees = p.fees || 0;
                 if (!peaByTicker[p.ticker]) {
                     peaByTicker[p.ticker] = { quantity: 0, invested: 0 };
                 }
                 peaByTicker[p.ticker].quantity += p.quantity;
-                peaByTicker[p.ticker].invested += p.quantity * p.price;
+                peaByTicker[p.ticker].invested += (p.quantity * p.price) + fees;
             });
 
             Object.entries(peaByTicker).forEach(([ticker, data]) => {
@@ -1088,7 +1276,10 @@
         }
 
         async function loadFromDrive() {
-            if (!isGoogleDriveConnected || !accessToken) return;
+            if (!isGoogleDriveConnected || !accessToken) {
+                alert('⚠️ Veuillez d\'abord vous connecter à Google Drive');
+                return;
+            }
             try {
                 let fid = localStorage.getItem('portfolioFileId');
                 if (!fid) {
@@ -1100,6 +1291,7 @@
                         fid = d.files[0].id;
                         localStorage.setItem('portfolioFileId', fid);
                     } else {
+                        alert('⚠️ Aucun fichier portfolio.json trouvé sur Google Drive');
                         return;
                     }
                 }
@@ -1107,13 +1299,42 @@
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 if (r.ok) {
-                    portfolio = await r.json();
+                    const importedData = await r.json();
+                    
+                    // Merge with existing structure to ensure all properties exist
+                    portfolio = {
+                        crypto: importedData.crypto || [],
+                        pea: importedData.pea || [],
+                        fundraising: importedData.fundraising || [],
+                        prices: importedData.prices || {},
+                        priceTimestamps: importedData.priceTimestamps || {}
+                    };
+                    
+                    // Ensure each PEA purchase has all required fields
+                    portfolio.pea = portfolio.pea.map(p => ({
+                        name: p.name || '',
+                        ticker: p.ticker || '',
+                        quantity: p.quantity || 0,
+                        price: p.price || 0,
+                        fees: p.fees || 0,
+                        date: p.date || new Date().toISOString().split('T')[0]
+                    }));
+                    
+                    console.log('📥 Données chargées depuis Drive:', portfolio);
+                    console.log('PEA items:', portfolio.pea.length);
+                    console.log('Crypto items:', portfolio.crypto.length);
+                    console.log('Fundraising items:', portfolio.fundraising.length);
+                    
+                    ensurePortfolioStructure();
                     saveData();
                     updateAll();
-                    alert('✅ Données chargées');
+                    alert(`✅ Données chargées depuis Google Drive!\n\nPEA: ${portfolio.pea.length} lignes\nCrypto: ${portfolio.crypto.length} lignes\nLevées: ${portfolio.fundraising.length} lignes`);
+                } else {
+                    alert('❌ Erreur lors du chargement: ' + r.status);
                 }
             } catch (e) {
-                console.error(e);
+                console.error('Erreur Drive:', e);
+                alert('❌ Erreur: ' + e.message);
             }
         }
 
@@ -1149,13 +1370,40 @@
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                     try {
-                        portfolio = JSON.parse(ev.target.result);
+                        const importedData = JSON.parse(ev.target.result);
+                        
+                        // Merge with existing structure to ensure all properties exist
+                        portfolio = {
+                            crypto: importedData.crypto || [],
+                            pea: importedData.pea || [],
+                            fundraising: importedData.fundraising || [],
+                            prices: importedData.prices || {},
+                            priceTimestamps: importedData.priceTimestamps || {}
+                        };
+                        
+                        // Ensure each PEA purchase has all required fields
+                        portfolio.pea = portfolio.pea.map(p => ({
+                            name: p.name || '',
+                            ticker: p.ticker || '',
+                            quantity: p.quantity || 0,
+                            price: p.price || 0,
+                            fees: p.fees || 0,
+                            date: p.date || new Date().toISOString().split('T')[0]
+                        }));
+                        
+                        console.log('📥 Données importées:', portfolio);
+                        console.log('PEA items:', portfolio.pea.length);
+                        console.log('Crypto items:', portfolio.crypto.length);
+                        console.log('Fundraising items:', portfolio.fundraising.length);
+                        
+                        ensurePortfolioStructure();
                         saveData();
                         syncDriveData();
                         updateAll();
-                        alert('✅ Importé');
+                        alert(`✅ Importé avec succès!\n\nPEA: ${portfolio.pea.length} lignes\nCrypto: ${portfolio.crypto.length} lignes\nLevées: ${portfolio.fundraising.length} lignes`);
                     } catch (err) {
-                        alert('❌ Erreur');
+                        console.error('Erreur import:', err);
+                        alert(`❌ Erreur lors de l'import:\n${err.message}\n\nVérifiez que le fichier est un JSON valide.`);
                     }
                 };
                 reader.readAsText(file);
