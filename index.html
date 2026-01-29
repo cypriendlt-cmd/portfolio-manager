@@ -104,6 +104,15 @@
             margin-bottom: 20px;
             font-size: 0.9em;
         }
+        .info-message {
+            background: rgba(52, 152, 219, 0.1);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            color: #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
         button {
             background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
             color: #1a1f2e;
@@ -133,6 +142,7 @@
         .positive { color: #00ff88; }
         .negative { color: #ff4757; }
         .loading { opacity: 0.6; pointer-events: none; }
+        .price-loading { color: #f39c12; font-style: italic; }
     </style>
 </head>
 <body>
@@ -177,6 +187,9 @@
 
         <div id="crypto" class="section">
             <h2>Crypto-Monnaies</h2>
+            <div class="info-message">
+                💡 <strong>Symboles crypto :</strong> BTC, ETH, SOL, ADA, DOGE, etc. (utilise CoinGecko API - gratuit)
+            </div>
             <form id="cryptoForm" onsubmit="addCrypto(event)">
                 <div class="form-grid">
                     <div class="form-group">
@@ -184,8 +197,8 @@
                         <input type="text" id="cryptoName" required>
                     </div>
                     <div class="form-group">
-                        <label>Symbol (ex: BTC)</label>
-                        <input type="text" id="cryptoSymbol" required>
+                        <label>Symbol CoinGecko (ex: bitcoin, ethereum)</label>
+                        <input type="text" id="cryptoSymbol" required placeholder="bitcoin">
                     </div>
                     <div class="form-group">
                         <label>Quantité</label>
@@ -218,8 +231,12 @@
 
         <div id="pea" class="section">
             <h2>PEA</h2>
-            <div class="warning-message">
-                ⚠️ Pour les actions US, utilisez le ticker Yahoo (ex: NVDA, AAPL). Pour les actions européennes, utilisez le ticker + suffixe bourse (ex: AI.PA pour Air Liquide Paris, SAN.MC pour Santander Madrid).
+            <div class="info-message">
+                💡 <strong>Tickers Yahoo Finance :</strong><br>
+                • Actions US : NVDA, AAPL, MSFT, TSLA<br>
+                • Actions FR : MC.PA (LVMH), OR.PA (L'Oréal), AI.PA (Air Liquide)<br>
+                • Actions EU : utilise le suffixe du marché (.PA = Paris, .AS = Amsterdam, .DE = Francfort)<br>
+                Les prix peuvent prendre quelques secondes à charger (gratuit via API proxy).
             </div>
             <form id="peaForm" onsubmit="addPEA(event)">
                 <div class="form-grid">
@@ -228,7 +245,7 @@
                         <input type="text" id="peaName" required>
                     </div>
                     <div class="form-group">
-                        <label>Ticker Yahoo (ex: NVDA, AI.PA)</label>
+                        <label>Ticker Yahoo (ex: NVDA, MC.PA)</label>
                         <input type="text" id="peaTicker" required placeholder="NVDA">
                     </div>
                     <div class="form-group">
@@ -355,7 +372,7 @@
             e.preventDefault();
             const crypto = {
                 name: document.getElementById('cryptoName').value,
-                symbol: document.getElementById('cryptoSymbol').value.toUpperCase(),
+                symbol: document.getElementById('cryptoSymbol').value.toLowerCase(),
                 quantity: parseFloat(document.getElementById('cryptoQuantity').value),
                 entryPrice: parseFloat(document.getElementById('cryptoPrice').value)
             };
@@ -381,24 +398,36 @@
             
             for (let i = 0; i < portfolio.crypto.length; i++) {
                 const c = portfolio.crypto[i];
-                const price = await getCryptoPrice(c.symbol);
-                const value = c.quantity * price;
-                const invested = c.quantity * c.entryPrice;
-                const pnl = value - invested;
-                const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
-
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${c.name}</td>
                     <td>${c.symbol}</td>
                     <td>${c.quantity.toFixed(8)}</td>
                     <td>${c.entryPrice.toFixed(2)} €</td>
-                    <td>${price.toFixed(2)} €</td>
-                    <td>${value.toFixed(2)} €</td>
-                    <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnl.toFixed(2)} €</td>
-                    <td class="${pnlPercent >= 0 ? 'positive' : 'negative'}">${pnlPercent.toFixed(2)}%</td>
+                    <td class="price-loading">Chargement...</td>
+                    <td class="price-loading">-</td>
+                    <td class="price-loading">-</td>
+                    <td class="price-loading">-</td>
                     <td><button class="btn-danger" onclick="deleteCrypto(${i})">🗑️</button></td>
                 `;
+                
+                // Charger le prix en async
+                getCryptoPrice(c.symbol).then(price => {
+                    const value = c.quantity * price;
+                    const invested = c.quantity * c.entryPrice;
+                    const pnl = value - invested;
+                    const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
+
+                    const cells = row.cells;
+                    cells[4].textContent = price.toFixed(2) + ' €';
+                    cells[4].className = '';
+                    cells[5].textContent = value.toFixed(2) + ' €';
+                    cells[5].className = '';
+                    cells[6].textContent = pnl.toFixed(2) + ' €';
+                    cells[6].className = pnl >= 0 ? 'positive' : 'negative';
+                    cells[7].textContent = pnlPercent.toFixed(2) + '%';
+                    cells[7].className = pnlPercent >= 0 ? 'positive' : 'negative';
+                });
             }
         }
 
@@ -433,24 +462,36 @@
             
             for (let i = 0; i < portfolio.pea.length; i++) {
                 const p = portfolio.pea[i];
-                const price = await getStockPrice(p.ticker);
-                const value = p.quantity * price;
-                const invested = p.quantity * p.entryPrice;
-                const pnl = value - invested;
-                const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
-
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${p.name}</td>
                     <td>${p.ticker}</td>
                     <td>${p.quantity.toFixed(2)}</td>
                     <td>${p.entryPrice.toFixed(2)} €</td>
-                    <td>${price.toFixed(2)} €</td>
-                    <td>${value.toFixed(2)} €</td>
-                    <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnl.toFixed(2)} €</td>
-                    <td class="${pnlPercent >= 0 ? 'positive' : 'negative'}">${pnlPercent.toFixed(2)}%</td>
+                    <td class="price-loading">Chargement...</td>
+                    <td class="price-loading">-</td>
+                    <td class="price-loading">-</td>
+                    <td class="price-loading">-</td>
                     <td><button class="btn-danger" onclick="deletePEA(${i})">🗑️</button></td>
                 `;
+                
+                // Charger le prix en async
+                getStockPrice(p.ticker).then(price => {
+                    const value = p.quantity * price;
+                    const invested = p.quantity * p.entryPrice;
+                    const pnl = value - invested;
+                    const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
+
+                    const cells = row.cells;
+                    cells[4].textContent = price.toFixed(2) + ' €';
+                    cells[4].className = '';
+                    cells[5].textContent = value.toFixed(2) + ' €';
+                    cells[5].className = '';
+                    cells[6].textContent = pnl.toFixed(2) + ' €';
+                    cells[6].className = pnl >= 0 ? 'positive' : 'negative';
+                    cells[7].textContent = pnlPercent.toFixed(2) + '%';
+                    cells[7].className = pnlPercent >= 0 ? 'positive' : 'negative';
+                });
             }
         }
 
@@ -510,18 +551,22 @@
             let totalInvested = 0;
 
             // Crypto
-            for (const c of portfolio.crypto) {
-                const price = await getCryptoPrice(c.symbol);
-                totalValue += c.quantity * price;
+            const cryptoPrices = await Promise.all(
+                portfolio.crypto.map(c => getCryptoPrice(c.symbol))
+            );
+            portfolio.crypto.forEach((c, i) => {
+                totalValue += c.quantity * cryptoPrices[i];
                 totalInvested += c.quantity * c.entryPrice;
-            }
+            });
 
             // PEA
-            for (const p of portfolio.pea) {
-                const price = await getStockPrice(p.ticker);
-                totalValue += p.quantity * price;
+            const stockPrices = await Promise.all(
+                portfolio.pea.map(p => getStockPrice(p.ticker))
+            );
+            portfolio.pea.forEach((p, i) => {
+                totalValue += p.quantity * stockPrices[i];
                 totalInvested += p.quantity * p.entryPrice;
-            }
+            });
 
             // Fundraising
             for (const f of portfolio.fundraising) {
@@ -539,24 +584,22 @@
             document.getElementById('totalPerformance').textContent = totalPerf.toFixed(2) + '%';
             document.getElementById('totalPerformance').className = 'stat-value ' + (totalPerf >= 0 ? 'positive' : 'negative');
 
-            updateChart();
+            updateChart(cryptoPrices, stockPrices);
         }
 
-        function updateChart() {
+        function updateChart(cryptoPrices, stockPrices) {
             const ctx = document.getElementById('portfolioChart').getContext('2d');
             
             let cryptoValue = 0;
             let peaValue = 0;
             let fundraisingValue = 0;
 
-            portfolio.crypto.forEach(c => {
-                const cached = priceCache[`crypto_${c.symbol}`];
-                if (cached) cryptoValue += c.quantity * cached.price;
+            portfolio.crypto.forEach((c, i) => {
+                cryptoValue += c.quantity * cryptoPrices[i];
             });
 
-            portfolio.pea.forEach(p => {
-                const cached = priceCache[`stock_${p.ticker}`];
-                if (cached) peaValue += p.quantity * cached.price;
+            portfolio.pea.forEach((p, i) => {
+                peaValue += p.quantity * stockPrices[i];
             });
 
             portfolio.fundraising.forEach(f => {
@@ -584,7 +627,7 @@
             });
         }
 
-        // Prix API - YAHOO FINANCE
+        // Prix API - CoinGecko pour crypto (gratuit, pas de CORS)
         async function getCryptoPrice(symbol) {
             const cacheKey = `crypto_${symbol}`;
             const cached = priceCache[cacheKey];
@@ -593,15 +636,12 @@
             }
 
             try {
-                // Utiliser l'API Yahoo Finance via proxy
-                const ticker = `${symbol}-USD`;
-                const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${symbol}&vs_currencies=eur`;
                 const r = await fetch(url);
                 const data = await r.json();
                 
-                if (data.chart && data.chart.result && data.chart.result[0]) {
-                    const result = data.chart.result[0];
-                    const price = result.meta.regularMarketPrice || 0;
+                if (data[symbol] && data[symbol].eur) {
+                    const price = data[symbol].eur;
                     priceCache[cacheKey] = { price, ts: Date.now() };
                     return price;
                 }
@@ -612,6 +652,7 @@
             }
         }
 
+        // Prix API - Yahoo Finance via proxy CORS (gratuit)
         async function getStockPrice(ticker) {
             const cacheKey = `stock_${ticker}`;
             const cached = priceCache[cacheKey];
@@ -620,8 +661,11 @@
             }
 
             try {
-                const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
-                const r = await fetch(url);
+                // Utiliser un proxy CORS public
+                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
+                
+                const r = await fetch(proxyUrl);
                 const data = await r.json();
                 
                 if (data.chart && data.chart.result && data.chart.result[0]) {
@@ -633,6 +677,22 @@
                 return 0;
             } catch (e) {
                 console.error('Erreur prix action:', ticker, e);
+                // Fallback : essayer un autre proxy
+                try {
+                    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+                    const fallbackProxy = `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`;
+                    const r = await fetch(fallbackProxy);
+                    const data = await r.json();
+                    
+                    if (data.chart && data.chart.result && data.chart.result[0]) {
+                        const result = data.chart.result[0];
+                        const price = result.meta.regularMarketPrice || 0;
+                        priceCache[cacheKey] = { price, ts: Date.now() };
+                        return price;
+                    }
+                } catch (e2) {
+                    console.error('Erreur proxy fallback:', ticker, e2);
+                }
                 return 0;
             }
         }
