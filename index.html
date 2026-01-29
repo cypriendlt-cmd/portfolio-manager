@@ -167,6 +167,16 @@
             display: none;
         }
 
+        .info-message {
+            background: rgba(0, 136, 255, 0.1);
+            border: 1px solid rgba(0, 136, 255, 0.3);
+            color: #00aaff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
         button {
             background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
             color: #1a1f2e;
@@ -391,6 +401,14 @@
         <!-- PEA Section -->
         <div id="pea" class="section">
             <h2>PEA (Plan d'Épargne en Actions)</h2>
+            
+            <div class="info-message">
+                <strong>💡 API Financial Modeling Prep</strong><br>
+                Cette application utilise l'API FMP pour les prix en temps réel. 
+                <a href="https://site.financialmodelingprep.com/register" target="_blank" style="color: #00aaff;">Obtenez votre clé API gratuite</a> 
+                et entrez-la dans les Paramètres.
+            </div>
+            
             <form id="peaForm" onsubmit="addPEA(event)">
                 <div class="form-grid">
                     <div class="form-group">
@@ -399,7 +417,7 @@
                     </div>
                     <div class="form-group">
                         <label>Code ISIN</label>
-                        <input type="text" id="peaISIN" required maxlength="12" placeholder="FR0000000000">
+                        <input type="text" id="peaISIN" required maxlength="12" placeholder="FR0000000000" style="text-transform: uppercase;">
                         <span class="error-message" id="peaISINError">Format ISIN invalide (ex: FR0000000000)</span>
                     </div>
                     <div class="form-group">
@@ -428,11 +446,11 @@
                         <th>Quantité</th>
                         <th>Prix d'entrée</th>
                         <th>Prix actuel</th>
-                        <th>ATH</th>
+                        <th>Variation 24h</th>
                         <th>Valeur</th>
                         <th>P&L</th>
                         <th>Performance</th>
-                        <th>Tendance 7J</th>
+                        <th>Tendance</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -492,6 +510,24 @@
         <!-- Settings Section -->
         <div id="settings" class="section">
             <h2>Paramètres</h2>
+            
+            <h3 style="color: #00ff88; margin-bottom: 15px;">API Financial Modeling Prep</h3>
+            <div class="info-message">
+                Pour obtenir des prix réels, inscrivez-vous sur 
+                <a href="https://site.financialmodelingprep.com/register" target="_blank" style="color: #00aaff; text-decoration: underline;">
+                    Financial Modeling Prep
+                </a> 
+                et obtenez votre clé API gratuite. Le plan gratuit offre 250 requêtes par jour.
+            </div>
+            <div class="form-group" style="margin-bottom: 30px;">
+                <label>Clé API FMP</label>
+                <input type="text" id="fmpApiKey" placeholder="Entrez votre clé API FMP">
+                <button onclick="saveFMPApiKey()" style="margin-top: 10px;">Enregistrer Clé API</button>
+            </div>
+            
+            <hr style="margin: 30px 0; border-color: rgba(255, 255, 255, 0.1);">
+            
+            <h3 style="color: #00ff88; margin-bottom: 15px;">Synchronisation Google Drive</h3>
             <div class="form-group" style="margin-bottom: 20px;">
                 <label>Google Drive Client ID</label>
                 <input type="text" id="clientId" placeholder="Entrez votre Client ID Google">
@@ -502,7 +538,10 @@
                 <button class="btn-warning" onclick="disconnectGoogleDrive()">Déconnecter</button>
                 <button class="btn-secondary" onclick="syncData()">Synchroniser maintenant</button>
             </div>
+            
             <hr style="margin: 30px 0; border-color: rgba(255, 255, 255, 0.1);">
+            
+            <h3 style="color: #00ff88; margin-bottom: 15px;">Gestion des Données</h3>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <button class="btn-secondary" onclick="exportData()">Exporter Données</button>
                 <input type="file" id="importFile" accept=".json" onchange="importData(event)" style="display: none;">
@@ -530,10 +569,12 @@
         let accessToken = null;
         let tokenClient = null;
         let isSyncing = false;
+        let fmpApiKey = '';
 
         // Initialize
         window.addEventListener('load', () => {
             loadData();
+            fmpApiKey = localStorage.getItem('fmpApiKey') || '';
             updateDashboard();
             updateCryptoTable();
             updatePEATable();
@@ -546,6 +587,12 @@
             document.getElementById('cryptoDate').value = today;
             document.getElementById('peaDate').value = today;
             document.getElementById('fundraisingDate').value = today;
+            
+            // Load saved API key
+            const savedKey = localStorage.getItem('fmpApiKey');
+            if (savedKey) {
+                document.getElementById('fmpApiKey').value = savedKey;
+            }
         });
 
         // UI Functions
@@ -588,6 +635,21 @@
                     errorElement.style.display = 'none';
                 }
                 return true;
+            }
+        }
+
+        // FMP API Settings
+        function saveFMPApiKey() {
+            const apiKey = document.getElementById('fmpApiKey').value.trim();
+            if (apiKey) {
+                localStorage.setItem('fmpApiKey', apiKey);
+                fmpApiKey = apiKey;
+                alert('✅ Clé API FMP enregistrée ! Les prix seront mis à jour.');
+                // Refresh prices
+                updatePEATable();
+                updateDashboard();
+            } else {
+                alert('⚠️ Veuillez entrer une clé API valide');
             }
         }
 
@@ -656,7 +718,7 @@
             if (!confirm('Supprimer cette position ?')) return;
             
             try {
-                // Find the position before deleting
+                // Find the position BEFORE deleting it
                 const deletedPosition = portfolio.crypto.find(p => p.id === id);
                 
                 // Delete from portfolio
@@ -848,7 +910,6 @@
                 try {
                     const priceData = await getStockPriceByISIN(position.isin);
                     const currentPrice = priceData?.price || 0;
-                    const ath = priceData?.ath || 0;
                     const change24h = priceData?.change24h || 0;
                     const sparkline = priceData?.sparkline || [];
                     
@@ -865,8 +926,8 @@
                         <td>${position.isin}</td>
                         <td>${position.quantity}</td>
                         <td>${position.entryPrice.toFixed(2)} €</td>
-                        <td>${currentPrice.toFixed(2)} €</td>
-                        <td>${ath.toFixed(2)} € <span class="${change24h >= 0 ? 'positive' : 'negative'}">(${change24h.toFixed(2)}%)</span></td>
+                        <td>${currentPrice > 0 ? currentPrice.toFixed(2) + ' €' : 'N/A'}</td>
+                        <td class="${change24h >= 0 ? 'positive' : 'negative'}">${change24h !== 0 ? change24h.toFixed(2) + '%' : 'N/A'}</td>
                         <td>${currentValue.toFixed(2)} €</td>
                         <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnl.toFixed(2)} €</td>
                         <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnlPercent}%</td>
@@ -1133,44 +1194,110 @@
                 console.error('No ISIN provided');
                 return {
                     price: 0,
-                    ath: 0,
                     change24h: 0,
                     sparkline: [],
                     timestamp: Date.now()
                 };
             }
             
+            // Check cache first
             if (priceCache[isin] && Date.now() - priceCache[isin].timestamp < 300000) {
                 return priceCache[isin];
             }
             
+            // Check if FMP API key is configured
+            if (!fmpApiKey) {
+                console.warn('FMP API key not configured. Please add it in Settings.');
+                return {
+                    price: 0,
+                    change24h: 0,
+                    sparkline: [],
+                    timestamp: Date.now()
+                };
+            }
+            
             try {
-                // NOTE: This uses mock data. In production, integrate with a real API like:
-                // - Twelve Data API: https://twelvedata.com/
-                // - Financial Modeling Prep: https://financialmodelingprep.com/
-                // - EOD Historical Data: https://eodhistoricaldata.com/
+                // Step 1: Search for the symbol using ISIN
+                console.log(`Searching for ISIN: ${isin}`);
+                const searchResponse = await fetch(
+                    `https://financialmodelingprep.com/api/v4/search/isin?isin=${isin}&apikey=${fmpApiKey}`
+                );
                 
-                console.warn(`Using mock price data for ISIN: ${isin}. Integrate a real API for production.`);
+                if (!searchResponse.ok) {
+                    throw new Error(`Search failed: ${searchResponse.status}`);
+                }
                 
-                const mockPrice = Math.random() * 200 + 50;
-                const mockChange = (Math.random() - 0.5) * 10;
-                const mockSparkline = Array.from({ length: 7 }, () => mockPrice + (Math.random() - 0.5) * 20);
+                const searchData = await searchResponse.json();
+                
+                if (!searchData || searchData.length === 0) {
+                    console.warn(`No results found for ISIN: ${isin}`);
+                    return {
+                        price: 0,
+                        change24h: 0,
+                        sparkline: [],
+                        timestamp: Date.now()
+                    };
+                }
+                
+                const symbol = searchData[0].symbol;
+                console.log(`Found symbol: ${symbol} for ISIN: ${isin}`);
+                
+                // Step 2: Get current quote for the symbol
+                const quoteResponse = await fetch(
+                    `https://financialmodelingprep.com/api/v3/quote/${symbol}?apikey=${fmpApiKey}`
+                );
+                
+                if (!quoteResponse.ok) {
+                    throw new Error(`Quote failed: ${quoteResponse.status}`);
+                }
+                
+                const quoteData = await quoteResponse.json();
+                
+                if (!quoteData || quoteData.length === 0) {
+                    console.warn(`No quote data for symbol: ${symbol}`);
+                    return {
+                        price: 0,
+                        change24h: 0,
+                        sparkline: [],
+                        timestamp: Date.now()
+                    };
+                }
+                
+                const quote = quoteData[0];
+                
+                // Step 3: Get historical data for sparkline (last 7 days)
+                const toDate = new Date().toISOString().split('T')[0];
+                const fromDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                
+                const historicalResponse = await fetch(
+                    `https://financialmodelingprep.com/api/v3/historical-price-full/${symbol}?from=${fromDate}&to=${toDate}&apikey=${fmpApiKey}`
+                );
+                
+                let sparklineData = [];
+                if (historicalResponse.ok) {
+                    const historicalData = await historicalResponse.json();
+                    if (historicalData.historical && historicalData.historical.length > 0) {
+                        sparklineData = historicalData.historical
+                            .reverse()
+                            .map(d => d.close);
+                    }
+                }
                 
                 const result = {
-                    price: mockPrice,
-                    ath: mockPrice * (1 + Math.random() * 0.5),
-                    change24h: mockChange,
-                    sparkline: mockSparkline,
+                    price: quote.price || 0,
+                    change24h: quote.changesPercentage || 0,
+                    sparkline: sparklineData,
                     timestamp: Date.now()
                 };
                 
                 priceCache[isin] = result;
+                console.log(`Price data for ${isin}:`, result);
                 return result;
+                
             } catch (error) {
                 console.error('Error fetching stock price for ISIN:', isin, error);
                 return {
                     price: 0,
-                    ath: 0,
                     change24h: 0,
                     sparkline: [],
                     timestamp: Date.now()
