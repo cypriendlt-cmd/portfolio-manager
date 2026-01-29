@@ -544,9 +544,29 @@
                     const line = lines[i].trim();
                     if (!line) continue;
                     
-                    const [ticker, priceStr] = line.split(',').map(s => s.trim().replace(/"/g, ''));
+                    // Parse CSV en gérant les guillemets et les virgules décimales
+                    const parts = [];
+                    let current = '';
+                    let inQuotes = false;
+                    
+                    for (let j = 0; j < line.length; j++) {
+                        const char = line[j];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            parts.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    parts.push(current.trim());
+                    
+                    const ticker = parts[0]?.replace(/"/g, '');
+                    const priceStr = parts[1]?.replace(/"/g, '');
                     
                     if (ticker && priceStr) {
+                        // Gérer à la fois le point et la virgule comme séparateur décimal
                         const price = parseFloat(priceStr.replace(',', '.'));
                         if (!isNaN(price) && price > 0) {
                             portfolio.prices[ticker.toUpperCase()] = price;
