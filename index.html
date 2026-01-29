@@ -514,62 +514,74 @@
             }
         }
 
-        async function syncPricesFromGoogleSheets() {
-            const sheetId = localStorage.getItem('googleSheetId');
-            if (!sheetId) {
-                alert('⚠️ Veuillez d\'abord configurer votre Google Sheet ID dans les paramètres');
-                showSection('settings');
-                return;
-            }
+     async function syncPricesFromGoogleSheets() {
+  const sheetId = localStorage.getItem('googleSheetId');
+  if (!sheetId) {
+    alert("⚠️ Veuillez d'abord configurer votre Google Sheet ID dans les paramètres");
+    showSection('settings');
+    return;
+  }
 
-            try {
-                console.log('🔄 Synchronisation depuis Google Sheets...');
-                
-                // URL pour accéder à une feuille Google Sheets publique en CSV
-                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
-                
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: Vérifiez que la feuille est publique`);
-                }
-                
-                const csvText = await response.text();
-                const lines = csvText.split('\n');
-                
-                let count = 0;
-                ensurePortfolioStructure();
-                
-                // Ignorer la première ligne (en-têtes)
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    
-                    const [ticker, priceStr] = line.split(',').map(s => s.trim().replace(/"/g, ''));
-                    
-                    if (ticker && priceStr) {
-                        const price = parseFloat(priceStr.replace(',', '.'));
-                        if (!isNaN(price) && price > 0) {
-                            portfolio.prices[ticker.toUpperCase()] = price;
-                            portfolio.priceTimestamps[ticker.toUpperCase()] = Date.now();
-                            count++;
-                            console.log(`✅ ${ticker}: ${price}€`);
-                        }
-                    }
-                }
-                
-                if (count > 0) {
-                    saveData();
-                    updateAll();
-                    alert(`✅ ${count} prix synchronisés depuis Google Sheets !`);
-                } else {
-                    alert('⚠️ Aucun prix trouvé. Vérifiez le format de votre feuille.');
-                }
-                
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert(`❌ Erreur: ${error.message}\n\nVérifiez que :\n1. La feuille est publiée sur le Web\n2. L'ID est correct\n3. Le format est : ticker,prix`);
-            }
-        }
+  // ✅ Ajoute un champ "googleSheetGid" dans tes paramètres si tu veux choisir l’onglet
+  const gid = localStorage.getItem('googleSheetGid') || '0';
+
+  try {
+    console.log('🔄 Synchronisation depuis Google Sheets...');
+
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${encodeURIComponent(gid)}`;
+
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: Vérifie que la feuille est publique + le gid est bon`);
+    }
+
+    const csvText = await response.text();
+
+    // ✅ Détecte automatiquement le séparateur (virgule ou point-virgule)
+    const firstLine = (csvText.split('\n')[0] || '').trim();
+    const sep = firstLine.includes(';') ? ';' : ',';
+
+    const lines = csvText.split('\n').map(l => l.trim()).filter(Boolean);
+
+    let count = 0;
+    ensurePortfolioStructure();
+
+    // ✅ Ignore l'entête si présente (ticker / prix)
+    for (let i = 0; i < lines.length; i++) {
+      const cols = lines[i].split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
+      if (cols.length < 2) continue;
+
+      const [tickerRaw, prixRaw] = cols;
+
+      if (!tickerRaw) continue;
+
+      // Skip header
+      if (tickerRaw.toLowerCase() === 'ticker') continue;
+
+      const ticker = tickerRaw.trim();
+
+      // ✅ Convertit 22,52 -> 22.52 et enlève espaces
+      const prix = parseFloat(
+        (prixRaw || '')
+          .replace(/\s/g, '')
+          .replace(',', '.')
+      );
+
+      if (!Number.isFinite(prix)) continue;
+
+      // 💡 Ici mets ton cache / structure à jour comme tu fais déjà
+      priceCache[ticker] = prix;
+      count++;
+    }
+
+    console.log(`✅ ${count} prix importés depuis Google Sheets`);
+    refreshUI?.(); // si tu as cette fonction
+  } catch (err) {
+    console.error('❌ Sync Google Sheets:', err);
+    alert(`❌ Impossible de synchroniser : ${err.message}`);
+  }
+}
+}
 
         function toggleAutoSync(enabled) {
             if (enabled) {
