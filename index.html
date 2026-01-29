@@ -838,12 +838,30 @@
                 alert('Veuillez remplir tous les champs');
                 return;
             }
-
-            portfolio.fundraising.push({ name, amount, valuation, date });
+            
+            if (isNaN(amount) || isNaN(valuation)) {
+                alert('Montant et valuation doivent être des nombres');
+                return;
+            }
+            
+            // Ensure portfolio structure exists
+            ensurePortfolioStructure();
+            
+            portfolio.fundraising.push({ 
+                name: name, 
+                amount: amount, 
+                valuation: valuation, 
+                date: date 
+            });
+            
+            console.log('✅ Investissement ajouté:', { name, amount, valuation, date });
+            
             saveData();
             syncDriveData();
             updateFundraisingList();
+            updateAll();
             
+            // Clear form
             document.getElementById('fundName').value = '';
             document.getElementById('fundAmount').value = '';
             document.getElementById('fundValuation').value = '';
@@ -1133,25 +1151,43 @@
         }
 
         function updateFundraisingList() {
+            const container = document.getElementById('fundraisingList');
+            if (!container) {
+                console.error('Container fundraisingList not found');
+                return;
+            }
+            
+            if (!portfolio.fundraising || portfolio.fundraising.length === 0) {
+                container.innerHTML = '<p style="color: #a0aec0; text-align: center; padding: 40px;">Aucun investissement enregistré.</p>';
+                return;
+            }
+            
             const html = portfolio.fundraising.map((item, index) => {
-                const equity = (item.amount / item.valuation) * 100;
+                // Vérification et conversion sécurisée
+                const amount = parseFloat(item.amount) || 0;
+                const valuation = parseFloat(item.valuation) || 0;
+                const date = item.date || 'N/A';
+                const name = item.name || 'Sans nom';
+                
+                const equity = valuation > 0 ? (amount / valuation) * 100 : 0;
+                
                 return `
                     <div class="asset-group">
                         <div class="asset-header">
                             <div class="asset-header-left">
                                 <div>
-                                    <div class="asset-name">${item.name}</div>
-                                    <div class="asset-ticker">${item.date}</div>
+                                    <div class="asset-name">${name}</div>
+                                    <div class="asset-ticker">${date}</div>
                                 </div>
                             </div>
                             <div class="asset-stats">
                                 <div class="asset-stat">
                                     <div class="asset-stat-label">Investi</div>
-                                    <div class="asset-stat-value">€${item.amount.toLocaleString()}</div>
+                                    <div class="asset-stat-value">€${amount.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                                 </div>
                                 <div class="asset-stat">
                                     <div class="asset-stat-label">Valuation</div>
-                                    <div class="asset-stat-value">€${item.valuation.toLocaleString()}</div>
+                                    <div class="asset-stat-value">€${valuation.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                                 </div>
                                 <div class="asset-stat">
                                     <div class="asset-stat-label">Part</div>
@@ -1169,7 +1205,7 @@
                     </div>
                 `;
             }).join('');
-            document.getElementById('fundraisingList').innerHTML = html;
+            container.innerHTML = html;
         }
 
         function createAssetChart(ticker, purchases, currentPrice) {
