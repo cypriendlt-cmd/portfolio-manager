@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Manager - Auto-Update</title>
+    <title>Portfolio Manager - Google Sheets Auto-Sync</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
@@ -43,8 +43,7 @@
             font-weight: bold;
             transition: all 0.3s;
         }
-        .update-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); }
-        .update-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .update-btn:hover { transform: translateY(-2px); }
         nav {
             background: rgba(0, 0, 0, 0.2);
             padding: 15px;
@@ -105,19 +104,19 @@
             border-radius: 8px;
         }
         input:focus, select:focus { outline: none; border-color: #00ff88; }
-        .info-message {
-            background: rgba(52, 152, 219, 0.1);
-            border: 1px solid rgba(52, 152, 219, 0.3);
-            color: #3498db;
+        .success-message {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
             font-size: 0.9em;
         }
-        .success-message {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            color: #00ff88;
+        .info-message {
+            background: rgba(52, 152, 219, 0.1);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            color: #3498db;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -137,7 +136,6 @@
         .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #fff; }
         .btn-danger { background: linear-gradient(135deg, #ff4757 0%, #cc3847 100%); color: #fff; }
         
-        /* Asset Group Styles */
         .asset-group {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -156,9 +154,7 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-        .asset-header:hover {
-            background: rgba(0, 255, 136, 0.12);
-        }
+        .asset-header:hover { background: rgba(0, 255, 136, 0.12); }
         .asset-header-left {
             display: flex;
             align-items: center;
@@ -170,9 +166,7 @@
             transition: transform 0.3s;
             flex-shrink: 0;
         }
-        .asset-toggle.expanded {
-            transform: rotate(90deg);
-        }
+        .asset-toggle.expanded { transform: rotate(90deg); }
         .asset-name {
             font-size: 1.2em;
             font-weight: bold;
@@ -210,12 +204,8 @@
             overflow: hidden;
             transition: max-height 0.3s ease-out;
         }
-        .asset-details.expanded {
-            max-height: 2000px;
-        }
-        .asset-purchases {
-            padding: 20px;
-        }
+        .asset-details.expanded { max-height: 2000px; }
+        .asset-purchases { padding: 20px; }
         table { 
             width: 100%; 
             border-collapse: collapse; 
@@ -242,7 +232,6 @@
         }
         .positive { color: #00ff88; }
         .negative { color: #ff4757; }
-        .updating { color: #f39c12; }
         
         @media (max-width: 1200px) {
             .asset-stats {
@@ -250,29 +239,15 @@
                 min-width: auto;
             }
         }
-        
-        @media (max-width: 768px) {
-            .asset-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .asset-stats {
-                grid-template-columns: repeat(2, 1fr);
-                width: 100%;
-            }
-            .asset-header-left {
-                width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📊 Portfolio Manager - Auto-Update</h1>
+            <h1>📊 Portfolio Manager - Google Sheets</h1>
             <div style="display: flex; gap: 10px; align-items: center;">
-                <button class="update-btn" id="updateAllBtn" onclick="updateAllPrices()">
-                    🔄 Mettre à jour tous les prix
+                <button class="update-btn" onclick="syncPricesFromGoogleSheets()">
+                    🔄 Sync depuis Google Sheets
                 </button>
                 <div id="syncStatus" class="sync-status">Non synchronisé</div>
             </div>
@@ -313,9 +288,6 @@
 
         <div id="crypto" class="section">
             <h2>Crypto-Monnaies</h2>
-            <div class="info-message">
-                💡 Les cryptos utilisent CoinGecko (mise à jour automatique)
-            </div>
             <form id="cryptoForm" onsubmit="addCrypto(event)">
                 <div class="form-grid">
                     <div class="form-group">
@@ -323,8 +295,8 @@
                         <input type="text" id="cryptoName" required>
                     </div>
                     <div class="form-group">
-                        <label>ID CoinGecko</label>
-                        <input type="text" id="cryptoSymbol" required placeholder="bitcoin">
+                        <label>Symbol</label>
+                        <input type="text" id="cryptoSymbol" required>
                     </div>
                     <div class="form-group">
                         <label>Quantité</label>
@@ -333,6 +305,10 @@
                     <div class="form-group">
                         <label>Prix d'entrée (€)</label>
                         <input type="number" step="0.01" id="cryptoPrice" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Prix actuel (€)</label>
+                        <input type="number" step="0.01" id="cryptoCurrentPrice" required min="0">
                     </div>
                 </div>
                 <button type="submit">Ajouter</button>
@@ -359,9 +335,9 @@
             <h2>PEA - Dollar Cost Averaging (DCA)</h2>
             
             <div class="success-message">
-                ✅ <strong>AUTO-UPDATE ACTIVÉ :</strong> Les prix se mettent à jour automatiquement !<br>
-                📊 Source : Boursorama / Yahoo Finance (scraping direct comme Power Query Excel)<br>
-                🔄 Cliquez sur "Mettre à jour tous les prix" ou attendez la mise à jour automatique toutes les 5 minutes
+                ✅ <strong>GOOGLE SHEETS AUTO-SYNC</strong> : Les prix se mettent à jour automatiquement depuis votre Google Sheet !<br>
+                📊 Format : 2 colonnes (ticker | prix) dans une feuille Google Sheets publique<br>
+                🔄 Cliquez sur "Sync depuis Google Sheets" pour mettre à jour
             </div>
 
             <form id="peaForm" onsubmit="addPEA(event)">
@@ -372,7 +348,7 @@
                     </div>
                     <div class="form-group">
                         <label>Code ISIN ou Ticker</label>
-                        <input type="text" id="peaTicker" required placeholder="FR0013451333" title="Code ISIN (ex: FR0013451333) ou ticker US (ex: AAPL)">
+                        <input type="text" id="peaTicker" required placeholder="FR0013451333">
                     </div>
                     <div class="form-group">
                         <label>Quantité achetée</label>
@@ -390,9 +366,7 @@
                 <button type="submit">➕ Ajouter un achat</button>
             </form>
 
-            <div id="peaAssets" style="margin-top: 30px;">
-                <!-- Les groupes d'actifs seront affichés ici -->
-            </div>
+            <div id="peaAssets" style="margin-top: 30px;"></div>
         </div>
 
         <div id="fundraising" class="section">
@@ -442,11 +416,35 @@
         <div id="settings" class="section">
             <h2>Paramètres</h2>
             
-            <h3 style="margin-top: 30px;">🔄 Mise à jour automatique</h3>
+            <h3 style="margin-top: 30px;">📊 Google Sheets Configuration</h3>
+            <div class="info-message">
+                <strong>Configuration :</strong><br>
+                1. Créez une Google Sheet avec 2 colonnes : <code>ticker</code> et <code>prix</code><br>
+                2. Fichier → Partager → Publier sur le Web → Publier<br>
+                3. Copiez l'ID de la feuille (dans l'URL : /d/<strong>ID_ICI</strong>/edit)<br>
+                4. Collez l'ID ci-dessous<br><br>
+                
+                <strong>Exemple d'URL :</strong><br>
+                <code>https://docs.google.com/spreadsheets/d/<span style="color: #00ff88;">1A2B3C4D5E6F7G8H9I0J</span>/edit</code><br><br>
+                
+                <strong>Format de votre feuille :</strong><br>
+                <table style="margin-top: 10px; max-width: 300px;">
+                    <tr><th>ticker</th><th>prix</th></tr>
+                    <tr><td>FR0013451333</td><td>87.37</td></tr>
+                    <tr><td>AAPL</td><td>182.50</td></tr>
+                </table>
+            </div>
+            
+            <div class="form-group" style="max-width: 600px; margin-top: 15px;">
+                <label>Google Sheet ID</label>
+                <input type="text" id="googleSheetId" placeholder="1A2B3C4D5E6F7G8H9I0J">
+                <button onclick="saveGoogleSheetId()" style="margin-top: 10px;">💾 Enregistrer</button>
+            </div>
+            
             <div style="margin-top: 15px;">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                    <input type="checkbox" id="autoUpdateCheckbox" onchange="toggleAutoUpdate(this.checked)" style="width: 20px; height: 20px;">
-                    <span>Activer la mise à jour automatique des prix toutes les 5 minutes</span>
+                    <input type="checkbox" id="autoSyncCheckbox" onchange="toggleAutoSync(this.checked)" style="width: 20px; height: 20px;">
+                    <span>Synchroniser automatiquement toutes les 5 minutes</span>
                 </label>
             </div>
 
@@ -473,7 +471,7 @@
             </div>
 
             <h3 style="margin-top: 30px;">⚠️ Zone dangereuse</h3>
-            <button class="btn-danger" onclick="if(confirm('Supprimer toutes les données ?')) { portfolio = {crypto: [], pea: [], fundraising: [], prices: {}}; saveData(); updateAll(); }">
+            <button class="btn-danger" onclick="if(confirm('Supprimer toutes les données ?')) { portfolio = {crypto: [], pea: [], fundraising: [], prices: {}, priceTimestamps: {}}; saveData(); updateAll(); }">
                 🗑️ Tout supprimer
             </button>
         </div>
@@ -491,7 +489,7 @@
         let tokenClient = null;
         let accessToken = null;
         let isGoogleDriveConnected = false;
-        let autoUpdateInterval = null;
+        let autoSyncInterval = null;
         
         function ensurePortfolioStructure() {
             if (!portfolio.crypto) portfolio.crypto = [];
@@ -507,199 +505,102 @@
             document.getElementById(section).classList.add('active');
         }
 
-        // AUTO-UPDATE - Récupération du prix depuis Boursorama
-        async function fetchPriceFromBoursorama(isin) {
-            try {
-                console.log(`📊 Récupération prix Boursorama pour: ${isin}`);
-                const url = `https://www.boursorama.com/bourse/trackers/cours/${isin}/`;
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                
-                const response = await fetch(proxyUrl, { 
-                    signal: AbortSignal.timeout(15000) 
-                });
-                
-                if (!response.ok) {
-                    console.log(`⚠️ Erreur HTTP ${response.status}`);
-                    return null;
-                }
-                
-                const data = await response.json();
-                const html = data.contents;
-                
-                // Chercher le prix dans la classe c-instrument c-instrument--last
-                // Pattern: <span class="c-instrument c-instrument--last" ... data-ist-last="87.3700">87.3700</span>
-                
-                // Méthode 1: Chercher data-ist-last
-                const dataMatch = html.match(/data-ist-last="([0-9.,]+)"/);
-                if (dataMatch) {
-                    const price = parseFloat(dataMatch[1].replace(',', '.'));
-                    console.log(`✅ Prix trouvé (data-ist-last): ${price}€`);
-                    return price;
-                }
-                
-                // Méthode 2: Chercher dans c-instrument--last
-                const priceMatch = html.match(/c-instrument--last[^>]*>([0-9.,\s]+)</);
-                if (priceMatch) {
-                    const price = parseFloat(priceMatch[1].replace(',', '.').trim());
-                    console.log(`✅ Prix trouvé (c-instrument--last): ${price}€`);
-                    return price;
-                }
-                
-                // Méthode 3: Chercher le span avec class contenant "c-faceplate__price"
-                const faceplateMatch = html.match(/c-faceplate__price[^>]*>([0-9.,\s]+)</);
-                if (faceplateMatch) {
-                    const price = parseFloat(faceplateMatch[1].replace(',', '.').trim());
-                    console.log(`✅ Prix trouvé (faceplate): ${price}€`);
-                    return price;
-                }
-                
-                console.log('❌ Prix non trouvé dans le HTML');
-                return null;
-                
-            } catch (e) {
-                console.log(`⚠️ Erreur Boursorama: ${e.message}`);
-                return null;
+        // GOOGLE SHEETS INTEGRATION
+        function saveGoogleSheetId() {
+            const id = document.getElementById('googleSheetId').value.trim();
+            if (id) {
+                localStorage.setItem('googleSheetId', id);
+                alert('✅ Google Sheet ID enregistré !');
             }
         }
 
-        async function fetchPriceFromYahoo(ticker) {
-            try {
-                console.log(`📊 Tentative Yahoo Finance pour: ${ticker}`);
-                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
-                
-                const response = await fetch(proxyUrl, { timeout: 10000 });
-                if (!response.ok) return null;
-                
-                const proxyData = await response.json();
-                const data = JSON.parse(proxyData.contents);
-                
-                if (data.chart?.result?.[0]?.meta?.regularMarketPrice) {
-                    const price = data.chart.result[0].meta.regularMarketPrice;
-                    console.log(`✅ Prix Yahoo trouvé: ${price}`);
-                    return price;
-                }
-            } catch (e) {
-                console.log(`⚠️ Erreur Yahoo: ${e.message}`);
+        async function syncPricesFromGoogleSheets() {
+            const sheetId = localStorage.getItem('googleSheetId');
+            if (!sheetId) {
+                alert('⚠️ Veuillez d\'abord configurer votre Google Sheet ID dans les paramètres');
+                showSection('settings');
+                return;
             }
-            return null;
-        }
 
-        async function fetchCryptoPrice(coinId) {
             try {
-                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=eur`;
+                console.log('🔄 Synchronisation depuis Google Sheets...');
+                
+                // URL pour accéder à une feuille Google Sheets publique en CSV
+                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
+                
                 const response = await fetch(url);
-                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: Vérifiez que la feuille est publique`);
+                }
                 
-                if (data[coinId]?.eur) {
-                    return data[coinId].eur;
+                const csvText = await response.text();
+                const lines = csvText.split('\n');
+                
+                let count = 0;
+                ensurePortfolioStructure();
+                
+                // Ignorer la première ligne (en-têtes)
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    const [ticker, priceStr] = line.split(',').map(s => s.trim().replace(/"/g, ''));
+                    
+                    if (ticker && priceStr) {
+                        const price = parseFloat(priceStr.replace(',', '.'));
+                        if (!isNaN(price) && price > 0) {
+                            portfolio.prices[ticker.toUpperCase()] = price;
+                            portfolio.priceTimestamps[ticker.toUpperCase()] = Date.now();
+                            count++;
+                            console.log(`✅ ${ticker}: ${price}€`);
+                        }
+                    }
                 }
-            } catch (e) {
-                console.log(`⚠️ Erreur CoinGecko: ${e.message}`);
+                
+                if (count > 0) {
+                    saveData();
+                    updateAll();
+                    alert(`✅ ${count} prix synchronisés depuis Google Sheets !`);
+                } else {
+                    alert('⚠️ Aucun prix trouvé. Vérifiez le format de votre feuille.');
+                }
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert(`❌ Erreur: ${error.message}\n\nVérifiez que :\n1. La feuille est publiée sur le Web\n2. L'ID est correct\n3. Le format est : ticker,prix`);
             }
-            return null;
         }
 
-        async function updatePriceForTicker(ticker) {
-            ensurePortfolioStructure();
-            
-            // Essayer Boursorama si ça ressemble à un ISIN
-            if (ticker.match(/^[A-Z]{2}[A-Z0-9]{10}$/)) {
-                const price = await fetchPriceFromBoursorama(ticker);
-                if (price) {
-                    portfolio.prices[ticker] = price;
-                    portfolio.priceTimestamps[ticker] = Date.now();
-                    return price;
-                }
-            }
-            
-            // Sinon essayer Yahoo Finance
-            const price = await fetchPriceFromYahoo(ticker);
-            if (price) {
-                portfolio.prices[ticker] = price;
-                portfolio.priceTimestamps[ticker] = Date.now();
-                return price;
-            }
-            
-            return null;
-        }
-
-        async function updateAllPrices() {
-            const btn = document.getElementById('updateAllBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ Mise à jour en cours...';
-            
-            console.log('🔄 Début de la mise à jour des prix...');
-            
-            // Mettre à jour les cryptos
-            for (const crypto of portfolio.crypto) {
-                const price = await fetchCryptoPrice(crypto.symbol);
-                if (price) {
-                    crypto.currentPrice = price;
-                }
-                await new Promise(resolve => setTimeout(resolve, 500)); // Rate limiting
-            }
-            
-            // Mettre à jour les tickers PEA uniques
-            const uniqueTickers = [...new Set(portfolio.pea.map(p => p.ticker))];
-            for (const ticker of uniqueTickers) {
-                await updatePriceForTicker(ticker);
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Rate limiting
-            }
-            
-            saveData();
-            syncData();
-            updateAll();
-            
-            btn.disabled = false;
-            btn.textContent = '✅ Mis à jour !';
-            setTimeout(() => {
-                btn.textContent = '🔄 Mettre à jour tous les prix';
-            }, 2000);
-            
-            console.log('✅ Mise à jour terminée !');
-        }
-
-        function toggleAutoUpdate(enabled) {
+        function toggleAutoSync(enabled) {
             if (enabled) {
-                // Mise à jour immédiate
-                updateAllPrices();
-                // Puis toutes les 5 minutes
-                autoUpdateInterval = setInterval(updateAllPrices, 5 * 60 * 1000);
-                localStorage.setItem('autoUpdateEnabled', 'true');
+                syncPricesFromGoogleSheets(); // Sync immédiat
+                autoSyncInterval = setInterval(syncPricesFromGoogleSheets, 5 * 60 * 1000); // Toutes les 5min
+                localStorage.setItem('autoSyncEnabled', 'true');
             } else {
-                if (autoUpdateInterval) {
-                    clearInterval(autoUpdateInterval);
-                    autoUpdateInterval = null;
+                if (autoSyncInterval) {
+                    clearInterval(autoSyncInterval);
+                    autoSyncInterval = null;
                 }
-                localStorage.setItem('autoUpdateEnabled', 'false');
+                localStorage.setItem('autoSyncEnabled', 'false');
             }
         }
 
         // Crypto
-        async function addCrypto(e) {
+        function addCrypto(e) {
             e.preventDefault();
             ensurePortfolioStructure();
             
-            const coinId = document.getElementById('cryptoSymbol').value.toLowerCase();
-            const price = await fetchCryptoPrice(coinId);
-            
-            if (!price) {
-                alert('⚠️ Impossible de récupérer le prix. Vérifiez l\'ID CoinGecko.');
-                return;
-            }
-            
             const crypto = {
                 name: document.getElementById('cryptoName').value,
-                symbol: coinId,
+                symbol: document.getElementById('cryptoSymbol').value.toUpperCase(),
                 quantity: parseFloat(document.getElementById('cryptoQuantity').value),
                 entryPrice: parseFloat(document.getElementById('cryptoPrice').value),
-                currentPrice: price
+                currentPrice: parseFloat(document.getElementById('cryptoCurrentPrice').value)
             };
             
             portfolio.crypto.push(crypto);
             saveData();
-            syncData();
+            syncDriveData();
             e.target.reset();
             updateAll();
         }
@@ -708,9 +609,17 @@
             if (confirm('Supprimer cette crypto ?')) {
                 portfolio.crypto.splice(index, 1);
                 saveData();
-                syncData();
+                syncDriveData();
                 updateAll();
             }
+        }
+
+        function updateCryptoPrice(index, newPrice) {
+            portfolio.crypto[index].currentPrice = parseFloat(newPrice);
+            saveData();
+            syncDriveData();
+            updateCryptoTable();
+            updateDashboard();
         }
 
         function updateCryptoTable() {
@@ -729,7 +638,11 @@
                     <td>${c.symbol}</td>
                     <td>${c.quantity.toFixed(8)}</td>
                     <td>${c.entryPrice.toFixed(2)} €</td>
-                    <td>${c.currentPrice.toFixed(2)} €</td>
+                    <td>
+                        <input type="number" step="0.01" value="${c.currentPrice.toFixed(2)}" 
+                               onchange="updateCryptoPrice(${i}, this.value)"
+                               style="width: 100px; padding: 5px;">
+                    </td>
                     <td>${value.toFixed(2)} €</td>
                     <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnl.toFixed(2)} €</td>
                     <td class="${pnlPercent >= 0 ? 'positive' : 'negative'}">${pnlPercent.toFixed(2)}%</td>
@@ -739,7 +652,7 @@
         }
 
         // PEA avec DCA
-        async function addPEA(e) {
+        function addPEA(e) {
             e.preventDefault();
             ensurePortfolioStructure();
             
@@ -762,18 +675,15 @@
                 date: date
             };
             
-            // Récupérer le prix actuel automatiquement
             if (!portfolio.prices[ticker]) {
-                const currentPrice = await updatePriceForTicker(ticker);
-                if (!currentPrice) {
-                    portfolio.prices[ticker] = price; // Fallback sur le prix d'achat
-                }
+                portfolio.prices[ticker] = price;
+                portfolio.priceTimestamps[ticker] = Date.now();
             }
             
             console.log('✅ Ajout achat PEA:', purchase);
             portfolio.pea.push(purchase);
             saveData();
-            syncData();
+            syncDriveData();
             e.target.reset();
             document.getElementById('peaDate').valueAsDate = new Date();
             updatePEAAssets();
@@ -784,7 +694,7 @@
             if (confirm('Supprimer cet achat ?')) {
                 portfolio.pea.splice(index, 1);
                 saveData();
-                syncData();
+                syncDriveData();
                 updatePEAAssets();
                 updateDashboard();
             }
@@ -810,18 +720,12 @@
             container.innerHTML = '';
 
             if (!portfolio.pea || portfolio.pea.length === 0) {
-                container.innerHTML = '<p style="color: #a0aec0; text-align: center; padding: 40px;">Aucun achat enregistré. Ajoutez votre premier achat ci-dessus.</p>';
+                container.innerHTML = '<p style="color: #a0aec0; text-align: center; padding: 40px;">Aucun achat enregistré.</p>';
                 return;
             }
 
-            // Grouper les achats par ticker
             const assetGroups = {};
             portfolio.pea.forEach((purchase, index) => {
-                if (!purchase.ticker || !purchase.quantity || !purchase.price) {
-                    console.error('Achat invalide:', purchase);
-                    return;
-                }
-                
                 if (!assetGroups[purchase.ticker]) {
                     assetGroups[purchase.ticker] = {
                         name: purchase.name || purchase.ticker,
@@ -832,20 +736,13 @@
                 assetGroups[purchase.ticker].purchases.push({ ...purchase, originalIndex: index });
             });
 
-            // Créer les groupes d'actifs
             for (const [ticker, asset] of Object.entries(assetGroups)) {
-                const assetDiv = document.createElement('div');
-                assetDiv.className = 'asset-group';
-                
-                // Calculer les statistiques
                 let totalQuantity = 0;
                 let totalInvested = 0;
                 
                 asset.purchases.forEach(p => {
-                    const qty = parseFloat(p.quantity) || 0;
-                    const prc = parseFloat(p.price) || 0;
-                    totalQuantity += qty;
-                    totalInvested += qty * prc;
+                    totalQuantity += p.quantity;
+                    totalInvested += p.quantity * p.price;
                 });
 
                 const avgPrice = totalQuantity > 0 ? totalInvested / totalQuantity : 0;
@@ -855,9 +752,11 @@
                 const pnlPercent = totalInvested > 0 ? (pnl / totalInvested) * 100 : 0;
                 
                 const lastUpdate = portfolio.priceTimestamps[ticker] 
-                    ? new Date(portfolio.priceTimestamps[ticker]).toLocaleTimeString('fr-FR')
+                    ? new Date(portfolio.priceTimestamps[ticker]).toLocaleString('fr-FR')
                     : 'Jamais';
 
+                const assetDiv = document.createElement('div');
+                assetDiv.className = 'asset-group';
                 assetDiv.innerHTML = `
                     <div class="asset-header" onclick="toggleAsset('${ticker}')">
                         <div class="asset-header-left">
@@ -914,21 +813,18 @@
                 `;
                 container.appendChild(assetDiv);
 
-                // Remplir le tableau des achats
                 const purchasesTable = document.getElementById(`purchases-${ticker}`);
                 asset.purchases
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .forEach(p => {
-                        const qty = p.quantity || 0;
-                        const prc = p.price || 0;
-                        const invested = qty * prc;
-                        const dateStr = p.date ? new Date(p.date).toLocaleDateString('fr-FR') : 'N/A';
+                        const invested = p.quantity * p.price;
+                        const dateStr = new Date(p.date).toLocaleDateString('fr-FR');
                         
                         const row = purchasesTable.insertRow();
                         row.innerHTML = `
                             <td>${dateStr}</td>
-                            <td>${qty.toFixed(2)}</td>
-                            <td>${prc.toFixed(2)} €</td>
+                            <td>${p.quantity.toFixed(2)}</td>
+                            <td>${p.price.toFixed(2)} €</td>
                             <td>${invested.toFixed(2)} €</td>
                             <td><button class="btn-danger" onclick="deletePEAPurchase(${p.originalIndex})">🗑️</button></td>
                         `;
@@ -948,7 +844,7 @@
             };
             portfolio.fundraising.push(investment);
             saveData();
-            syncData();
+            syncDriveData();
             e.target.reset();
             updateFundraisingTable();
             updateDashboard();
@@ -958,7 +854,7 @@
             if (confirm('Supprimer cette levée ?')) {
                 portfolio.fundraising.splice(index, 1);
                 saveData();
-                syncData();
+                syncDriveData();
                 updateFundraisingTable();
                 updateDashboard();
             }
@@ -991,13 +887,11 @@
             let totalValue = 0;
             let totalInvested = 0;
 
-            // Crypto
             portfolio.crypto.forEach(c => {
                 totalValue += c.quantity * c.currentPrice;
                 totalInvested += c.quantity * c.entryPrice;
             });
 
-            // PEA
             const peaByTicker = {};
             portfolio.pea.forEach(p => {
                 if (!peaByTicker[p.ticker]) {
@@ -1014,7 +908,6 @@
                 totalInvested += data.invested;
             });
 
-            // Fundraising
             portfolio.fundraising.forEach(f => {
                 totalValue += f.currentValue;
                 totalInvested += f.amount;
@@ -1082,7 +975,7 @@
             updateFundraisingTable();
         }
 
-        // Google Drive functions (same as before)
+        // Google Drive
         function saveClientId() {
             const id = document.getElementById('clientId').value.trim();
             if (id) {
@@ -1143,7 +1036,7 @@
             document.getElementById('syncStatus').classList.remove('synced');
         }
 
-        async function syncData() {
+        async function syncDriveData() {
             if (!isGoogleDriveConnected || !accessToken) return;
             try {
                 const fid = localStorage.getItem('portfolioFileId');
@@ -1213,13 +1106,9 @@
             if (saved) {
                 try {
                     portfolio = JSON.parse(saved);
-                    if (!portfolio.crypto) portfolio.crypto = [];
-                    if (!portfolio.pea) portfolio.pea = [];
-                    if (!portfolio.fundraising) portfolio.fundraising = [];
-                    if (!portfolio.prices) portfolio.prices = {};
-                    if (!portfolio.priceTimestamps) portfolio.priceTimestamps = {};
+                    ensurePortfolioStructure();
                 } catch (e) {
-                    console.error('Erreur chargement données:', e);
+                    console.error('Erreur chargement:', e);
                     portfolio = { crypto: [], pea: [], fundraising: [], prices: {}, priceTimestamps: {} };
                 }
             }
@@ -1242,7 +1131,7 @@
                     try {
                         portfolio = JSON.parse(ev.target.result);
                         saveData();
-                        syncData();
+                        syncDriveData();
                         updateAll();
                         alert('✅ Importé');
                     } catch (err) {
@@ -1256,16 +1145,21 @@
         // Init
         ensurePortfolioStructure();
         loadData();
-        ensurePortfolioStructure();
         updateAll();
         initGoogleDrive();
         document.getElementById('peaDate').valueAsDate = new Date();
         
-        // Restaurer l'état de l'auto-update
-        const autoUpdateEnabled = localStorage.getItem('autoUpdateEnabled') === 'true';
-        document.getElementById('autoUpdateCheckbox').checked = autoUpdateEnabled;
-        if (autoUpdateEnabled) {
-            toggleAutoUpdate(true);
+        // Restore Google Sheet ID
+        const savedSheetId = localStorage.getItem('googleSheetId');
+        if (savedSheetId) {
+            document.getElementById('googleSheetId').value = savedSheetId;
+        }
+        
+        // Restore auto-sync setting
+        const autoSyncEnabled = localStorage.getItem('autoSyncEnabled') === 'true';
+        document.getElementById('autoSyncCheckbox').checked = autoSyncEnabled;
+        if (autoSyncEnabled) {
+            toggleAutoSync(true);
         }
     </script>
 </body>
