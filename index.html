@@ -474,11 +474,24 @@
     </div>
 
     <script>
-        let portfolio = { crypto: [], pea: [], fundraising: [], prices: {} };
+        let portfolio = { 
+            crypto: [], 
+            pea: [], 
+            fundraising: [], 
+            prices: {} 
+        };
         let myChart = null;
         let tokenClient = null;
         let accessToken = null;
         let isGoogleDriveConnected = false;
+        
+        // Ensure portfolio is properly initialized
+        function ensurePortfolioStructure() {
+            if (!portfolio.crypto) portfolio.crypto = [];
+            if (!portfolio.pea) portfolio.pea = [];
+            if (!portfolio.fundraising) portfolio.fundraising = [];
+            if (!portfolio.prices) portfolio.prices = {};
+        }
 
         // Navigation
         function showSection(section) {
@@ -553,6 +566,8 @@
         function addPEA(e) {
             e.preventDefault();
             
+            ensurePortfolioStructure();
+            
             const name = document.getElementById('peaName').value;
             const ticker = document.getElementById('peaTicker').value.toUpperCase();
             const quantity = parseFloat(document.getElementById('peaQuantity').value);
@@ -572,12 +587,16 @@
                 date: date
             };
             
+            console.log('✅ Ajout achat PEA:', purchase);
+            
             // Initialiser le prix actuel avec le prix d'achat si pas encore de prix
+            if (!portfolio.prices) {
+                portfolio.prices = {};
+            }
             if (!portfolio.prices[ticker]) {
                 portfolio.prices[ticker] = price;
             }
             
-            console.log('✅ Ajout achat PEA:', purchase);
             portfolio.pea.push(purchase);
             saveData();
             syncData();
@@ -611,6 +630,10 @@
         }
 
         function updateAssetPrice(ticker, newPrice) {
+            ensurePortfolioStructure();
+            if (!portfolio.prices) {
+                portfolio.prices = {};
+            }
             portfolio.prices[ticker] = parseFloat(newPrice);
             saveData();
             syncData();
@@ -619,6 +642,8 @@
         }
 
         function updatePEAAssets() {
+            ensurePortfolioStructure();
+            
             const container = document.getElementById('peaAssets');
             container.innerHTML = '';
 
@@ -1078,7 +1103,9 @@
         }
 
         // Init
+        ensurePortfolioStructure();
         loadData();
+        ensurePortfolioStructure(); // Double check after loading
         updateAll();
         initGoogleDrive();
         document.getElementById('peaDate').valueAsDate = new Date();
