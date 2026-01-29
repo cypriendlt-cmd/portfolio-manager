@@ -514,6 +514,37 @@
                     <button class="btn-secondary" onclick="loadFromDrive()">📥 Charger</button>
                     <button class="btn-secondary" onclick="syncDriveData()">📤 Sauvegarder</button>
                 </div>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px;">📊 Synchronisation Google Sheets</h3>
+                <div class="info-message">
+                    <strong>Configuration :</strong><br>
+                    1. Créez une Google Sheet avec 2 colonnes : <code>ticker</code> et <code>prix</code><br>
+                    2. Fichier → Partager → Publier sur le Web → Publier<br>
+                    3. Copiez l'ID de la feuille (dans l'URL : /d/<strong>ID_ICI</strong>/edit)<br>
+                    4. Collez l'ID ci-dessous<br><br>
+                    
+                    <strong>Exemple d'URL :</strong><br>
+                    <code>https://docs.google.com/spreadsheets/d/<span style="color: #00ff88;">1A2B3C4D5E6F7G8H9I0J</span>/edit</code><br><br>
+                    
+                    <strong>Format de votre feuille :</strong><br>
+                    <table style="margin-top: 10px; max-width: 300px;">
+                        <tr><th>ticker</th><th>prix</th></tr>
+                        <tr><td>FR0013451333</td><td>87.37</td></tr>
+                        <tr><td>AAPL</td><td>182.50</td></tr>
+                    </table>
+                </div>
+                
+                <div class="form-group" style="max-width: 600px; margin-top: 15px;">
+                    <label>Google Sheet ID</label>
+                    <input type="text" id="googleSheetId" placeholder="1A2B3C4D5E6F7G8H9I0J">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                    <button onclick="saveGoogleSheetId()">💾 Enregistrer l'ID</button>
+                    <button onclick="syncPricesFromGoogleSheets()" class="btn-primary">🔄 Synchroniser les prix</button>
+                </div>
                 
                 <div style="margin-top: 15px;">
                     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
@@ -521,19 +552,6 @@
                         <span>🔄 Synchronisation automatique (toutes les 5 minutes)</span>
                     </label>
                 </div>
-            </div>
-
-            <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                <h3 style="margin-bottom: 15px;">📊 Google Sheets</h3>
-                <div class="info-message">
-                    Pour obtenir l'ID de votre Google Sheet, copiez la partie entre /d/ et /edit dans l'URL de votre feuille.
-                    <br>Exemple: docs.google.com/spreadsheets/d/<strong>VOTRE_ID_ICI</strong>/edit
-                </div>
-                <div class="form-group">
-                    <label>ID Google Sheet</label>
-                    <input type="text" id="googleSheetId" placeholder="1ABC...XYZ">
-                </div>
-                <button onclick="exportToGoogleSheets()" style="margin-top: 10px;">📤 Exporter vers Google Sheets</button>
             </div>
             
             <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px;">
@@ -597,6 +615,7 @@
         let isGoogleDriveConnected = false;
         let accessToken = null;
         let tokenClient = null;
+        let myChart = null;
 
         // Initialize crypto library display
         function initCryptoLibrary() {
@@ -988,20 +1007,30 @@
 
         function updatePEAList() {
             const grouped = {};
-            portfolio.pea.forEach(item => {
-                if (!grouped[item.ticker]) grouped[item.ticker] = [];
-                grouped[item.ticker].push(item);
+            portfolio.pea.forEach((item, index) => {
+                if (!grouped[item.ticker]) {
+                    grouped[item.ticker] = {
+                        name: item.name || item.ticker,
+                        ticker: item.ticker,
+                        purchases: []
+                    };
+                }
+                grouped[item.ticker].purchases.push({ ...item, originalIndex: index });
             });
 
-            const html = Object.entries(grouped).map(([ticker, items]) => {
-                const totalQty = items.reduce((sum, i) => sum + i.quantity, 0);
-                const totalFees = items.reduce((sum, i) => sum + i.fees, 0);
-                const avgPrice = (items.reduce((sum, i) => sum + (i.price * i.quantity), 0) + totalFees) / totalQty;
-                const currentPrice = portfolio.prices[ticker] || 0;
+            const html = Object.entries(grouped).map(([ticker, asset]) => {
+                const totalQty = asset.purchases.reduce((sum, i) => sum + i.quantity, 0);
+                const totalFees = asset.purchases.reduce((sum, i) => sum + (i.fees || 0), 0);
+                const totalInvested = asset.purchases.reduce((sum, i) => sum + (i.price * i.quantity) + (i.fees || 0), 0);
+                const avgPrice = totalQty > 0 ? totalInvested / totalQty : 0;
+                const currentPrice = portfolio.prices[ticker] || avgPrice;
                 const currentValue = totalQty * currentPrice;
-                const invested = items.reduce((sum, i) => sum + (i.price * i.quantity) + i.fees, 0);
-                const pnl = currentValue - invested;
-                const pnlPercent = ((pnl / invested) * 100) || 0;
+                const pnl = currentValue - totalInvested;
+                const pnlPercent = totalInvested > 0 ? (pnl / totalInvested) * 100 : 0;
+
+                const lastUpdate = portfolio.priceTimestamps[ticker] 
+                    ? new Date(portfolio.priceTimestamps[ticker]).toLocaleString('fr-FR')
+                    : 'Jamais';
 
                 return `
                     <div class="asset-group">
@@ -1009,17 +1038,17 @@
                             <div class="asset-header-left">
                                 <span class="asset-toggle" id="toggle-${ticker}">▶</span>
                                 <div>
-                                    <div class="asset-name">${items[0].name}</div>
-                                    <div class="asset-ticker">${ticker}</div>
+                                    <div class="asset-name">${asset.name}</div>
+                                    <div class="asset-ticker">${ticker} • MAJ: ${lastUpdate}</div>
                                 </div>
                             </div>
                             <div class="asset-stats">
                                 <div class="asset-stat">
                                     <div class="asset-stat-label">Quantité</div>
-                                    <div class="asset-stat-value">${totalQty}</div>
+                                    <div class="asset-stat-value">${totalQty.toFixed(2)}</div>
                                 </div>
                                 <div class="asset-stat">
-                                    <div class="asset-stat-label">PMR</div>
+                                    <div class="asset-stat-label">PRU</div>
                                     <div class="asset-stat-value">€${avgPrice.toFixed(2)}</div>
                                 </div>
                                 <div class="asset-stat">
@@ -1044,41 +1073,45 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="asset-content" id="content-${ticker}">
+                        <div class="asset-content" id="details-${ticker}" style="display: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 20px;">
+                                <h4 style="margin: 0; color: #a0aec0;">📊 Historique des achats</h4>
+                                <div style="flex: 1; max-width: 500px; height: 150px;">
+                                    <canvas id="chart-${ticker}"></canvas>
+                                </div>
+                            </div>
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Date</th>
                                         <th>Quantité</th>
-                                        <th>Prix</th>
+                                        <th>Prix d'achat</th>
                                         <th>Frais</th>
-                                        <th>Total investi</th>
                                         <th>Valeur actuelle</th>
                                         <th>P&L</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${items.map((item, idx) => {
-                                        const itemInvested = (item.quantity * item.price) + item.fees;
+                                    ${asset.purchases.map((item) => {
                                         const itemValue = item.quantity * currentPrice;
+                                        const itemInvested = item.quantity * item.price + (item.fees || 0);
                                         const itemPnl = itemValue - itemInvested;
-                                        const itemPnlPercent = ((itemPnl / itemInvested) * 100) || 0;
+                                        const itemPnlPercent = itemInvested > 0 ? ((itemPnl / itemInvested) * 100) : 0;
                                         
                                         return `
                                             <tr>
-                                                <td>${item.date}</td>
-                                                <td>${item.quantity}</td>
+                                                <td>${new Date(item.date).toLocaleDateString('fr-FR')}</td>
+                                                <td>${item.quantity.toFixed(2)}</td>
                                                 <td>€${item.price.toFixed(2)}</td>
-                                                <td>€${item.fees.toFixed(2)}</td>
-                                                <td>€${itemInvested.toFixed(2)}</td>
+                                                <td>€${(item.fees || 0).toFixed(2)}</td>
                                                 <td>€${itemValue.toFixed(2)}</td>
                                                 <td class="${itemPnl >= 0 ? 'positive' : 'negative'}">
                                                     ${itemPnl >= 0 ? '+' : ''}€${itemPnl.toFixed(2)} (${itemPnlPercent.toFixed(2)}%)
                                                 </td>
                                                 <td>
-                                                    <button onclick="editPEA('${ticker}', ${portfolio.pea.indexOf(item)})" class="btn-secondary">✏️</button>
-                                                    <button onclick="deletePEA(${portfolio.pea.indexOf(item)})" class="btn-danger">🗑️</button>
+                                                    <button onclick="editPEA('${ticker}', ${item.originalIndex})" class="btn-secondary">✏️</button>
+                                                    <button onclick="deletePEA(${item.originalIndex})" class="btn-danger">🗑️</button>
                                                 </td>
                                             </tr>
                                         `;
@@ -1091,6 +1124,12 @@
             }).join('');
 
             document.getElementById('peaList').innerHTML = html;
+            
+            // Create charts for each asset
+            Object.entries(grouped).forEach(([ticker, asset]) => {
+                const currentPrice = portfolio.prices[ticker] || 0;
+                setTimeout(() => createAssetChart(ticker, asset.purchases, currentPrice), 100);
+            });
         }
 
         function updateFundraisingList() {
@@ -1133,16 +1172,106 @@
             document.getElementById('fundraisingList').innerHTML = html;
         }
 
-        function toggleAsset(id) {
-            const content = document.getElementById(`content-${id}`);
-            const toggle = document.getElementById(`toggle-${id}`);
+        function createAssetChart(ticker, purchases, currentPrice) {
+            const ctx = document.getElementById(`chart-${ticker}`);
+            if (!ctx) return;
             
-            if (content.classList.contains('expanded')) {
-                content.classList.remove('expanded');
-                toggle.classList.remove('expanded');
-            } else {
-                content.classList.add('expanded');
-                toggle.classList.add('expanded');
+            // Sort purchases by date
+            const sortedPurchases = [...purchases].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Calculate cumulative portfolio value over time
+            const chartData = [];
+            let cumulativeQuantity = 0;
+            let cumulativeInvested = 0;
+            
+            sortedPurchases.forEach(p => {
+                const fees = p.fees || 0;
+                cumulativeQuantity += p.quantity;
+                cumulativeInvested += (p.quantity * p.price) + fees;
+                
+                const avgPrice = cumulativeInvested / cumulativeQuantity;
+                const currentValue = cumulativeQuantity * currentPrice;
+                
+                chartData.push({
+                    date: new Date(p.date).toLocaleDateString('fr-FR'),
+                    invested: cumulativeInvested,
+                    value: currentValue,
+                    quantity: cumulativeQuantity
+                });
+            });
+            
+            // Create chart
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.map(d => d.date),
+                    datasets: [
+                        {
+                            label: 'Valeur actuelle',
+                            data: chartData.map(d => d.value),
+                            borderColor: '#00ff88',
+                            backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Montant investi',
+                            data: chartData.map(d => d.invested),
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: '#fff', font: { size: 10 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' €';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#a0aec0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#a0aec0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function toggleAsset(ticker) {
+            const content = document.getElementById(`content-${ticker}`);
+            const details = document.getElementById(`details-${ticker}`);
+            const toggle = document.getElementById(`toggle-${ticker}`);
+            
+            const targetElement = content || details;
+            
+            if (targetElement) {
+                if (targetElement.classList.contains('expanded') || targetElement.style.display === 'block') {
+                    targetElement.classList.remove('expanded');
+                    targetElement.style.display = 'none';
+                    if (toggle) toggle.classList.remove('expanded');
+                } else {
+                    targetElement.classList.add('expanded');
+                    targetElement.style.display = 'block';
+                    if (toggle) toggle.classList.add('expanded');
+                }
             }
         }
 
@@ -1218,80 +1347,113 @@
         }
 
         function updateDashboard() {
-            // Calculate totals
-            const cryptoTotal = portfolio.crypto.reduce((sum, item) => {
-                const price = portfolio.prices[item.symbol] || 0;
-                return sum + (item.quantity * price);
-            }, 0);
+            let totalValue = 0;
+            let totalInvested = 0;
 
-            const cryptoInvested = portfolio.crypto.reduce((sum, item) => {
-                return sum + (item.quantity * item.price);
-            }, 0);
+            // Crypto calculations
+            portfolio.crypto.forEach(c => {
+                const currentPrice = portfolio.prices[c.symbol] || 0;
+                totalValue += c.quantity * currentPrice;
+                totalInvested += c.quantity * c.price;
+            });
 
-            const peaTotal = portfolio.pea.reduce((sum, item) => {
-                const price = portfolio.prices[item.ticker] || 0;
-                return sum + (item.quantity * price);
-            }, 0);
+            // PEA calculations
+            const peaByTicker = {};
+            portfolio.pea.forEach(p => {
+                const fees = p.fees || 0;
+                if (!peaByTicker[p.ticker]) {
+                    peaByTicker[p.ticker] = { quantity: 0, invested: 0 };
+                }
+                peaByTicker[p.ticker].quantity += p.quantity;
+                peaByTicker[p.ticker].invested += (p.quantity * p.price) + fees;
+            });
 
-            const peaInvested = portfolio.pea.reduce((sum, item) => {
-                return sum + (item.quantity * item.price) + item.fees;
-            }, 0);
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const avgPrice = data.invested / data.quantity;
+                const currentPrice = portfolio.prices[ticker] || avgPrice;
+                totalValue += data.quantity * currentPrice;
+                totalInvested += data.invested;
+            });
 
-            const fundraisingTotal = portfolio.fundraising.reduce((sum, item) => sum + item.amount, 0);
+            // Fundraising calculations
+            portfolio.fundraising.forEach(f => {
+                totalValue += f.valuation;
+                totalInvested += f.amount;
+            });
 
-            const totalValue = cryptoTotal + peaTotal + fundraisingTotal;
-            const totalInvested = cryptoInvested + peaInvested + fundraisingTotal;
-            const totalPnl = totalValue - totalInvested;
-            const totalPnlPercent = ((totalPnl / totalInvested) * 100) || 0;
+            const totalPnL = totalValue - totalInvested;
+            const totalPerf = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
 
             const html = `
                 <div class="stat-card">
                     <div class="stat-label">💰 Valeur Totale</div>
-                    <div class="stat-value">$${totalValue.toFixed(2)}</div>
+                    <div class="stat-value">€${totalValue.toFixed(2)}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">📊 Total Investi</div>
-                    <div class="stat-value">$${totalInvested.toFixed(2)}</div>
+                    <div class="stat-value">€${totalInvested.toFixed(2)}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">📈 P&L Global</div>
-                    <div class="stat-value ${totalPnl >= 0 ? 'positive' : 'negative'}">
-                        ${totalPnl >= 0 ? '+' : ''}$${totalPnl.toFixed(2)}
+                    <div class="stat-value ${totalPnL >= 0 ? 'positive' : 'negative'}">
+                        ${totalPnL >= 0 ? '+' : ''}€${totalPnL.toFixed(2)}
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">📊 P&L %</div>
-                    <div class="stat-value ${totalPnlPercent >= 0 ? 'positive' : 'negative'}">
-                        ${totalPnlPercent >= 0 ? '+' : ''}${totalPnlPercent.toFixed(2)}%
+                    <div class="stat-value ${totalPerf >= 0 ? 'positive' : 'negative'}">
+                        ${totalPerf >= 0 ? '+' : ''}${totalPerf.toFixed(2)}%
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">₿ Crypto</div>
-                    <div class="stat-value">$${cryptoTotal.toFixed(2)}</div>
+                    <div class="stat-value">€${portfolio.crypto.reduce((sum, c) => sum + (c.quantity * (portfolio.prices[c.symbol] || 0)), 0).toFixed(2)}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">📊 PEA</div>
-                    <div class="stat-value">€${peaTotal.toFixed(2)}</div>
+                    <div class="stat-value">€${Object.entries(peaByTicker).reduce((sum, [ticker, data]) => {
+                        const avgPrice = data.invested / data.quantity;
+                        const currentPrice = portfolio.prices[ticker] || avgPrice;
+                        return sum + (data.quantity * currentPrice);
+                    }, 0).toFixed(2)}</div>
                 </div>
             `;
 
             document.getElementById('dashboardStats').innerHTML = html;
-            updateChart(cryptoTotal, peaTotal, fundraisingTotal);
+            updateChart(peaByTicker);
         }
 
-        function updateChart(crypto, pea, fundraising) {
-            const ctx = document.getElementById('portfolioChart').getContext('2d');
+        function updateChart(peaByTicker) {
+            const ctx = document.getElementById('portfolioChart');
+            if (!ctx) return;
             
-            if (window.myChart) {
-                window.myChart.destroy();
-            }
+            let cryptoValue = 0;
+            let peaValue = 0;
+            let fundraisingValue = 0;
 
-            window.myChart = new Chart(ctx, {
+            portfolio.crypto.forEach(c => {
+                const currentPrice = portfolio.prices[c.symbol] || 0;
+                cryptoValue += c.quantity * currentPrice;
+            });
+
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const avgPrice = data.invested / data.quantity;
+                const currentPrice = portfolio.prices[ticker] || avgPrice;
+                peaValue += data.quantity * currentPrice;
+            });
+
+            portfolio.fundraising.forEach(f => {
+                fundraisingValue += f.valuation;
+            });
+
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Crypto', 'PEA', 'Levées de fonds'],
+                    labels: ['Crypto', 'PEA', 'Levées'],
                     datasets: [{
-                        data: [crypto, pea, fundraising],
+                        data: [cryptoValue, peaValue, fundraisingValue],
                         backgroundColor: [
                             'rgba(0, 255, 136, 0.8)',
                             'rgba(52, 152, 219, 0.8)',
@@ -1335,121 +1497,107 @@
             }
 
             localStorage.setItem('googleSheetId', sheetId);
+            alert('⚠️ Cette fonction nécessite une authentification Google Sheets API. Utilisez plutôt la synchronisation depuis Google Sheets vers l\'application.');
+        }
 
-            if (!isGoogleDriveConnected || !accessToken) {
-                alert('⚠️ Veuillez d\'abord vous connecter à Google Drive');
+        function saveGoogleSheetId() {
+            const id = document.getElementById('googleSheetId').value.trim();
+            if (id) {
+                localStorage.setItem('googleSheetId', id);
+                alert('✅ Google Sheet ID enregistré');
+            }
+        }
+
+        async function syncPricesFromGoogleSheets() {
+            const sheetId = localStorage.getItem('googleSheetId');
+            if (!sheetId) {
+                alert('⚠️ Veuillez d\'abord enregistrer l\'ID de votre Google Sheet');
+                showSection('settings');
                 return;
             }
 
             try {
-                // Prepare data for sheets
-                const cryptoData = [
-                    ['Symbole', 'Quantité', 'Prix d\'achat', 'Prix actuel', 'Valeur', 'P&L', 'P&L %', 'Date']
-                ];
+                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
                 
-                portfolio.crypto.forEach(item => {
-                    const currentPrice = portfolio.prices[item.symbol] || 0;
-                    const value = item.quantity * currentPrice;
-                    const invested = item.quantity * item.price;
-                    const pnl = value - invested;
-                    const pnlPercent = ((pnl / invested) * 100) || 0;
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: Vérifiez que la feuille est publique`);
+                }
+                
+                const csvText = await response.text();
+                const lines = csvText.split('\n');
+                
+                let count = 0;
+                ensurePortfolioStructure();
+                
+                // Skip header line
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
                     
-                    cryptoData.push([
-                        item.symbol,
-                        item.quantity,
-                        item.price,
-                        currentPrice,
-                        value,
-                        pnl,
-                        pnlPercent,
-                        item.date
-                    ]);
-                });
-
-                const peaData = [
-                    ['Nom', 'Ticker', 'Quantité', 'Prix d\'achat', 'Frais', 'Prix actuel', 'Valeur', 'P&L', 'P&L %', 'Date']
-                ];
-                
-                portfolio.pea.forEach(item => {
-                    const currentPrice = portfolio.prices[item.ticker] || 0;
-                    const value = item.quantity * currentPrice;
-                    const invested = (item.quantity * item.price) + item.fees;
-                    const pnl = value - invested;
-                    const pnlPercent = ((pnl / invested) * 100) || 0;
+                    // Parse CSV handling quotes and decimal commas
+                    const parts = [];
+                    let current = '';
+                    let inQuotes = false;
                     
-                    peaData.push([
-                        item.name,
-                        item.ticker,
-                        item.quantity,
-                        item.price,
-                        item.fees,
-                        currentPrice,
-                        value,
-                        pnl,
-                        pnlPercent,
-                        item.date
-                    ]);
-                });
-
-                const fundraisingData = [
-                    ['Entreprise', 'Montant investi', 'Valuation', 'Part (%)', 'Date']
-                ];
-                
-                portfolio.fundraising.forEach(item => {
-                    const equity = (item.amount / item.valuation) * 100;
-                    fundraisingData.push([
-                        item.name,
-                        item.amount,
-                        item.valuation,
-                        equity,
-                        item.date
-                    ]);
-                });
-
-                // Update sheets
-                const requests = [
-                    {
-                        updateCells: {
-                            range: { sheetId: 0, startRowIndex: 0, startColumnIndex: 0 },
-                            rows: cryptoData.map(row => ({
-                                values: row.map(cell => ({ userEnteredValue: { numberValue: typeof cell === 'number' ? cell : undefined, stringValue: typeof cell === 'string' ? cell : undefined } }))
-                            })),
-                            fields: 'userEnteredValue'
+                    for (let j = 0; j < line.length; j++) {
+                        const char = line[j];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            parts.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
                         }
                     }
-                ];
-
-                await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ requests })
-                });
-
-                alert('✅ Données exportées vers Google Sheets !');
-            } catch (e) {
-                console.error('Erreur export Sheets:', e);
-                alert('❌ Erreur lors de l\'export vers Google Sheets:\n' + e.message);
+                    parts.push(current.trim());
+                    
+                    const ticker = parts[0]?.replace(/"/g, '');
+                    const priceStr = parts[1]?.replace(/"/g, '');
+                    
+                    if (ticker && priceStr) {
+                        // Handle both point and comma as decimal separator
+                        const price = parseFloat(priceStr.replace(',', '.'));
+                        if (!isNaN(price) && price > 0) {
+                            portfolio.prices[ticker.toUpperCase()] = price;
+                            portfolio.priceTimestamps[ticker.toUpperCase()] = Date.now();
+                            count++;
+                            console.log(`✅ ${ticker}: ${price}€`);
+                        }
+                    }
+                }
+                
+                if (count > 0) {
+                    saveData();
+                    updateAll();
+                    alert(`✅ ${count} prix synchronisés depuis Google Sheets !`);
+                } else {
+                    alert('⚠️ Aucun prix trouvé. Vérifiez le format de votre feuille.');
+                }
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert(`❌ Erreur: ${error.message}\n\nVérifiez que :\n1. La feuille est publiée sur le Web\n2. L'ID est correct\n3. Le format est : ticker,prix`);
             }
         }
 
         function toggleAutoSync(isEnabled) {
-            localStorage.setItem('autoSyncEnabled', isEnabled);
-            
             if (autoSyncInterval) {
                 clearInterval(autoSyncInterval);
                 autoSyncInterval = null;
             }
             
             if (isEnabled) {
+                syncPricesFromGoogleSheets(); // Immediate sync
                 autoSyncInterval = setInterval(() => {
-                    console.log('🔄 Auto-sync...');
-                    syncDriveData();
-                }, 5 * 60 * 1000); // 5 minutes
+                    console.log('🔄 Auto-sync Google Sheets...');
+                    syncPricesFromGoogleSheets();
+                }, 5 * 60 * 1000); // Every 5 minutes
+                localStorage.setItem('autoSyncEnabled', 'true');
                 console.log('✅ Auto-sync activé (5 min)');
             } else {
+                localStorage.setItem('autoSyncEnabled', 'false');
                 console.log('❌ Auto-sync désactivé');
             }
         }
