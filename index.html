@@ -132,6 +132,8 @@
             justify-content: space-between;
             align-items: center;
             transition: all 0.3s;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         .asset-header:hover {
             background: rgba(0, 255, 136, 0.12);
@@ -140,10 +142,12 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            min-width: 200px;
         }
         .asset-toggle {
             font-size: 1.2em;
             transition: transform 0.3s;
+            flex-shrink: 0;
         }
         .asset-toggle.expanded {
             transform: rotate(90deg);
@@ -159,21 +163,25 @@
         }
         .asset-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
             text-align: right;
+            flex: 1;
+            min-width: 600px;
         }
         .asset-stat {
             display: flex;
             flex-direction: column;
+            min-width: 90px;
         }
         .asset-stat-label {
-            font-size: 0.75em;
+            font-size: 0.7em;
             color: #a0aec0;
             margin-bottom: 4px;
+            text-transform: uppercase;
         }
         .asset-stat-value {
-            font-size: 1.1em;
+            font-size: 0.95em;
             font-weight: bold;
         }
         .asset-details {
@@ -215,9 +223,24 @@
         .negative { color: #ff4757; }
         .price-loading { color: #f39c12; font-style: italic; }
         
+        @media (max-width: 1200px) {
+            .asset-stats {
+                grid-template-columns: repeat(3, 1fr);
+                min-width: auto;
+            }
+        }
+        
         @media (max-width: 768px) {
+            .asset-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
             .asset-stats {
                 grid-template-columns: repeat(2, 1fr);
+                width: 100%;
+            }
+            .asset-header-left {
+                width: 100%;
             }
         }
     </style>
@@ -500,13 +523,28 @@
         // PEA avec DCA
         async function addPEA(e) {
             e.preventDefault();
+            
+            const name = document.getElementById('peaName').value;
+            const ticker = document.getElementById('peaTicker').value.toUpperCase();
+            const quantity = parseFloat(document.getElementById('peaQuantity').value);
+            const price = parseFloat(document.getElementById('peaPrice').value);
+            const date = document.getElementById('peaDate').value;
+            
+            // Validation
+            if (!name || !ticker || isNaN(quantity) || isNaN(price) || !date) {
+                alert('⚠️ Veuillez remplir tous les champs correctement');
+                return;
+            }
+            
             const purchase = {
-                name: document.getElementById('peaName').value,
-                ticker: document.getElementById('peaTicker').value.toUpperCase(),
-                quantity: parseFloat(document.getElementById('peaQuantity').value),
-                price: parseFloat(document.getElementById('peaPrice').value),
-                date: document.getElementById('peaDate').value
+                name: name,
+                ticker: ticker,
+                quantity: quantity,
+                price: price,
+                date: date
             };
+            
+            console.log('Ajout achat PEA:', purchase);
             portfolio.pea.push(purchase);
             saveData();
             syncData();
@@ -544,12 +582,23 @@
             const container = document.getElementById('peaAssets');
             container.innerHTML = '';
 
+            if (!portfolio.pea || portfolio.pea.length === 0) {
+                container.innerHTML = '<p style="color: #a0aec0; text-align: center; padding: 40px;">Aucun achat enregistré. Ajoutez votre premier achat ci-dessus.</p>';
+                return;
+            }
+
             // Grouper les achats par ticker
             const assetGroups = {};
             portfolio.pea.forEach((purchase, index) => {
+                // Validation des données
+                if (!purchase.ticker || !purchase.quantity || !purchase.price) {
+                    console.error('Achat invalide:', purchase);
+                    return;
+                }
+                
                 if (!assetGroups[purchase.ticker]) {
                     assetGroups[purchase.ticker] = {
-                        name: purchase.name,
+                        name: purchase.name || purchase.ticker,
                         ticker: purchase.ticker,
                         purchases: []
                     };
@@ -622,11 +671,13 @@
                 let totalInvested = 0;
                 
                 asset.purchases.forEach(p => {
-                    totalQuantity += p.quantity;
-                    totalInvested += p.quantity * p.price;
+                    const qty = parseFloat(p.quantity) || 0;
+                    const prc = parseFloat(p.price) || 0;
+                    totalQuantity += qty;
+                    totalInvested += qty * prc;
                 });
 
-                const avgPrice = totalInvested / totalQuantity;
+                const avgPrice = totalQuantity > 0 ? totalInvested / totalQuantity : 0;
 
                 // Afficher les stats de base
                 document.getElementById(`qty-${ticker}`).textContent = totalQuantity.toFixed(2);
@@ -637,12 +688,17 @@
                 asset.purchases
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .forEach(p => {
-                        const invested = p.quantity * p.price;
+                        // Safety checks
+                        const qty = p.quantity || 0;
+                        const prc = p.price || 0;
+                        const invested = qty * prc;
+                        const dateStr = p.date ? new Date(p.date).toLocaleDateString('fr-FR') : 'N/A';
+                        
                         const row = purchasesTable.insertRow();
                         row.innerHTML = `
-                            <td>${new Date(p.date).toLocaleDateString('fr-FR')}</td>
-                            <td>${p.quantity.toFixed(2)}</td>
-                            <td>${p.price.toFixed(2)} €</td>
+                            <td>${dateStr}</td>
+                            <td>${qty.toFixed(2)}</td>
+                            <td>${prc.toFixed(2)} €</td>
                             <td>${invested.toFixed(2)} €</td>
                             <td><button class="btn-danger" onclick="deletePEAPurchase(${p.originalIndex})">🗑️</button></td>
                         `;
@@ -650,6 +706,15 @@
 
                 // Charger le prix actuel et mettre à jour
                 getStockPrice(ticker).then(currentPrice => {
+                    console.log(`Prix chargé pour ${ticker}:`, currentPrice);
+                    
+                    if (currentPrice === 0 || isNaN(currentPrice)) {
+                        console.warn(`Prix invalide pour ${ticker}`);
+                        document.getElementById(`current-${ticker}`).textContent = 'Erreur';
+                        document.getElementById(`current-${ticker}`).className = 'asset-stat-value negative';
+                        return;
+                    }
+                    
                     const totalValue = totalQuantity * currentPrice;
                     const pnl = totalValue - totalInvested;
                     const pnlPercent = totalInvested > 0 ? (pnl / totalInvested) * 100 : 0;
@@ -667,6 +732,10 @@
                     const perfEl = document.getElementById(`perf-${ticker}`);
                     perfEl.textContent = pnlPercent.toFixed(2) + '%';
                     perfEl.className = 'asset-stat-value ' + (pnlPercent >= 0 ? 'positive' : 'negative');
+                }).catch(err => {
+                    console.error(`Erreur chargement prix ${ticker}:`, err);
+                    document.getElementById(`current-${ticker}`).textContent = 'Erreur';
+                    document.getElementById(`current-${ticker}`).className = 'asset-stat-value negative';
                 });
             }
         }
@@ -1018,7 +1087,16 @@
         function loadData() {
             const saved = localStorage.getItem('portfolioData');
             if (saved) {
-                portfolio = JSON.parse(saved);
+                try {
+                    portfolio = JSON.parse(saved);
+                    // Ensure all arrays exist
+                    if (!portfolio.crypto) portfolio.crypto = [];
+                    if (!portfolio.pea) portfolio.pea = [];
+                    if (!portfolio.fundraising) portfolio.fundraising = [];
+                } catch (e) {
+                    console.error('Erreur chargement données:', e);
+                    portfolio = { crypto: [], pea: [], fundraising: [] };
+                }
             }
         }
 
