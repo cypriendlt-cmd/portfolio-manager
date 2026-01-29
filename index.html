@@ -332,8 +332,19 @@
         <div id="pea" class="section">
             <h2>PEA - Dollar Cost Averaging (DCA)</h2>
             <div class="info-message">
-                💡 <strong>Tickers Yahoo Finance :</strong> NVDA, AAPL, TSLA (US) • MC.PA, OR.PA, AI.PA (France)<br>
-                📅 <strong>DCA :</strong> Chaque achat est enregistré avec sa date. Les actifs sont groupés automatiquement.
+                💡 <strong>Tickers Yahoo Finance corrects :</strong><br>
+                <strong style="color: #00ff88;">✅ Actions US :</strong> AAPL (Apple), MSFT (Microsoft), NVDA (Nvidia), TSLA (Tesla), GOOGL (Google)<br>
+                <strong style="color: #00ff88;">✅ Actions France :</strong> MC.PA (LVMH), OR.PA (L'Oréal), AI.PA (Air Liquide), BN.PA (Danone)<br>
+                <strong style="color: #00ff88;">✅ ETF US :</strong> SPY (S&P 500), VOO (S&P 500 Vanguard), QQQ (Nasdaq 100)<br>
+                <strong style="color: #00ff88;">✅ ETF Europe :</strong> VUSA.AS (S&P 500 Amsterdam), IWDA.AS (MSCI World Amsterdam)<br>
+                <br>
+                <strong style="color: #ff4757;">❌ Tickers invalides :</strong><br>
+                • PUST.PA ❌ (n'existe pas sur Yahoo Finance)<br>
+                • PSP500 ❌ (n'existe pas, utilisez SPY ou VOO)<br>
+                • STELLANTIS ❌ (utilisez STLA ou STLAM.MI ou STLA.PA)<br>
+                <br>
+                🔍 <strong>Vérifier un ticker :</strong> <a href="https://finance.yahoo.com" target="_blank" style="color: #3498db;">finance.yahoo.com</a> → recherchez votre action<br>
+                📅 Les prix peuvent prendre 10-20 secondes à charger (API gratuite).
             </div>
             
             <form id="peaForm" onsubmit="addPEA(event)">
@@ -536,6 +547,21 @@
                 return;
             }
             
+            // Vérification des tickers invalides courants
+            const invalidTickers = ['PUST', 'PUST.PA', 'PSP500', 'SP500', 'NASDAQ', 'NASDAQ2'];
+            if (invalidTickers.includes(ticker)) {
+                const suggestions = {
+                    'PUST': 'Ce ticker n\'existe pas',
+                    'PUST.PA': 'Ce ticker n\'existe pas',
+                    'PSP500': 'Utilisez SPY ou VOO pour le S&P 500',
+                    'SP500': 'Utilisez SPY ou VOO pour le S&P 500',
+                    'NASDAQ': 'Utilisez QQQ pour le Nasdaq 100',
+                    'NASDAQ2': 'Utilisez QQQ pour le Nasdaq 100'
+                };
+                alert(`❌ Ticker invalide: ${ticker}\n\n${suggestions[ticker]}\n\nVérifiez sur finance.yahoo.com`);
+                return;
+            }
+            
             const purchase = {
                 name: name,
                 ticker: ticker,
@@ -544,7 +570,7 @@
                 date: date
             };
             
-            console.log('Ajout achat PEA:', purchase);
+            console.log('✅ Ajout achat PEA:', purchase);
             portfolio.pea.push(purchase);
             saveData();
             syncData();
@@ -916,39 +942,58 @@
                 return cached.price;
             }
 
-            try {
-                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
-                
-                const r = await fetch(proxyUrl);
-                const data = await r.json();
-                
-                if (data.chart && data.chart.result && data.chart.result[0]) {
-                    const result = data.chart.result[0];
-                    const price = result.meta.regularMarketPrice || 0;
-                    priceCache[cacheKey] = { price, ts: Date.now() };
-                    return price;
-                }
-                return 0;
-            } catch (e) {
-                console.error('Erreur prix action:', ticker, e);
+            console.log(`🔍 Recherche du prix pour: ${ticker}`);
+
+            // Liste des proxies CORS à essayer dans l'ordre
+            const proxies = [
+                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+            ];
+
+            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+
+            for (let i = 0; i < proxies.length; i++) {
                 try {
-                    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
-                    const fallbackProxy = `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`;
-                    const r = await fetch(fallbackProxy);
+                    console.log(`⏳ Tentative ${i + 1}/${proxies.length} pour ${ticker}...`);
+                    const proxyUrl = proxies[i](yahooUrl);
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+                    
+                    const r = await fetch(proxyUrl, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    
+                    if (!r.ok) {
+                        console.warn(`❌ Proxy ${i + 1} a échoué (status ${r.status})`);
+                        continue;
+                    }
+                    
                     const data = await r.json();
                     
                     if (data.chart && data.chart.result && data.chart.result[0]) {
                         const result = data.chart.result[0];
                         const price = result.meta.regularMarketPrice || 0;
-                        priceCache[cacheKey] = { price, ts: Date.now() };
-                        return price;
+                        
+                        if (price > 0) {
+                            console.log(`✅ Prix trouvé pour ${ticker}: ${price} €`);
+                            priceCache[cacheKey] = { price, ts: Date.now() };
+                            return price;
+                        }
                     }
-                } catch (e2) {
-                    console.error('Erreur proxy fallback:', ticker, e2);
+                    
+                    console.warn(`⚠️ Données invalides du proxy ${i + 1}`);
+                } catch (e) {
+                    if (e.name === 'AbortError') {
+                        console.warn(`⏱️ Timeout pour proxy ${i + 1}`);
+                    } else {
+                        console.warn(`❌ Erreur proxy ${i + 1}:`, e.message);
+                    }
                 }
-                return 0;
             }
+            
+            console.error(`❌ Impossible de récupérer le prix pour ${ticker} après ${proxies.length} tentatives`);
+            return 0;
         }
 
         async function updateAll() {
