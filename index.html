@@ -514,7 +514,7 @@
             }
         }
 
-          async function syncPricesFromGoogleSheets() {
+        async function syncPricesFromGoogleSheets() {
             const sheetId = localStorage.getItem('googleSheetId');
             if (!sheetId) {
                 alert('⚠️ Veuillez d\'abord configurer votre Google Sheet ID dans les paramètres');
@@ -570,15 +570,6 @@
                 alert(`❌ Erreur: ${error.message}\n\nVérifiez que :\n1. La feuille est publiée sur le Web\n2. L'ID est correct\n3. Le format est : ticker,prix`);
             }
         }
-        }
-    console.log(`✅ ${count} prix importés depuis Google Sheets`);
-    refreshUI?.(); // si tu as cette fonction
-  } catch (err) {
-    console.error('❌ Sync Google Sheets:', err);
-    alert(`❌ Impossible de synchroniser : ${err.message}`);
-  }
-}
-
 
         function toggleAutoSync(enabled) {
             if (enabled) {
