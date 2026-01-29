@@ -156,6 +156,17 @@
             border-color: #00ff88;
         }
 
+        input.error {
+            border-color: #ff4757;
+        }
+
+        .error-message {
+            color: #ff4757;
+            font-size: 0.85em;
+            margin-top: 5px;
+            display: none;
+        }
+
         button {
             background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
             color: #1a1f2e;
@@ -254,239 +265,32 @@
             color: #ff4757;
         }
 
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
+        .sparkline {
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%);
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            color: #00ff88;
-            font-size: 1.5em;
-        }
-
-        .close-btn {
-            background: none;
-            color: #ff4757;
-            font-size: 1.5em;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-        }
-
-        /* Crypto library styles */
-        .crypto-library {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
-            max-height: 400px;
-            overflow-y: auto;
-            margin-top: 15px;
-        }
-
-        .crypto-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .crypto-item:hover {
-            background: rgba(0, 255, 136, 0.1);
-            border-color: #00ff88;
-            transform: translateY(-2px);
-        }
-
-        .crypto-icon {
-            font-size: 2em;
-            margin-bottom: 8px;
-        }
-
-        .crypto-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .crypto-symbol {
-            font-size: 0.8em;
-            color: #a0aec0;
-        }
-
-        /* News section */
-        .news-section {
-            margin-top: 30px;
-        }
-
-        .news-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .news-card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #00ff88;
-            transition: all 0.3s;
-        }
-
-        .news-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(5px);
-        }
-
-        .news-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #00ff88;
-            font-size: 1.1em;
-        }
-
-        .news-description {
-            color: #a0aec0;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-
-        .news-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8em;
-            color: #718096;
-            margin-top: 10px;
-        }
-
-        .news-source {
-            font-weight: bold;
-        }
-
-        .news-date {
-            font-style: italic;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .icon-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.85em;
-            transition: all 0.3s;
-        }
-
-        .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .sparkline-container {
-            width: 100px;
             height: 40px;
-            position: relative;
-        }
-
-        .sparkline-canvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        .ath-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.85em;
-            font-weight: bold;
-            background: rgba(245, 158, 11, 0.2);
-            color: #f59e0b;
-        }
-
-        .change-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.85em;
-            font-weight: bold;
-        }
-
-        .change-badge.positive {
-            background: rgba(0, 255, 136, 0.2);
-            color: #00ff88;
-        }
-
-        .change-badge.negative {
-            background: rgba(255, 71, 87, 0.2);
-            color: #ff4757;
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.05);
-            color: #ffffff;
-            border-radius: 8px;
+            margin-top: 10px;
         }
 
         @media (max-width: 768px) {
+            .stats-grid,
             .form-grid {
                 grid-template-columns: 1fr;
             }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
+            
+            nav {
+                flex-direction: column;
             }
-
-            .crypto-library {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            
+            .nav-btn {
+                width: 100%;
             }
-
-            .news-grid {
-                grid-template-columns: 1fr;
+            
+            table {
+                font-size: 0.85em;
+            }
+            
+            th, td {
+                padding: 10px 5px;
             }
         }
     </style>
@@ -494,119 +298,89 @@
 <body>
     <div class="container">
         <header>
-            <h1>💼 Portfolio Manager</h1>
-            <div class="sync-status" id="syncStatus">Non synchronisé</div>
+            <h1>📊 Portfolio Manager</h1>
+            <div id="syncStatus" class="sync-status">Non synchronisé</div>
         </header>
 
         <nav>
-            <button class="nav-btn" onclick="showSection('dashboard')">Dashboard</button>
-            <button class="nav-btn" onclick="showSection('crypto')">Crypto</button>
-            <button class="nav-btn" onclick="showSection('pea')">PEA / Actions</button>
-            <button class="nav-btn" onclick="showSection('fundraising')">Levée de Fonds</button>
-            <button class="nav-btn" onclick="showSection('markets')">Marchés</button>
-            <button class="nav-btn" onclick="showSection('settings')">Paramètres</button>
+            <button class="nav-btn" onclick="showSection('dashboard')">📈 Dashboard</button>
+            <button class="nav-btn" onclick="showSection('crypto')">₿ Crypto</button>
+            <button class="nav-btn" onclick="showSection('pea')">📊 PEA</button>
+            <button class="nav-btn" onclick="showSection('fundraising')">💼 Levées de Fonds</button>
+            <button class="nav-btn" onclick="showSection('market')">🌐 Marchés</button>
+            <button class="nav-btn" onclick="showSection('settings')">⚙️ Paramètres</button>
         </nav>
 
-        <!-- Dashboard -->
+        <!-- Dashboard Section -->
         <div id="dashboard" class="section active">
-            <h2>📊 Vue d'ensemble</h2>
-            
+            <h2>Dashboard</h2>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-label">Valeur Totale</div>
-                    <div class="stat-value" id="totalValue">0 €</div>
+                    <div id="totalValue" class="stat-value">0.00 €</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Investissement</div>
-                    <div class="stat-value" id="totalInvestment">0 €</div>
+                    <div class="stat-label">Investissement Total</div>
+                    <div id="totalInvestment" class="stat-value">0.00 €</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">P&L Total</div>
-                    <div class="stat-value" id="totalPnL">0 €</div>
+                    <div id="totalPnL" class="stat-value">0.00 €</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Performance</div>
-                    <div class="stat-value" id="totalPerformance">0%</div>
+                    <div id="totalPerformance" class="stat-value">0.00%</div>
                 </div>
             </div>
-
             <div class="chart-container">
                 <canvas id="portfolioChart"></canvas>
-            </div>
-
-            <h3>📈 Comparaison Portfolio vs Actif</h3>
-            <div class="form-group" style="max-width: 300px; margin: 20px 0;">
-                <label>Comparer avec :</label>
-                <select id="compareAsset" onchange="updateComparisonChart()">
-                    <option value="bitcoin">Bitcoin (BTC)</option>
-                    <option value="ethereum">Ethereum (ETH)</option>
-                    <option value="sp500">S&P 500</option>
-                    <option value="nasdaq">NASDAQ</option>
-                </select>
-            </div>
-            <div class="chart-container">
-                <canvas id="comparisonChart"></canvas>
-            </div>
-
-            <!-- News Section -->
-            <div class="news-section">
-                <h3>📰 Actualités des Marchés</h3>
-                
-                <h4 style="color: #00ff88; margin-top: 20px;">Crypto</h4>
-                <div class="news-grid" id="cryptoNews"></div>
-
-                <h4 style="color: #3b82f6; margin-top: 30px;">Bourse</h4>
-                <div class="news-grid" id="stockNews"></div>
             </div>
         </div>
 
         <!-- Crypto Section -->
         <div id="crypto" class="section">
-            <h2>💎 Gestion Crypto</h2>
-            
-            <button onclick="openCryptoLibrary()" style="margin-bottom: 20px;">📚 Choisir depuis la bibliothèque</button>
-            
-            <form id="cryptoForm" onsubmit="addCryptoPosition(event)">
+            <h2>Crypto-Monnaies</h2>
+            <form id="cryptoForm" onsubmit="addCrypto(event)">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Nom du Token</label>
+                        <label>Nom</label>
                         <input type="text" id="cryptoName" required>
                     </div>
                     <div class="form-group">
-                        <label>Symbol (ID CoinGecko)</label>
+                        <label>Symbol (ex: bitcoin)</label>
                         <input type="text" id="cryptoSymbol" required>
                     </div>
                     <div class="form-group">
                         <label>Quantité</label>
-                        <input type="number" step="any" id="cryptoQuantity" required>
+                        <input type="number" step="any" id="cryptoQuantity" required min="0">
                     </div>
                     <div class="form-group">
-                        <label>Prix d'Achat (€)</label>
-                        <input type="number" step="any" id="cryptoPrice" required>
+                        <label>Prix d'entrée (€)</label>
+                        <input type="number" step="0.01" id="cryptoPrice" required min="0" oninput="validateNumberInput(this)">
+                        <span class="error-message" id="cryptoPriceError">Veuillez entrer un nombre valide</span>
                     </div>
                     <div class="form-group">
-                        <label>Date d'Achat</label>
+                        <label>Date</label>
                         <input type="date" id="cryptoDate" required>
                     </div>
                 </div>
-                <input type="hidden" id="cryptoEditId" value="">
                 <button type="submit" id="cryptoSubmitBtn">Ajouter Position</button>
-                <button type="button" class="btn-secondary" onclick="cancelEdit('crypto')" id="cryptoCancelBtn" style="display: none;">Annuler</button>
+                <button type="button" class="btn-secondary" id="cryptoCancelBtn" onclick="cancelEdit('crypto')" style="display: none;">Annuler</button>
+                <input type="hidden" id="cryptoEditId">
             </form>
-
-            <table id="cryptoTable">
+            <table>
                 <thead>
                     <tr>
-                        <th>Token</th>
+                        <th>Nom</th>
+                        <th>Symbol</th>
                         <th>Quantité</th>
-                        <th>Prix d'Entrée</th>
-                        <th>Prix Actuel</th>
-                        <th>ATH (All-Time High)</th>
-                        <th>Var. 24h</th>
-                        <th>Valeur Actuelle</th>
+                        <th>Prix d'entrée</th>
+                        <th>Prix actuel</th>
+                        <th>ATH</th>
+                        <th>Valeur</th>
                         <th>P&L</th>
-                        <th>Historique 7j</th>
-                        <th>Date</th>
+                        <th>Performance</th>
+                        <th>Tendance 7J</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -616,9 +390,8 @@
 
         <!-- PEA Section -->
         <div id="pea" class="section">
-            <h2>📈 PEA / Actions</h2>
-            
-            <form id="peaForm" onsubmit="addPEAPosition(event)">
+            <h2>PEA (Plan d'Épargne en Actions)</h2>
+            <form id="peaForm" onsubmit="addPEA(event)">
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Nom</label>
@@ -626,41 +399,40 @@
                     </div>
                     <div class="form-group">
                         <label>Code ISIN</label>
-                        <input type="text" id="peaISIN" required placeholder="FR0000120404" maxlength="12">
-                        <small style="color: #a0aec0; font-size: 0.75em; margin-top: 4px;">Ex: FR0000120404 (Air Liquide)</small>
+                        <input type="text" id="peaISIN" required maxlength="12" placeholder="FR0000000000">
+                        <span class="error-message" id="peaISINError">Format ISIN invalide (ex: FR0000000000)</span>
                     </div>
                     <div class="form-group">
                         <label>Quantité</label>
-                        <input type="number" step="any" id="peaQuantity" required>
+                        <input type="number" step="any" id="peaQuantity" required min="0">
                     </div>
                     <div class="form-group">
-                        <label>Prix d'Achat (€)</label>
-                        <input type="number" step="any" id="peaPrice" required>
+                        <label>Prix d'entrée (€)</label>
+                        <input type="number" step="0.01" id="peaPrice" required min="0" oninput="validateNumberInput(this)">
+                        <span class="error-message" id="peaPriceError">Veuillez entrer un nombre valide</span>
                     </div>
                     <div class="form-group">
-                        <label>Date d'Achat</label>
+                        <label>Date</label>
                         <input type="date" id="peaDate" required>
                     </div>
                 </div>
-                <input type="hidden" id="peaEditId" value="">
                 <button type="submit" id="peaSubmitBtn">Ajouter Position</button>
-                <button type="button" class="btn-secondary" onclick="cancelEdit('pea')" id="peaCancelBtn" style="display: none;">Annuler</button>
+                <button type="button" class="btn-secondary" id="peaCancelBtn" onclick="cancelEdit('pea')" style="display: none;">Annuler</button>
+                <input type="hidden" id="peaEditId">
             </form>
-
-            <table id="peaTable">
+            <table>
                 <thead>
                     <tr>
                         <th>Nom</th>
                         <th>ISIN</th>
                         <th>Quantité</th>
-                        <th>Prix d'Entrée</th>
-                        <th>Prix Actuel</th>
-                        <th>Prix Max Atteint</th>
-                        <th>Var. 24h</th>
-                        <th>Valeur Actuelle</th>
+                        <th>Prix d'entrée</th>
+                        <th>Prix actuel</th>
+                        <th>ATH</th>
+                        <th>Valeur</th>
                         <th>P&L</th>
-                        <th>Historique 7j</th>
-                        <th>Date</th>
+                        <th>Performance</th>
+                        <th>Tendance 7J</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -670,42 +442,36 @@
 
         <!-- Fundraising Section -->
         <div id="fundraising" class="section">
-            <h2>🚀 Levées de Fonds</h2>
-            
-            <form id="fundraisingForm" onsubmit="addFundraisingPosition(event)">
+            <h2>Levées de Fonds</h2>
+            <form id="fundraisingForm" onsubmit="addFundraising(event)">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Startup</label>
-                        <input type="text" id="fundName" required>
+                        <label>Entreprise</label>
+                        <input type="text" id="fundraisingCompany" required>
                     </div>
                     <div class="form-group">
-                        <label>Montant Investi (€)</label>
-                        <input type="number" step="any" id="fundAmount" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Valorisation (€)</label>
-                        <input type="number" step="any" id="fundValuation">
+                        <label>Montant investi (€)</label>
+                        <input type="number" step="0.01" id="fundraisingAmount" required min="0" oninput="validateNumberInput(this)">
+                        <span class="error-message" id="fundraisingAmountError">Veuillez entrer un nombre valide</span>
                     </div>
                     <div class="form-group">
                         <label>Date</label>
-                        <input type="date" id="fundDate" required>
+                        <input type="date" id="fundraisingDate" required>
                     </div>
                     <div class="form-group">
                         <label>Notes</label>
-                        <input type="text" id="fundNotes">
+                        <input type="text" id="fundraisingNotes">
                     </div>
                 </div>
-                <input type="hidden" id="fundEditId" value="">
-                <button type="submit" id="fundSubmitBtn">Ajouter Investissement</button>
-                <button type="button" class="btn-secondary" onclick="cancelEdit('fundraising')" id="fundCancelBtn" style="display: none;">Annuler</button>
+                <button type="submit" id="fundraisingSubmitBtn">Ajouter Investissement</button>
+                <button type="button" class="btn-secondary" id="fundraisingCancelBtn" onclick="cancelEdit('fundraising')" style="display: none;">Annuler</button>
+                <input type="hidden" id="fundraisingEditId">
             </form>
-
-            <table id="fundraisingTable">
+            <table>
                 <thead>
                     <tr>
-                        <th>Startup</th>
+                        <th>Entreprise</th>
                         <th>Montant</th>
-                        <th>Valorisation</th>
                         <th>Date</th>
                         <th>Notes</th>
                         <th>Actions</th>
@@ -715,224 +481,148 @@
             </table>
         </div>
 
-        <!-- Markets Section -->
-        <div id="markets" class="section">
-            <h2>📊 Indicateurs des Marchés</h2>
-            
-            <h3>Crypto</h3>
-            <div class="market-grid">
-                <div class="market-card">
-                    <div class="market-label">Bitcoin</div>
-                    <div class="market-value" id="btcPrice">-</div>
-                </div>
-                <div class="market-card">
-                    <div class="market-label">Ethereum</div>
-                    <div class="market-value" id="ethPrice">-</div>
-                </div>
-                <div class="market-card">
-                    <div class="market-label">BTC Dominance</div>
-                    <div class="market-value" id="btcDominance">-</div>
-                </div>
-                <div class="market-card">
-                    <div class="market-label">Market Cap</div>
-                    <div class="market-value" id="totalMarketCap">-</div>
-                </div>
-            </div>
-
-            <h3 style="margin-top: 20px;">Boursiers</h3>
-            <div class="market-grid">
-                <div class="market-card">
-                    <div class="market-label">S&P 500</div>
-                    <div class="market-value" id="sp500">-</div>
-                </div>
-                <div class="market-card">
-                    <div class="market-label">Dow Jones</div>
-                    <div class="market-value" id="dowJones">-</div>
-                </div>
-                <div class="market-card">
-                    <div class="market-label">NASDAQ</div>
-                    <div class="market-value" id="nasdaq">-</div>
-                </div>
-                <div class="market-card">
-                    <div class="market-label">CAC 40</div>
-                    <div class="market-value" id="cac40">-</div>
-                </div>
+        <!-- Market Section -->
+        <div id="market" class="section">
+            <h2>État des Marchés</h2>
+            <div class="market-grid" id="marketData">
+                <!-- Market data will be loaded here -->
             </div>
         </div>
 
         <!-- Settings Section -->
         <div id="settings" class="section">
-            <h2>⚙️ Paramètres</h2>
-            
-            <h3>Google Drive Sync</h3>
-            <div class="form-group" style="max-width: 600px;">
-                <label>Client ID Google</label>
-                <input type="text" id="clientId" placeholder="votre-client-id.apps.googleusercontent.com">
+            <h2>Paramètres</h2>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Google Drive Client ID</label>
+                <input type="text" id="clientId" placeholder="Entrez votre Client ID Google">
+                <button onclick="saveClientId()" style="margin-top: 10px;">Enregistrer Client ID</button>
             </div>
-            
-            <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-                <button onclick="saveClientId()">Enregistrer Client ID</button>
-                <button class="btn-secondary" onclick="connectGoogleDrive()">Se connecter</button>
-                <button class="btn-danger" onclick="disconnectGoogleDrive()">Déconnecter</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                <button onclick="connectGoogleDrive()">Connecter Google Drive</button>
+                <button class="btn-warning" onclick="disconnectGoogleDrive()">Déconnecter</button>
+                <button class="btn-secondary" onclick="syncData()">Synchroniser maintenant</button>
             </div>
-
-            <h3 style="margin-top: 30px;">Export / Import</h3>
-            <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-                <button onclick="exportData()">📥 Exporter JSON</button>
-                <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📤 Importer JSON</button>
-                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+            <hr style="margin: 30px 0; border-color: rgba(255, 255, 255, 0.1);">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn-secondary" onclick="exportData()">Exporter Données</button>
+                <input type="file" id="importFile" accept=".json" onchange="importData(event)" style="display: none;">
+                <button class="btn-secondary" onclick="document.getElementById('importFile').click()">Importer Données</button>
+                <button class="btn-danger" onclick="if(confirm('Êtes-vous sûr ?')) { localStorage.clear(); location.reload(); }">Réinitialiser Tout</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Crypto Library Modal -->
-    <div id="cryptoLibraryModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">📚 Bibliothèque de Cryptomonnaies</h3>
-                <button class="close-btn" onclick="closeCryptoLibrary()">×</button>
-            </div>
-            <input type="text" id="cryptoSearch" class="search-box" placeholder="Rechercher une crypto..." onkeyup="filterCryptoLibrary()">
-            <div class="crypto-library" id="cryptoLibrary"></div>
         </div>
     </div>
 
     <script>
-        let portfolio = { crypto: [], pea: [], fundraising: [] };
+        // Global Variables
+        let portfolio = {
+            crypto: [],
+            pea: [],
+            fundraising: []
+        };
+        
+        let charts = {
+            portfolio: null,
+            performance: null
+        };
+        
         let priceCache = {};
-        let charts = { portfolio: null, comparison: null };
         let isGoogleDriveConnected = false;
         let accessToken = null;
         let tokenClient = null;
         let isSyncing = false;
 
-        // Bibliothèque de cryptomonnaies populaires
-        const cryptoLibrary = [
-            { name: 'Bitcoin', symbol: 'bitcoin', icon: '₿' },
-            { name: 'Ethereum', symbol: 'ethereum', icon: 'Ξ' },
-            { name: 'Tether', symbol: 'tether', icon: '₮' },
-            { name: 'BNB', symbol: 'binancecoin', icon: '⬡' },
-            { name: 'Solana', symbol: 'solana', icon: '◎' },
-            { name: 'XRP', symbol: 'ripple', icon: '✕' },
-            { name: 'USD Coin', symbol: 'usd-coin', icon: '$' },
-            { name: 'Cardano', symbol: 'cardano', icon: '₳' },
-            { name: 'Dogecoin', symbol: 'dogecoin', icon: 'Ð' },
-            { name: 'TRON', symbol: 'tron', icon: '₮' },
-            { name: 'Avalanche', symbol: 'avalanche-2', icon: '▲' },
-            { name: 'Polkadot', symbol: 'polkadot', icon: '●' },
-            { name: 'Polygon', symbol: 'matic-network', icon: '⬣' },
-            { name: 'Litecoin', symbol: 'litecoin', icon: 'Ł' },
-            { name: 'Chainlink', symbol: 'chainlink', icon: '⬢' },
-            { name: 'Uniswap', symbol: 'uniswap', icon: '🦄' },
-            { name: 'Stellar', symbol: 'stellar', icon: '*' },
-            { name: 'Monero', symbol: 'monero', icon: 'ɱ' },
-            { name: 'Bitcoin Cash', symbol: 'bitcoin-cash', icon: '฿' },
-            { name: 'Cosmos', symbol: 'cosmos', icon: '⚛' },
-            { name: 'Near Protocol', symbol: 'near', icon: 'Ⓝ' },
-            { name: 'VeChain', symbol: 'vechain', icon: 'V' },
-            { name: 'Algorand', symbol: 'algorand', icon: 'A' },
-            { name: 'ApeCoin', symbol: 'apecoin', icon: '🦍' },
-            { name: 'The Graph', symbol: 'the-graph', icon: 'G' },
-            { name: 'Sandbox', symbol: 'the-sandbox', icon: '🏖' },
-            { name: 'Decentraland', symbol: 'decentraland', icon: '🏛' },
-            { name: 'Tezos', symbol: 'tezos', icon: 'ꜩ' },
-            { name: 'Aave', symbol: 'aave', icon: '👻' },
-            { name: 'Shiba Inu', symbol: 'shiba-inu', icon: '🐕' }
-        ];
-
+        // Initialize
         window.addEventListener('load', () => {
             loadData();
             updateDashboard();
             updateCryptoTable();
             updatePEATable();
             updateFundraisingTable();
-            updateMarketIndicators();
-            loadNews();
-            renderCryptoLibrary();
+            updateMarketData();
+            initGoogleDrive();
             
-            const savedClientId = localStorage.getItem('googleClientId');
-            if (savedClientId) {
-                document.getElementById('clientId').value = savedClientId;
-            }
-
-            // Update news daily
-            const lastNewsUpdate = localStorage.getItem('lastNewsUpdate');
-            const today = new Date().toDateString();
-            if (lastNewsUpdate !== today) {
-                loadNews();
-                localStorage.setItem('lastNewsUpdate', today);
-            }
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('cryptoDate').value = today;
+            document.getElementById('peaDate').value = today;
+            document.getElementById('fundraisingDate').value = today;
         });
 
+        // UI Functions
         function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
             document.getElementById(sectionId).classList.add('active');
+        }
+
+        function cancelEdit(type) {
+            document.getElementById(`${type}Form`).reset();
+            document.getElementById(`${type}EditId`).value = '';
+            document.getElementById(`${type}SubmitBtn`).textContent = type === 'crypto' ? 'Ajouter Position' : type === 'pea' ? 'Ajouter Position' : 'Ajouter Investissement';
+            document.getElementById(`${type}CancelBtn`).style.display = 'none';
             
-            if (sectionId === 'dashboard') {
-                updateDashboard();
-                updateComparisonChart();
+            // Reset date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById(`${type}Date`).value = today;
+        }
+
+        // Validation Functions
+        function validateNumberInput(input) {
+            const value = input.value;
+            const errorId = input.id + 'Error';
+            const errorElement = document.getElementById(errorId);
+            
+            // Check if value contains non-numeric characters (except decimal point)
+            if (value && !/^\d*\.?\d*$/.test(value)) {
+                input.classList.add('error');
+                if (errorElement) {
+                    errorElement.style.display = 'block';
+                }
+                // Remove invalid characters
+                input.value = value.replace(/[^\d.]/g, '');
+                return false;
+            } else {
+                input.classList.remove('error');
+                if (errorElement) {
+                    errorElement.style.display = 'none';
+                }
+                return true;
             }
         }
 
-        // Crypto Library Functions
-        function openCryptoLibrary() {
-            document.getElementById('cryptoLibraryModal').classList.add('active');
-        }
-
-        function closeCryptoLibrary() {
-            document.getElementById('cryptoLibraryModal').classList.remove('active');
-        }
-
-        function renderCryptoLibrary() {
-            const container = document.getElementById('cryptoLibrary');
-            container.innerHTML = cryptoLibrary.map(crypto => `
-                <div class="crypto-item" onclick="selectCrypto('${crypto.name}', '${crypto.symbol}')">
-                    <div class="crypto-icon">${crypto.icon}</div>
-                    <div class="crypto-name">${crypto.name}</div>
-                    <div class="crypto-symbol">${crypto.symbol}</div>
-                </div>
-            `).join('');
-        }
-
-        function filterCryptoLibrary() {
-            const search = document.getElementById('cryptoSearch').value.toLowerCase();
-            const items = document.querySelectorAll('.crypto-item');
-            
-            items.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(search) ? 'block' : 'none';
-            });
-        }
-
-        function selectCrypto(name, symbol) {
-            document.getElementById('cryptoName').value = name;
-            document.getElementById('cryptoSymbol').value = symbol;
-            closeCryptoLibrary();
-            document.getElementById('cryptoQuantity').focus();
-        }
-
-        // CRUD Functions for Crypto
-        function addCryptoPosition(event) {
+        // Crypto Functions
+        function addCrypto(event) {
             event.preventDefault();
             
+            const name = document.getElementById('cryptoName').value;
+            const symbol = document.getElementById('cryptoSymbol').value.toLowerCase();
+            const quantity = parseFloat(document.getElementById('cryptoQuantity').value);
+            const entryPrice = parseFloat(document.getElementById('cryptoPrice').value);
+            const date = document.getElementById('cryptoDate').value;
             const editId = document.getElementById('cryptoEditId').value;
+            
+            // Validate numeric inputs
+            if (isNaN(quantity) || isNaN(entryPrice)) {
+                alert('❌ Veuillez entrer des valeurs numériques valides');
+                return;
+            }
+            
             const position = {
                 id: editId || Date.now(),
-                name: document.getElementById('cryptoName').value,
-                symbol: document.getElementById('cryptoSymbol').value.toLowerCase(),
-                quantity: parseFloat(document.getElementById('cryptoQuantity').value),
-                entryPrice: parseFloat(document.getElementById('cryptoPrice').value),
-                date: document.getElementById('cryptoDate').value
+                name,
+                symbol,
+                quantity,
+                entryPrice,
+                date
             };
             
             if (editId) {
-                // Update existing
                 const index = portfolio.crypto.findIndex(p => p.id == editId);
                 if (index !== -1) {
                     portfolio.crypto[index] = position;
                 }
             } else {
-                // Add new
                 portfolio.crypto.push(position);
             }
             
@@ -965,29 +655,25 @@
         function deleteCrypto(id) {
             if (!confirm('Supprimer cette position ?')) return;
             
-            portfolio.crypto = portfolio.crypto.filter(p => p.id !== id);
-            saveData();
-            syncData();
-            updateCryptoTable();
-            updateDashboard();
-        }
-
-        function cancelEdit(type) {
-            if (type === 'crypto') {
-                document.getElementById('cryptoForm').reset();
-                document.getElementById('cryptoEditId').value = '';
-                document.getElementById('cryptoSubmitBtn').textContent = 'Ajouter Position';
-                document.getElementById('cryptoCancelBtn').style.display = 'none';
-            } else if (type === 'pea') {
-                document.getElementById('peaForm').reset();
-                document.getElementById('peaEditId').value = '';
-                document.getElementById('peaSubmitBtn').textContent = 'Ajouter Position';
-                document.getElementById('peaCancelBtn').style.display = 'none';
-            } else if (type === 'fundraising') {
-                document.getElementById('fundraisingForm').reset();
-                document.getElementById('fundEditId').value = '';
-                document.getElementById('fundSubmitBtn').textContent = 'Ajouter Investissement';
-                document.getElementById('fundCancelBtn').style.display = 'none';
+            try {
+                // Find the position before deleting
+                const deletedPosition = portfolio.crypto.find(p => p.id === id);
+                
+                // Delete from portfolio
+                portfolio.crypto = portfolio.crypto.filter(p => p.id !== id);
+                
+                // Clean up cache for this position
+                if (deletedPosition && deletedPosition.symbol) {
+                    delete priceCache[deletedPosition.symbol];
+                }
+                
+                saveData();
+                syncData();
+                updateCryptoTable();
+                updateDashboard();
+            } catch (error) {
+                console.error('Error deleting crypto position:', error);
+                alert('❌ Erreur lors de la suppression. Veuillez rafraîchir la page et réessayer.');
             }
         }
 
@@ -996,79 +682,81 @@
             tbody.innerHTML = '';
             
             for (const position of portfolio.crypto) {
-                const priceData = await getCryptoPrice(position.symbol);
-                const currentPrice = priceData.price;
-                const ath = priceData.ath;
-                const change24h = priceData.change24h;
-                const sparkline = priceData.sparkline;
-                
-                const currentValue = position.quantity * currentPrice;
-                const invested = position.quantity * position.entryPrice;
-                const pnl = currentValue - invested;
-                const pnlPercent = ((pnl / invested) * 100).toFixed(2);
-                
-                const canvasId = `sparkline-crypto-${position.id}`;
-                
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td><strong>${position.name}</strong></td>
-                    <td>${position.quantity.toFixed(6)}</td>
-                    <td>${position.entryPrice.toFixed(2)} €</td>
-                    <td><strong>${currentPrice.toFixed(2)} €</strong></td>
-                    <td>
-                        <span class="ath-badge">${ath.toFixed(2)} €</span>
-                    </td>
-                    <td>
-                        <span class="change-badge ${change24h >= 0 ? 'positive' : 'negative'}">
-                            ${change24h >= 0 ? '▲' : '▼'} ${Math.abs(change24h).toFixed(2)}%
-                        </span>
-                    </td>
-                    <td><strong>${currentValue.toFixed(2)} €</strong></td>
-                    <td class="${pnl >= 0 ? 'positive' : 'negative'}">
-                        ${pnl >= 0 ? '▲' : '▼'} ${pnl.toFixed(2)} € (${pnlPercent}%)
-                    </td>
-                    <td>
-                        <div class="sparkline-container">
-                            <canvas id="${canvasId}" class="sparkline-canvas" width="100" height="40"></canvas>
-                        </div>
-                    </td>
-                    <td>${formatDate(position.date)}</td>
-                    <td>
-                        <div class="action-btns">
-                            <button class="icon-btn btn-warning" onclick="editCrypto(${position.id})">✏️</button>
-                            <button class="icon-btn btn-danger" onclick="deleteCrypto(${position.id})">🗑️</button>
-                        </div>
-                    </td>
-                `;
-                
-                // Draw sparkline after row is added to DOM
-                setTimeout(() => {
-                    const color = change24h >= 0 ? '#00ff88' : '#ff4757';
-                    drawSparkline(canvasId, sparkline, color);
-                }, 100);
+                try {
+                    const priceData = await getCryptoPrice(position.symbol);
+                    const currentPrice = priceData?.price || 0;
+                    const ath = priceData?.ath || 0;
+                    const change24h = priceData?.change24h || 0;
+                    const sparkline = priceData?.sparkline || [];
+                    
+                    const currentValue = position.quantity * currentPrice;
+                    const invested = position.quantity * position.entryPrice;
+                    const pnl = currentValue - invested;
+                    const pnlPercent = invested > 0 ? ((pnl / invested) * 100).toFixed(2) : '0.00';
+                    
+                    const canvasId = `sparkline-crypto-${position.id}`;
+                    
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${position.name}</td>
+                        <td>${position.symbol.toUpperCase()}</td>
+                        <td>${position.quantity}</td>
+                        <td>${position.entryPrice.toFixed(2)} €</td>
+                        <td>${currentPrice.toFixed(2)} €</td>
+                        <td>${ath.toFixed(2)} € <span class="${change24h >= 0 ? 'positive' : 'negative'}">(${change24h.toFixed(2)}%)</span></td>
+                        <td>${currentValue.toFixed(2)} €</td>
+                        <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnl.toFixed(2)} €</td>
+                        <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnlPercent}%</td>
+                        <td><canvas id="${canvasId}" class="sparkline" width="100" height="40"></canvas></td>
+                        <td>
+                            <button class="btn-secondary" onclick="editCrypto(${position.id})">✏️</button>
+                            <button class="btn-danger" onclick="deleteCrypto(${position.id})">🗑️</button>
+                        </td>
+                    `;
+                    
+                    // Draw sparkline
+                    setTimeout(() => drawSparkline(canvasId, sparkline), 100);
+                } catch (error) {
+                    console.error('Error updating crypto row:', position, error);
+                }
             }
         }
 
         // PEA Functions
-        function addPEAPosition(event) {
+        function addPEA(event) {
             event.preventDefault();
             
-            const editId = document.getElementById('peaEditId').value;
+            const name = document.getElementById('peaName').value;
             const isin = document.getElementById('peaISIN').value.toUpperCase();
+            const quantity = parseFloat(document.getElementById('peaQuantity').value);
+            const entryPrice = parseFloat(document.getElementById('peaPrice').value);
+            const date = document.getElementById('peaDate').value;
+            const editId = document.getElementById('peaEditId').value;
             
-            // Validate ISIN format
-            if (!validateISIN(isin)) {
-                alert('⚠️ Format ISIN invalide. Format attendu: 2 lettres + 9 caractères + 1 chiffre (ex: FR0000120404)');
+            // Validate numeric inputs
+            if (isNaN(quantity) || isNaN(entryPrice)) {
+                alert('❌ Veuillez entrer des valeurs numériques valides');
                 return;
             }
             
+            // Validate ISIN format
+            if (!validateISIN(isin)) {
+                alert('❌ Format ISIN invalide. Format attendu: 2 lettres + 10 caractères alphanumériques (ex: FR0000000000)');
+                document.getElementById('peaISIN').classList.add('error');
+                document.getElementById('peaISINError').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('peaISIN').classList.remove('error');
+            document.getElementById('peaISINError').style.display = 'none';
+            
             const position = {
                 id: editId || Date.now(),
-                name: document.getElementById('peaName').value,
-                isin: isin,
-                quantity: parseFloat(document.getElementById('peaQuantity').value),
-                entryPrice: parseFloat(document.getElementById('peaPrice').value),
-                date: document.getElementById('peaDate').value
+                name,
+                isin,
+                quantity,
+                entryPrice,
+                date
             };
             
             if (editId) {
@@ -1089,8 +777,7 @@
         }
 
         function validateISIN(isin) {
-            // ISIN format: 2 letters (country code) + 9 alphanumeric + 1 check digit
-            // Being more lenient to accept valid ISINs
+            // ISIN format: 2 letters (country code) + 10 alphanumeric
             if (!isin || isin.length !== 12) {
                 return false;
             }
@@ -1132,10 +819,13 @@
             if (!confirm('Supprimer cette position ?')) return;
             
             try {
+                // Find the position BEFORE deleting it
+                const deletedPosition = portfolio.pea.find(p => p.id === id);
+                
+                // Delete from portfolio
                 portfolio.pea = portfolio.pea.filter(p => p.id !== id);
                 
                 // Clean up cache for this position
-                const deletedPosition = portfolio.pea.find(p => p.id === id);
                 if (deletedPosition && deletedPosition.isin) {
                     delete priceCache[deletedPosition.isin];
                 }
@@ -1171,78 +861,52 @@
                     
                     const row = tbody.insertRow();
                     row.innerHTML = `
-                        <td><strong>${position.name}</strong></td>
-                        <td><code style="font-size: 0.8em; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 3px;">${position.isin}</code></td>
-                        <td>${position.quantity.toFixed(2)}</td>
+                        <td>${position.name}</td>
+                        <td>${position.isin}</td>
+                        <td>${position.quantity}</td>
                         <td>${position.entryPrice.toFixed(2)} €</td>
-                        <td><strong>${currentPrice > 0 ? currentPrice.toFixed(2) : 'N/A'} €</strong></td>
+                        <td>${currentPrice.toFixed(2)} €</td>
+                        <td>${ath.toFixed(2)} € <span class="${change24h >= 0 ? 'positive' : 'negative'}">(${change24h.toFixed(2)}%)</span></td>
+                        <td>${currentValue.toFixed(2)} €</td>
+                        <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnl.toFixed(2)} €</td>
+                        <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnlPercent}%</td>
+                        <td><canvas id="${canvasId}" class="sparkline" width="100" height="40"></canvas></td>
                         <td>
-                            <span class="ath-badge">${ath > 0 ? ath.toFixed(2) + ' €' : 'N/A'}</span>
-                        </td>
-                        <td>
-                            <span class="change-badge ${change24h >= 0 ? 'positive' : 'negative'}">
-                                ${change24h !== 0 ? (change24h >= 0 ? '▲' : '▼') + ' ' + Math.abs(change24h).toFixed(2) + '%' : 'N/A'}
-                            </span>
-                        </td>
-                        <td><strong>${currentValue.toFixed(2)} €</strong></td>
-                        <td class="${pnl >= 0 ? 'positive' : 'negative'}">
-                            ${pnl >= 0 ? '▲' : '▼'} ${pnl.toFixed(2)} € (${pnlPercent}%)
-                        </td>
-                        <td>
-                            <div class="sparkline-container">
-                                <canvas id="${canvasId}" class="sparkline-canvas" width="100" height="40"></canvas>
-                            </div>
-                        </td>
-                        <td>${formatDate(position.date)}</td>
-                        <td>
-                            <div class="action-btns">
-                                <button class="icon-btn btn-warning" onclick="editPEA(${position.id})">✏️</button>
-                                <button class="icon-btn btn-danger" onclick="deletePEA(${position.id})">🗑️</button>
-                            </div>
+                            <button class="btn-secondary" onclick="editPEA(${position.id})">✏️</button>
+                            <button class="btn-danger" onclick="deletePEA(${position.id})">🗑️</button>
                         </td>
                     `;
                     
-                    // Draw sparkline after row is added to DOM
-                    if (sparkline && sparkline.length > 0) {
-                        setTimeout(() => {
-                            const color = change24h >= 0 ? '#00ff88' : '#ff4757';
-                            drawSparkline(canvasId, sparkline, color);
-                        }, 100);
-                    }
+                    // Draw sparkline
+                    setTimeout(() => drawSparkline(canvasId, sparkline), 100);
                 } catch (error) {
-                    console.error('Error updating PEA row for position:', position, error);
-                    // Still create a basic row even if there's an error
-                    const row = tbody.insertRow();
-                    row.innerHTML = `
-                        <td><strong>${position.name}</strong></td>
-                        <td><code style="font-size: 0.8em; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 3px;">${position.isin}</code></td>
-                        <td>${position.quantity.toFixed(2)}</td>
-                        <td>${position.entryPrice.toFixed(2)} €</td>
-                        <td colspan="5" style="color: #ff4757;">Erreur de chargement des données</td>
-                        <td>${formatDate(position.date)}</td>
-                        <td>
-                            <div class="action-btns">
-                                <button class="icon-btn btn-warning" onclick="editPEA(${position.id})">✏️</button>
-                                <button class="icon-btn btn-danger" onclick="deletePEA(${position.id})">🗑️</button>
-                            </div>
-                        </td>
-                    `;
+                    console.error('Error updating PEA row:', position, error);
                 }
             }
         }
 
         // Fundraising Functions
-        function addFundraisingPosition(event) {
+        function addFundraising(event) {
             event.preventDefault();
             
-            const editId = document.getElementById('fundEditId').value;
+            const company = document.getElementById('fundraisingCompany').value;
+            const amount = parseFloat(document.getElementById('fundraisingAmount').value);
+            const date = document.getElementById('fundraisingDate').value;
+            const notes = document.getElementById('fundraisingNotes').value;
+            const editId = document.getElementById('fundraisingEditId').value;
+            
+            // Validate numeric input
+            if (isNaN(amount)) {
+                alert('❌ Veuillez entrer un montant valide');
+                return;
+            }
+            
             const position = {
                 id: editId || Date.now(),
-                name: document.getElementById('fundName').value,
-                amount: parseFloat(document.getElementById('fundAmount').value),
-                valuation: parseFloat(document.getElementById('fundValuation').value) || 0,
-                date: document.getElementById('fundDate').value,
-                notes: document.getElementById('fundNotes').value
+                company,
+                amount,
+                date,
+                notes
             };
             
             if (editId) {
@@ -1266,15 +930,14 @@
             const position = portfolio.fundraising.find(p => p.id === id);
             if (!position) return;
             
-            document.getElementById('fundName').value = position.name;
-            document.getElementById('fundAmount').value = position.amount;
-            document.getElementById('fundValuation').value = position.valuation;
-            document.getElementById('fundDate').value = position.date;
-            document.getElementById('fundNotes').value = position.notes;
-            document.getElementById('fundEditId').value = position.id;
+            document.getElementById('fundraisingCompany').value = position.company;
+            document.getElementById('fundraisingAmount').value = position.amount;
+            document.getElementById('fundraisingDate').value = position.date;
+            document.getElementById('fundraisingNotes').value = position.notes || '';
+            document.getElementById('fundraisingEditId').value = position.id;
             
-            document.getElementById('fundSubmitBtn').textContent = 'Modifier Investissement';
-            document.getElementById('fundCancelBtn').style.display = 'inline-block';
+            document.getElementById('fundraisingSubmitBtn').textContent = 'Modifier Investissement';
+            document.getElementById('fundraisingCancelBtn').style.display = 'inline-block';
             
             showSection('fundraising');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1292,27 +955,21 @@
 
         function updateFundraisingTable() {
             const tbody = document.getElementById('fundraisingTableBody');
-            tbody.innerHTML = '';
-            
-            portfolio.fundraising.forEach(position => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td><strong>${position.name}</strong></td>
+            tbody.innerHTML = portfolio.fundraising.map(position => `
+                <tr>
+                    <td>${position.company}</td>
                     <td>${position.amount.toFixed(2)} €</td>
-                    <td>${position.valuation.toFixed(0)} €</td>
                     <td>${formatDate(position.date)}</td>
-                    <td>${position.notes}</td>
+                    <td>${position.notes || '-'}</td>
                     <td>
-                        <div class="action-btns">
-                            <button class="icon-btn btn-warning" onclick="editFundraising(${position.id})">✏️</button>
-                            <button class="icon-btn btn-danger" onclick="deleteFundraising(${position.id})">🗑️</button>
-                        </div>
+                        <button class="btn-secondary" onclick="editFundraising(${position.id})">✏️</button>
+                        <button class="btn-danger" onclick="deleteFundraising(${position.id})">🗑️</button>
                     </td>
-                `;
-            });
+                </tr>
+            `).join('');
         }
 
-        // Dashboard Updates
+        // Dashboard Functions
         async function updateDashboard() {
             let totalValue = 0;
             let totalInvestment = 0;
@@ -1347,7 +1004,7 @@
             
             portfolio.fundraising.forEach(position => {
                 totalInvestment += position.amount;
-                totalValue += position.amount; // For simplicity, assuming same value
+                totalValue += position.amount;
             });
             
             const totalPnL = totalValue - totalInvestment;
@@ -1393,11 +1050,12 @@
             charts.portfolio = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Crypto', 'PEA/Actions', 'Levées de Fonds'],
+                    labels: ['Crypto', 'PEA', 'Levées de Fonds'],
                     datasets: [{
                         data: [cryptoValue, peaValue, fundValue],
-                        backgroundColor: ['#00ff88', '#3b82f6', '#f59e0b'],
-                        borderWidth: 0
+                        backgroundColor: ['#00ff88', '#00ccff', '#ff6b6b'],
+                        borderColor: '#1a1f2e',
+                        borderWidth: 2
                     }]
                 },
                 options: {
@@ -1406,213 +1064,34 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: { color: '#ffffff', padding: 20, font: { size: 14 } }
+                            labels: { color: '#ffffff' }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Répartition du Portfolio',
+                            color: '#00ff88',
+                            font: { size: 18 }
                         }
                     }
                 }
             });
         }
 
-        async function updateComparisonChart() {
-            const ctx = document.getElementById('comparisonChart');
-            const compareAsset = document.getElementById('compareAsset').value;
+        // Market Data Functions
+        async function updateMarketData() {
+            const container = document.getElementById('marketData');
             
-            if (charts.comparison) {
-                charts.comparison.destroy();
-            }
-            
-            // Generate last 30 days of data
-            const days = 30;
-            const labels = [];
-            const portfolioData = [];
-            const compareData = [];
-            
-            // Get current portfolio value
-            let currentPortfolioValue = 0;
-            for (const p of portfolio.crypto) {
-                const priceData = await getCryptoPrice(p.symbol);
-                currentPortfolioValue += p.quantity * priceData.price;
-            }
-            for (const p of portfolio.pea) {
-                const priceData = await getStockPriceByISIN(p.isin);
-                currentPortfolioValue += p.quantity * priceData.price;
-            }
-            portfolio.fundraising.forEach(p => currentPortfolioValue += p.amount);
-            
-            // Simulate historical data (in production, use real historical data)
-            for (let i = days; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                labels.push(date.toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' }));
-                
-                // Simulate portfolio growth with some volatility
-                const portfolioGrowth = 100 + (Math.random() - 0.5) * 20 - (i / days) * 5;
-                portfolioData.push(portfolioGrowth);
-                
-                // Simulate comparison asset with different pattern
-                const assetGrowth = 100 + (Math.random() - 0.5) * 15 - (i / days) * 3;
-                compareData.push(assetGrowth);
-            }
-            
-            const assetNames = {
-                'bitcoin': 'Bitcoin',
-                'ethereum': 'Ethereum',
-                'sp500': 'S&P 500',
-                'nasdaq': 'NASDAQ'
-            };
-            
-            charts.comparison = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Mon Portfolio',
-                            data: portfolioData,
-                            borderColor: '#00ff88',
-                            backgroundColor: 'rgba(0, 255, 136, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: assetNames[compareAsset],
-                            data: compareData,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#ffffff', font: { size: 14 } }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            ticks: { color: '#a0aec0' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        },
-                        x: {
-                            ticks: { color: '#a0aec0' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Market Indicators
-        async function updateMarketIndicators() {
-            try {
-                const btcData = await getCryptoPrice('bitcoin');
-                const ethData = await getCryptoPrice('ethereum');
-                
-                document.getElementById('btcPrice').textContent = `$${btcData.price.toFixed(0)}`;
-                document.getElementById('ethPrice').textContent = `$${ethData.price.toFixed(0)}`;
-                document.getElementById('btcDominance').textContent = '54.2%';
-                document.getElementById('totalMarketCap').textContent = '$2.4T';
-            } catch (e) {
-                console.error('Error fetching market data:', e);
-            }
-            
-            // Mock stock market data
-            document.getElementById('sp500').textContent = '5,825';
-            document.getElementById('dowJones').textContent = '42,350';
-            document.getElementById('nasdaq').textContent = '18,450';
-            document.getElementById('cac40').textContent = '7,680';
-        }
-
-        // News Functions
-        async function loadNews() {
-            loadCryptoNews();
-            loadStockNews();
-        }
-
-        function loadCryptoNews() {
-            // Mock crypto news data (in production, use a real API like CoinGecko or CryptoPanic)
-            const cryptoNews = [
-                {
-                    title: "Bitcoin atteint un nouveau sommet historique",
-                    description: "Le prix du Bitcoin a franchi la barre des 100 000 $ pour la première fois de son histoire, porté par l'adoption institutionnelle croissante.",
-                    source: "CoinDesk",
-                    date: "Aujourd'hui"
-                },
-                {
-                    title: "Ethereum 2.0 : Mise à jour majeure réussie",
-                    description: "La dernière mise à jour d'Ethereum améliore considérablement la scalabilité et réduit les frais de transaction de 60%.",
-                    source: "CoinTelegraph",
-                    date: "Il y a 2h"
-                },
-                {
-                    title: "Les ETF Bitcoin continuent d'attirer les flux",
-                    description: "Plus de 2 milliards de dollars ont été investis dans les ETF Bitcoin au cours de la dernière semaine.",
-                    source: "Bloomberg Crypto",
-                    date: "Hier"
-                },
-                {
-                    title: "Solana lance sa plateforme DeFi améliorée",
-                    description: "La nouvelle version promet des transactions encore plus rapides et des frais quasi inexistants pour les utilisateurs.",
-                    source: "Decrypt",
-                    date: "Il y a 5h"
-                }
+            const indices = [
+                { name: 'S&P 500', symbol: 'SPY' },
+                { name: 'NASDAQ', symbol: 'QQQ' },
+                { name: 'CAC 40', symbol: '^FCHI' },
+                { name: 'BTC Dominance', symbol: 'bitcoin' }
             ];
             
-            const container = document.getElementById('cryptoNews');
-            container.innerHTML = cryptoNews.map(news => `
-                <div class="news-card">
-                    <div class="news-title">${news.title}</div>
-                    <div class="news-description">${news.description}</div>
-                    <div class="news-meta">
-                        <span class="news-source">${news.source}</span>
-                        <span class="news-date">${news.date}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function loadStockNews() {
-            // Mock stock market news (in production, use APIs like Alpha Vantage, NewsAPI, or Yahoo Finance)
-            const stockNews = [
-                {
-                    title: "Le S&P 500 clôture en hausse de 1,2%",
-                    description: "Les marchés américains terminent la séance sur une note positive, soutenus par de bons résultats d'entreprises technologiques.",
-                    source: "Reuters",
-                    date: "Aujourd'hui"
-                },
-                {
-                    title: "La Fed maintient ses taux directeurs",
-                    description: "La Réserve fédérale a décidé de maintenir ses taux d'intérêt, signalant une approche prudente face à l'inflation.",
-                    source: "Wall Street Journal",
-                    date: "Il y a 3h"
-                },
-                {
-                    title: "Le CAC 40 dépasse les 7 700 points",
-                    description: "L'indice parisien profite de l'optimisme des investisseurs et des bons chiffres de l'économie européenne.",
-                    source: "Les Échos",
-                    date: "Hier"
-                },
-                {
-                    title: "Les valeurs technologiques en forte demande",
-                    description: "Le NASDAQ enregistre sa meilleure semaine depuis six mois grâce aux performances des géants de la tech.",
-                    source: "Financial Times",
-                    date: "Il y a 6h"
-                }
-            ];
-            
-            const container = document.getElementById('stockNews');
-            container.innerHTML = stockNews.map(news => `
-                <div class="news-card">
-                    <div class="news-title">${news.title}</div>
-                    <div class="news-description">${news.description}</div>
-                    <div class="news-meta">
-                        <span class="news-source">${news.source}</span>
-                        <span class="news-date">${news.date}</span>
-                    </div>
+            container.innerHTML = indices.map(index => `
+                <div class="market-card">
+                    <div class="market-label">${index.name}</div>
+                    <div class="market-value">Chargement...</div>
                 </div>
             `).join('');
         }
@@ -1624,7 +1103,6 @@
             }
             
             try {
-                // Get current price, ATH, 24h change, and 7-day sparkline
                 const response = await fetch(`https://api.coingecko.com/api/v3/coins/${symbol}?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=true`);
                 const data = await response.json();
                 
@@ -1650,28 +1128,6 @@
             }
         }
 
-        async function getStockPrice(ticker) {
-            if (priceCache[ticker] && Date.now() - priceCache[ticker].timestamp < 300000) {
-                return priceCache[ticker];
-            }
-            
-            // Mock stock prices with additional data (in production, use a real API like Alpha Vantage or Yahoo Finance)
-            const mockPrice = Math.random() * 200 + 50;
-            const mockChange = (Math.random() - 0.5) * 10; // -5% to +5%
-            const mockSparkline = Array.from({ length: 7 }, () => mockPrice + (Math.random() - 0.5) * 20);
-            
-            const result = {
-                price: mockPrice,
-                ath: mockPrice * (1 + Math.random() * 0.5), // Mock ATH 0-50% higher
-                change24h: mockChange,
-                sparkline: mockSparkline,
-                timestamp: Date.now()
-            };
-            
-            priceCache[ticker] = result;
-            return result;
-        }
-
         async function getStockPriceByISIN(isin) {
             if (!isin) {
                 console.error('No ISIN provided');
@@ -1689,19 +1145,20 @@
             }
             
             try {
-                // Mock stock prices with additional data
-                // In production, use an API that supports ISIN lookup like:
+                // NOTE: This uses mock data. In production, integrate with a real API like:
                 // - Twelve Data API: https://twelvedata.com/
                 // - Financial Modeling Prep: https://financialmodelingprep.com/
                 // - EOD Historical Data: https://eodhistoricaldata.com/
                 
+                console.warn(`Using mock price data for ISIN: ${isin}. Integrate a real API for production.`);
+                
                 const mockPrice = Math.random() * 200 + 50;
-                const mockChange = (Math.random() - 0.5) * 10; // -5% to +5%
+                const mockChange = (Math.random() - 0.5) * 10;
                 const mockSparkline = Array.from({ length: 7 }, () => mockPrice + (Math.random() - 0.5) * 20);
                 
                 const result = {
                     price: mockPrice,
-                    ath: mockPrice * (1 + Math.random() * 0.5), // Mock ATH 0-50% higher
+                    ath: mockPrice * (1 + Math.random() * 0.5),
                     change24h: mockChange,
                     sparkline: mockSparkline,
                     timestamp: Date.now()
@@ -1895,12 +1352,11 @@
                 if (portfolio.pea && portfolio.pea.length > 0) {
                     portfolio.pea.forEach(position => {
                         if (position.ticker && !position.isin) {
-                            // If old data has ticker but no ISIN, keep it as ISIN for now
                             position.isin = position.ticker;
                             delete position.ticker;
                         }
                     });
-                    saveData(); // Save migrated data
+                    saveData();
                 }
             }
         }
@@ -1955,21 +1411,17 @@
             const width = canvas.width;
             const height = canvas.height;
             
-            // Clear canvas
             ctx.clearRect(0, 0, width, height);
             
-            // Find min and max for scaling
             const min = Math.min(...data);
             const max = Math.max(...data);
             const range = max - min || 1;
             
-            // Calculate points
             const points = data.map((value, index) => ({
                 x: (index / (data.length - 1)) * width,
                 y: height - ((value - min) / range) * height
             }));
             
-            // Draw line
             ctx.beginPath();
             ctx.strokeStyle = color;
             ctx.lineWidth = 2;
@@ -1985,11 +1437,10 @@
             
             ctx.stroke();
             
-            // Fill area under the line
             ctx.lineTo(width, height);
             ctx.lineTo(0, height);
             ctx.closePath();
-            ctx.fillStyle = color + '20'; // Add transparency
+            ctx.fillStyle = color + '20';
             ctx.fill();
         }
     </script>
