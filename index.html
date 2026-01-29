@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Manager - DCA</title>
+    <title>Portfolio Manager - DCA (Sans Blocage)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
@@ -102,6 +102,15 @@
             margin-bottom: 20px;
             font-size: 0.9em;
         }
+        .success-message {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
         button {
             background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
             color: #1a1f2e;
@@ -115,6 +124,7 @@
         button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4); }
         .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #fff; }
         .btn-danger { background: linear-gradient(135deg, #ff4757 0%, #cc3847 100%); color: #fff; }
+        .btn-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #1a1f2e; }
         
         /* Asset Group Styles */
         .asset-group {
@@ -195,6 +205,22 @@
         .asset-purchases {
             padding: 20px;
         }
+        .price-update-section {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+        .price-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            margin-top: 10px;
+        }
+        .price-input-group input {
+            flex: 1;
+        }
         table { 
             width: 100%; 
             border-collapse: collapse; 
@@ -221,7 +247,6 @@
         }
         .positive { color: #00ff88; }
         .negative { color: #ff4757; }
-        .price-loading { color: #f39c12; font-style: italic; }
         
         @media (max-width: 1200px) {
             .asset-stats {
@@ -288,7 +313,7 @@
         <div id="crypto" class="section">
             <h2>Crypto-Monnaies</h2>
             <div class="info-message">
-                💡 <strong>Symboles crypto :</strong> bitcoin, ethereum, solana, cardano, etc. (utilise CoinGecko API)
+                💡 Pour les cryptos, utilisez CoinGecko (bitcoin, ethereum, solana, etc.)
             </div>
             <form id="cryptoForm" onsubmit="addCrypto(event)">
                 <div class="form-grid">
@@ -297,8 +322,8 @@
                         <input type="text" id="cryptoName" required>
                     </div>
                     <div class="form-group">
-                        <label>Symbol CoinGecko</label>
-                        <input type="text" id="cryptoSymbol" required placeholder="bitcoin">
+                        <label>Symbol</label>
+                        <input type="text" id="cryptoSymbol" required>
                     </div>
                     <div class="form-group">
                         <label>Quantité</label>
@@ -307,6 +332,10 @@
                     <div class="form-group">
                         <label>Prix d'entrée (€)</label>
                         <input type="number" step="0.01" id="cryptoPrice" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Prix actuel (€)</label>
+                        <input type="number" step="0.01" id="cryptoCurrentPrice" required min="0">
                     </div>
                 </div>
                 <button type="submit">Ajouter</button>
@@ -331,21 +360,12 @@
 
         <div id="pea" class="section">
             <h2>PEA - Dollar Cost Averaging (DCA)</h2>
-            <div class="info-message">
-                💡 <strong>Tickers Yahoo Finance corrects :</strong><br>
-                <strong style="color: #00ff88;">✅ Actions US :</strong> AAPL (Apple), MSFT (Microsoft), NVDA (Nvidia), TSLA (Tesla), GOOGL (Google)<br>
-                <strong style="color: #00ff88;">✅ Actions France :</strong> MC.PA (LVMH), OR.PA (L'Oréal), AI.PA (Air Liquide), BN.PA (Danone)<br>
-                <strong style="color: #00ff88;">✅ ETF US :</strong> SPY (S&P 500), VOO (S&P 500 Vanguard), QQQ (Nasdaq 100)<br>
-                <strong style="color: #00ff88;">✅ ETF Europe :</strong> VUSA.AS (S&P 500 Amsterdam), IWDA.AS (MSCI World Amsterdam)<br>
-                <br>
-                <strong style="color: #ff4757;">❌ Tickers invalides :</strong><br>
-                • PUST.PA ❌ • PSP500 ❌ • STELLANTIS ❌ (utilisez STLA)<br>
-                <br>
-                ⚠️ <strong>API gratuite limitations :</strong> Si "API indisponible" apparaît, les calculs utilisent votre dernier prix d'achat comme estimation (marqué avec *). Les données sont sauvegardées et vous pouvez rafraîchir la page plus tard pour obtenir les vrais prix.<br>
-                <br>
-                🔍 <strong>Vérifier un ticker :</strong> <a href="https://finance.yahoo.com" target="_blank" style="color: #3498db;">finance.yahoo.com</a>
-            </div>
             
+            <div class="success-message">
+                ✅ <strong>MODE SANS BLOCAGE :</strong> Aucun appel API automatique ! Vous contrôlez tout.<br>
+                📊 Entrez vos prix manuellement ou mettez-les à jour depuis TradingView/Yahoo Finance
+            </div>
+
             <form id="peaForm" onsubmit="addPEA(event)">
                 <div class="form-grid">
                     <div class="form-group">
@@ -353,8 +373,8 @@
                         <input type="text" id="peaName" required placeholder="S&P 500">
                     </div>
                     <div class="form-group">
-                        <label>Ticker Yahoo</label>
-                        <input type="text" id="peaTicker" required placeholder="NVDA">
+                        <label>Ticker (référence)</label>
+                        <input type="text" id="peaTicker" required placeholder="SPY">
                     </div>
                     <div class="form-group">
                         <label>Quantité achetée</label>
@@ -447,15 +467,14 @@
             </div>
 
             <h3 style="margin-top: 30px;">⚠️ Zone dangereuse</h3>
-            <button class="btn-danger" onclick="if(confirm('Supprimer toutes les données ?')) { portfolio = {crypto: [], pea: [], fundraising: []}; saveData(); updateAll(); }">
+            <button class="btn-danger" onclick="if(confirm('Supprimer toutes les données ?')) { portfolio = {crypto: [], pea: [], fundraising: [], prices: {}}; saveData(); updateAll(); }">
                 🗑️ Tout supprimer
             </button>
         </div>
     </div>
 
     <script>
-        let portfolio = { crypto: [], pea: [], fundraising: [] };
-        let priceCache = {};
+        let portfolio = { crypto: [], pea: [], fundraising: [], prices: {} };
         let myChart = null;
         let tokenClient = null;
         let accessToken = null;
@@ -468,19 +487,20 @@
         }
 
         // Crypto
-        async function addCrypto(e) {
+        function addCrypto(e) {
             e.preventDefault();
             const crypto = {
                 name: document.getElementById('cryptoName').value,
                 symbol: document.getElementById('cryptoSymbol').value.toLowerCase(),
                 quantity: parseFloat(document.getElementById('cryptoQuantity').value),
-                entryPrice: parseFloat(document.getElementById('cryptoPrice').value)
+                entryPrice: parseFloat(document.getElementById('cryptoPrice').value),
+                currentPrice: parseFloat(document.getElementById('cryptoCurrentPrice').value)
             };
             portfolio.crypto.push(crypto);
             saveData();
             syncData();
             e.target.reset();
-            await updateAll();
+            updateAll();
         }
 
         function deleteCrypto(index) {
@@ -492,46 +512,45 @@
             }
         }
 
-        async function updateCryptoTable() {
+        function updateCryptoPrice(index, newPrice) {
+            portfolio.crypto[index].currentPrice = parseFloat(newPrice);
+            saveData();
+            syncData();
+            updateCryptoTable();
+            updateDashboard();
+        }
+
+        function updateCryptoTable() {
             const tbody = document.querySelector('#cryptoTable tbody');
             tbody.innerHTML = '';
             
-            for (let i = 0; i < portfolio.crypto.length; i++) {
-                const c = portfolio.crypto[i];
+            portfolio.crypto.forEach((c, i) => {
+                const value = c.quantity * c.currentPrice;
+                const invested = c.quantity * c.entryPrice;
+                const pnl = value - invested;
+                const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
+
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${c.name}</td>
                     <td>${c.symbol}</td>
                     <td>${c.quantity.toFixed(8)}</td>
                     <td>${c.entryPrice.toFixed(2)} €</td>
-                    <td class="price-loading">Chargement...</td>
-                    <td class="price-loading">-</td>
-                    <td class="price-loading">-</td>
-                    <td class="price-loading">-</td>
+                    <td>
+                        <input type="number" step="0.01" value="${c.currentPrice.toFixed(2)}" 
+                               onchange="updateCryptoPrice(${i}, this.value)"
+                               style="width: 100px; padding: 5px;">
+                    </td>
+                    <td>${value.toFixed(2)} €</td>
+                    <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnl.toFixed(2)} €</td>
+                    <td class="${pnlPercent >= 0 ? 'positive' : 'negative'}">${pnlPercent.toFixed(2)}%</td>
                     <td><button class="btn-danger" onclick="deleteCrypto(${i})">🗑️</button></td>
                 `;
-                
-                getCryptoPrice(c.symbol).then(price => {
-                    const value = c.quantity * price;
-                    const invested = c.quantity * c.entryPrice;
-                    const pnl = value - invested;
-                    const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
-
-                    const cells = row.cells;
-                    cells[4].textContent = price.toFixed(2) + ' €';
-                    cells[4].className = '';
-                    cells[5].textContent = value.toFixed(2) + ' €';
-                    cells[5].className = '';
-                    cells[6].textContent = pnl.toFixed(2) + ' €';
-                    cells[6].className = pnl >= 0 ? 'positive' : 'negative';
-                    cells[7].textContent = pnlPercent.toFixed(2) + '%';
-                    cells[7].className = pnlPercent >= 0 ? 'positive' : 'negative';
-                });
-            }
+            });
         }
 
         // PEA avec DCA
-        async function addPEA(e) {
+        function addPEA(e) {
             e.preventDefault();
             
             const name = document.getElementById('peaName').value;
@@ -540,24 +559,8 @@
             const price = parseFloat(document.getElementById('peaPrice').value);
             const date = document.getElementById('peaDate').value;
             
-            // Validation
             if (!name || !ticker || isNaN(quantity) || isNaN(price) || !date) {
                 alert('⚠️ Veuillez remplir tous les champs correctement');
-                return;
-            }
-            
-            // Vérification des tickers invalides courants
-            const invalidTickers = ['PUST', 'PUST.PA', 'PSP500', 'SP500', 'NASDAQ', 'NASDAQ2'];
-            if (invalidTickers.includes(ticker)) {
-                const suggestions = {
-                    'PUST': 'Ce ticker n\'existe pas',
-                    'PUST.PA': 'Ce ticker n\'existe pas',
-                    'PSP500': 'Utilisez SPY ou VOO pour le S&P 500',
-                    'SP500': 'Utilisez SPY ou VOO pour le S&P 500',
-                    'NASDAQ': 'Utilisez QQQ pour le Nasdaq 100',
-                    'NASDAQ2': 'Utilisez QQQ pour le Nasdaq 100'
-                };
-                alert(`❌ Ticker invalide: ${ticker}\n\n${suggestions[ticker]}\n\nVérifiez sur finance.yahoo.com`);
                 return;
             }
             
@@ -569,15 +572,19 @@
                 date: date
             };
             
+            // Initialiser le prix actuel avec le prix d'achat si pas encore de prix
+            if (!portfolio.prices[ticker]) {
+                portfolio.prices[ticker] = price;
+            }
+            
             console.log('✅ Ajout achat PEA:', purchase);
             portfolio.pea.push(purchase);
             saveData();
             syncData();
             e.target.reset();
-            // Set date to today by default
             document.getElementById('peaDate').valueAsDate = new Date();
-            await updatePEAAssets();
-            await updateDashboard();
+            updatePEAAssets();
+            updateDashboard();
         }
 
         function deletePEAPurchase(index) {
@@ -603,7 +610,15 @@
             }
         }
 
-        async function updatePEAAssets() {
+        function updateAssetPrice(ticker, newPrice) {
+            portfolio.prices[ticker] = parseFloat(newPrice);
+            saveData();
+            syncData();
+            updatePEAAssets();
+            updateDashboard();
+        }
+
+        function updatePEAAssets() {
             const container = document.getElementById('peaAssets');
             container.innerHTML = '';
 
@@ -615,7 +630,6 @@
             // Grouper les achats par ticker
             const assetGroups = {};
             portfolio.pea.forEach((purchase, index) => {
-                // Validation des données
                 if (!purchase.ticker || !purchase.quantity || !purchase.price) {
                     console.error('Achat invalide:', purchase);
                     return;
@@ -635,6 +649,24 @@
             for (const [ticker, asset] of Object.entries(assetGroups)) {
                 const assetDiv = document.createElement('div');
                 assetDiv.className = 'asset-group';
+                
+                // Calculer les statistiques
+                let totalQuantity = 0;
+                let totalInvested = 0;
+                
+                asset.purchases.forEach(p => {
+                    const qty = parseFloat(p.quantity) || 0;
+                    const prc = parseFloat(p.price) || 0;
+                    totalQuantity += qty;
+                    totalInvested += qty * prc;
+                });
+
+                const avgPrice = totalQuantity > 0 ? totalInvested / totalQuantity : 0;
+                const currentPrice = portfolio.prices[ticker] || avgPrice;
+                const totalValue = totalQuantity * currentPrice;
+                const pnl = totalValue - totalInvested;
+                const pnlPercent = totalInvested > 0 ? (pnl / totalInvested) * 100 : 0;
+
                 assetDiv.innerHTML = `
                     <div class="asset-header" onclick="toggleAsset('${ticker}')">
                         <div class="asset-header-left">
@@ -646,33 +678,49 @@
                         </div>
                         <div class="asset-stats">
                             <div class="asset-stat">
-                                <span class="asset-stat-label">Quantité totale</span>
-                                <span class="asset-stat-value" id="qty-${ticker}">-</span>
+                                <span class="asset-stat-label">Quantité</span>
+                                <span class="asset-stat-value">${totalQuantity.toFixed(2)}</span>
                             </div>
                             <div class="asset-stat">
                                 <span class="asset-stat-label">PRU</span>
-                                <span class="asset-stat-value" id="pru-${ticker}">-</span>
+                                <span class="asset-stat-value">${avgPrice.toFixed(2)} €</span>
                             </div>
                             <div class="asset-stat">
                                 <span class="asset-stat-label">Prix actuel</span>
-                                <span class="asset-stat-value price-loading" id="current-${ticker}">...</span>
+                                <span class="asset-stat-value">${currentPrice.toFixed(2)} €</span>
                             </div>
                             <div class="asset-stat">
                                 <span class="asset-stat-label">Valeur</span>
-                                <span class="asset-stat-value price-loading" id="value-${ticker}">-</span>
+                                <span class="asset-stat-value">${totalValue.toFixed(2)} €</span>
                             </div>
                             <div class="asset-stat">
                                 <span class="asset-stat-label">P&L</span>
-                                <span class="asset-stat-value price-loading" id="pnl-${ticker}">-</span>
+                                <span class="asset-stat-value ${pnl >= 0 ? 'positive' : 'negative'}">${pnl.toFixed(2)} €</span>
                             </div>
                             <div class="asset-stat">
-                                <span class="asset-stat-label">Performance</span>
-                                <span class="asset-stat-value price-loading" id="perf-${ticker}">-</span>
+                                <span class="asset-stat-label">Perf</span>
+                                <span class="asset-stat-value ${pnlPercent >= 0 ? 'positive' : 'negative'}">${pnlPercent.toFixed(2)}%</span>
                             </div>
                         </div>
                     </div>
                     <div class="asset-details" id="details-${ticker}">
                         <div class="asset-purchases">
+                            <div class="price-update-section">
+                                <h4 style="margin-bottom: 10px; color: #3498db;">💰 Mettre à jour le prix actuel</h4>
+                                <p style="font-size: 0.85em; color: #a0aec0; margin-bottom: 10px;">
+                                    Allez sur <a href="https://www.tradingview.com/symbols/${ticker}/" target="_blank" style="color: #3498db;">TradingView</a> 
+                                    ou <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank" style="color: #3498db;">Yahoo Finance</a> 
+                                    pour obtenir le prix en temps réel
+                                </p>
+                                <div class="price-input-group">
+                                    <input type="number" step="0.01" id="price-input-${ticker}" 
+                                           value="${currentPrice.toFixed(2)}" placeholder="Nouveau prix">
+                                    <button onclick="updateAssetPrice('${ticker}', document.getElementById('price-input-${ticker}').value)">
+                                        ✅ Mettre à jour
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <h4 style="margin-bottom: 15px; color: #a0aec0;">📊 Historique des achats</h4>
                             <table>
                                 <thead>
@@ -691,29 +739,11 @@
                 `;
                 container.appendChild(assetDiv);
 
-                // Calculer les statistiques
-                let totalQuantity = 0;
-                let totalInvested = 0;
-                
-                asset.purchases.forEach(p => {
-                    const qty = parseFloat(p.quantity) || 0;
-                    const prc = parseFloat(p.price) || 0;
-                    totalQuantity += qty;
-                    totalInvested += qty * prc;
-                });
-
-                const avgPrice = totalQuantity > 0 ? totalInvested / totalQuantity : 0;
-
-                // Afficher les stats de base
-                document.getElementById(`qty-${ticker}`).textContent = totalQuantity.toFixed(2);
-                document.getElementById(`pru-${ticker}`).textContent = avgPrice.toFixed(2) + ' €';
-
                 // Remplir le tableau des achats
                 const purchasesTable = document.getElementById(`purchases-${ticker}`);
                 asset.purchases
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .forEach(p => {
-                        // Safety checks
                         const qty = p.quantity || 0;
                         const prc = p.price || 0;
                         const invested = qty * prc;
@@ -728,62 +758,6 @@
                             <td><button class="btn-danger" onclick="deletePEAPurchase(${p.originalIndex})">🗑️</button></td>
                         `;
                     });
-
-                // Charger le prix actuel et mettre à jour
-                getStockPrice(ticker).then(currentPrice => {
-                    console.log(`Prix chargé pour ${ticker}:`, currentPrice);
-                    
-                    if (currentPrice === 0 || isNaN(currentPrice)) {
-                        console.warn(`Prix invalide pour ${ticker}`);
-                        document.getElementById(`current-${ticker}`).innerHTML = 
-                            '<span style="color: #f39c12;">API indisponible</span>';
-                        document.getElementById(`current-${ticker}`).className = 'asset-stat-value';
-                        
-                        // Utiliser le dernier prix d'achat comme estimation
-                        const lastPurchase = asset.purchases[asset.purchases.length - 1];
-                        const estimatedPrice = lastPurchase.price;
-                        
-                        const totalValue = totalQuantity * estimatedPrice;
-                        const pnl = totalValue - totalInvested;
-                        const pnlPercent = totalInvested > 0 ? (pnl / totalInvested) * 100 : 0;
-
-                        document.getElementById(`value-${ticker}`).textContent = totalValue.toFixed(2) + ' €*';
-                        document.getElementById(`value-${ticker}`).className = 'asset-stat-value';
-                        
-                        const pnlEl = document.getElementById(`pnl-${ticker}`);
-                        pnlEl.textContent = pnl.toFixed(2) + ' €*';
-                        pnlEl.className = 'asset-stat-value ' + (pnl >= 0 ? 'positive' : 'negative');
-                        
-                        const perfEl = document.getElementById(`perf-${ticker}`);
-                        perfEl.textContent = pnlPercent.toFixed(2) + '%*';
-                        perfEl.className = 'asset-stat-value ' + (pnlPercent >= 0 ? 'positive' : 'negative');
-                        
-                        console.log(`ℹ️ Utilisation du dernier prix d'achat comme estimation: ${estimatedPrice} €`);
-                        return;
-                    }
-                    
-                    const totalValue = totalQuantity * currentPrice;
-                    const pnl = totalValue - totalInvested;
-                    const pnlPercent = totalInvested > 0 ? (pnl / totalInvested) * 100 : 0;
-
-                    document.getElementById(`current-${ticker}`).textContent = currentPrice.toFixed(2) + ' €';
-                    document.getElementById(`current-${ticker}`).className = 'asset-stat-value';
-                    
-                    document.getElementById(`value-${ticker}`).textContent = totalValue.toFixed(2) + ' €';
-                    document.getElementById(`value-${ticker}`).className = 'asset-stat-value';
-                    
-                    const pnlEl = document.getElementById(`pnl-${ticker}`);
-                    pnlEl.textContent = pnl.toFixed(2) + ' €';
-                    pnlEl.className = 'asset-stat-value ' + (pnl >= 0 ? 'positive' : 'negative');
-                    
-                    const perfEl = document.getElementById(`perf-${ticker}`);
-                    perfEl.textContent = pnlPercent.toFixed(2) + '%';
-                    perfEl.className = 'asset-stat-value ' + (pnlPercent >= 0 ? 'positive' : 'negative');
-                }).catch(err => {
-                    console.error(`Erreur chargement prix ${ticker}:`, err);
-                    document.getElementById(`current-${ticker}`).textContent = 'Erreur API';
-                    document.getElementById(`current-${ticker}`).className = 'asset-stat-value negative';
-                });
             }
         }
 
@@ -838,20 +812,17 @@
         }
 
         // Dashboard
-        async function updateDashboard() {
+        function updateDashboard() {
             let totalValue = 0;
             let totalInvested = 0;
 
             // Crypto
-            const cryptoPrices = await Promise.all(
-                portfolio.crypto.map(c => getCryptoPrice(c.symbol))
-            );
-            portfolio.crypto.forEach((c, i) => {
-                totalValue += c.quantity * cryptoPrices[i];
+            portfolio.crypto.forEach(c => {
+                totalValue += c.quantity * c.currentPrice;
                 totalInvested += c.quantity * c.entryPrice;
             });
 
-            // PEA - grouper par ticker
+            // PEA
             const peaByTicker = {};
             portfolio.pea.forEach(p => {
                 if (!peaByTicker[p.ticker]) {
@@ -861,22 +832,18 @@
                 peaByTicker[p.ticker].invested += p.quantity * p.price;
             });
 
-            const peaTickers = Object.keys(peaByTicker);
-            const stockPrices = await Promise.all(
-                peaTickers.map(ticker => getStockPrice(ticker))
-            );
-            
-            peaTickers.forEach((ticker, i) => {
-                const data = peaByTicker[ticker];
-                totalValue += data.quantity * stockPrices[i];
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const avgPrice = data.invested / data.quantity;
+                const currentPrice = portfolio.prices[ticker] || avgPrice;
+                totalValue += data.quantity * currentPrice;
                 totalInvested += data.invested;
             });
 
             // Fundraising
-            for (const f of portfolio.fundraising) {
+            portfolio.fundraising.forEach(f => {
                 totalValue += f.currentValue;
                 totalInvested += f.amount;
-            }
+            });
 
             const totalPnL = totalValue - totalInvested;
             const totalPerf = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
@@ -888,22 +855,24 @@
             document.getElementById('totalPerformance').textContent = totalPerf.toFixed(2) + '%';
             document.getElementById('totalPerformance').className = 'stat-value ' + (totalPerf >= 0 ? 'positive' : 'negative');
 
-            updateChart(cryptoPrices, stockPrices, peaTickers, peaByTicker);
+            updateChart(peaByTicker);
         }
 
-        function updateChart(cryptoPrices, stockPrices, peaTickers, peaByTicker) {
+        function updateChart(peaByTicker) {
             const ctx = document.getElementById('portfolioChart').getContext('2d');
             
             let cryptoValue = 0;
             let peaValue = 0;
             let fundraisingValue = 0;
 
-            portfolio.crypto.forEach((c, i) => {
-                cryptoValue += c.quantity * cryptoPrices[i];
+            portfolio.crypto.forEach(c => {
+                cryptoValue += c.quantity * c.currentPrice;
             });
 
-            peaTickers.forEach((ticker, i) => {
-                peaValue += peaByTicker[ticker].quantity * stockPrices[i];
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const avgPrice = data.invested / data.quantity;
+                const currentPrice = portfolio.prices[ticker] || avgPrice;
+                peaValue += data.quantity * currentPrice;
             });
 
             portfolio.fundraising.forEach(f => {
@@ -931,121 +900,14 @@
             });
         }
 
-        // Prix API
-        async function getCryptoPrice(symbol) {
-            const cacheKey = `crypto_${symbol}`;
-            const cached = priceCache[cacheKey];
-            if (cached && Date.now() - cached.ts < 60000) {
-                return cached.price;
-            }
-
-            try {
-                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${symbol}&vs_currencies=eur`;
-                const r = await fetch(url);
-                const data = await r.json();
-                
-                if (data[symbol] && data[symbol].eur) {
-                    const price = data[symbol].eur;
-                    priceCache[cacheKey] = { price, ts: Date.now() };
-                    return price;
-                }
-                return 0;
-            } catch (e) {
-                console.error('Erreur prix crypto:', symbol, e);
-                return 0;
-            }
-        }
-
-        async function getStockPrice(ticker) {
-            const cacheKey = `stock_${ticker}`;
-            const cached = priceCache[cacheKey];
-            if (cached && Date.now() - cached.ts < 60000) {
-                console.log(`📦 Cache hit pour ${ticker}: ${cached.price}`);
-                return cached.price;
-            }
-
-            console.log(`🔍 Recherche du prix pour: ${ticker}`);
-
-            // Méthode 1: Essayer directement Yahoo (peut fonctionner selon le navigateur)
-            try {
-                console.log(`⏳ Tentative directe Yahoo pour ${ticker}...`);
-                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
-                
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000);
-                
-                const r = await fetch(yahooUrl, { 
-                    signal: controller.signal,
-                    mode: 'cors'
-                });
-                clearTimeout(timeoutId);
-                
-                if (r.ok) {
-                    const data = await r.json();
-                    if (data.chart?.result?.[0]?.meta?.regularMarketPrice) {
-                        const price = data.chart.result[0].meta.regularMarketPrice;
-                        console.log(`✅ Prix trouvé (direct) pour ${ticker}: ${price}`);
-                        priceCache[cacheKey] = { price, ts: Date.now() };
-                        return price;
-                    }
-                }
-            } catch (e) {
-                console.log(`⚠️ Accès direct Yahoo bloqué pour ${ticker}: ${e.message}`);
-            }
-
-            // Méthode 2: Utiliser allorigins avec gestion d'erreur améliorée
-            try {
-                console.log(`⏳ Tentative avec allorigins pour ${ticker}...`);
-                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
-                
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000);
-                
-                const r = await fetch(proxyUrl, { signal: controller.signal });
-                clearTimeout(timeoutId);
-                
-                if (r.ok) {
-                    const proxyData = await r.json();
-                    if (proxyData.contents) {
-                        try {
-                            const data = JSON.parse(proxyData.contents);
-                            if (data.chart?.result?.[0]?.meta?.regularMarketPrice) {
-                                const price = data.chart.result[0].meta.regularMarketPrice;
-                                console.log(`✅ Prix trouvé (allorigins) pour ${ticker}: ${price}`);
-                                priceCache[cacheKey] = { price, ts: Date.now() };
-                                return price;
-                            }
-                        } catch (parseErr) {
-                            console.error(`❌ Erreur parsing JSON pour ${ticker}:`, parseErr.message);
-                        }
-                    }
-                }
-            } catch (e) {
-                if (e.name === 'AbortError') {
-                    console.warn(`⏱️ Timeout allorigins pour ${ticker}`);
-                } else {
-                    console.warn(`❌ Erreur allorigins pour ${ticker}:`, e.message);
-                }
-            }
-
-            // Méthode 3: API alternative - Yahoo Finance via rapidapi (nécessite clé gratuite)
-            // Pour l'instant, on retourne 0 si tout échoue
-            console.error(`❌ Impossible de récupérer le prix pour ${ticker} après toutes les tentatives`);
-            
-            // Marquer dans le cache pour éviter de réessayer trop souvent
-            priceCache[cacheKey] = { price: 0, ts: Date.now() };
-            return 0;
-        }
-
-        async function updateAll() {
-            await updateDashboard();
-            await updateCryptoTable();
-            await updatePEAAssets();
+        function updateAll() {
+            updateDashboard();
+            updateCryptoTable();
+            updatePEAAssets();
             updateFundraisingTable();
         }
 
-        // Google Drive (même code qu'avant)
+        // Google Drive (mêmes fonctions qu'avant)
         function saveClientId() {
             const id = document.getElementById('clientId').value.trim();
             if (id) {
@@ -1176,13 +1038,13 @@
             if (saved) {
                 try {
                     portfolio = JSON.parse(saved);
-                    // Ensure all arrays exist
                     if (!portfolio.crypto) portfolio.crypto = [];
                     if (!portfolio.pea) portfolio.pea = [];
                     if (!portfolio.fundraising) portfolio.fundraising = [];
+                    if (!portfolio.prices) portfolio.prices = {};
                 } catch (e) {
                     console.error('Erreur chargement données:', e);
-                    portfolio = { crypto: [], pea: [], fundraising: [] };
+                    portfolio = { crypto: [], pea: [], fundraising: [], prices: {} };
                 }
             }
         }
@@ -1219,7 +1081,6 @@
         loadData();
         updateAll();
         initGoogleDrive();
-        // Set date to today by default
         document.getElementById('peaDate').valueAsDate = new Date();
     </script>
 </body>
