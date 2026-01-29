@@ -304,6 +304,24 @@
         .positive { color: #00ff88; }
         .negative { color: #ff4757; }
         .neutral { color: #a0aec0; }
+        
+        /* Quick Select Buttons */
+        .quick-select-btn {
+            background: rgba(52, 152, 219, 0.2);
+            border: 1px solid rgba(52, 152, 219, 0.5);
+            color: #3498db;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .quick-select-btn:hover {
+            background: rgba(52, 152, 219, 0.4);
+            transform: translateY(-2px);
+        }
+        
         .asset-content {
             display: none;
             padding: 20px;
@@ -438,14 +456,23 @@
         <!-- PEA Section -->
         <div id="pea" class="section">
             <h2 style="margin-bottom: 20px;">📊 Plan d'Épargne en Actions (PEA)</h2>
+            
+            <!-- Quick Select for existing assets -->
+            <div class="info-message" style="margin-bottom: 20px;">
+                <strong>💡 Astuce :</strong> Pour ajouter une ligne sur un actif existant, sélectionnez-le ci-dessous :
+                <div id="quickSelectPEA" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px;"></div>
+            </div>
+            
             <div class="form-grid">
                 <div class="form-group">
                     <label>Nom de l'action</label>
-                    <input type="text" id="peaName" placeholder="Apple Inc.">
+                    <input type="text" id="peaName" placeholder="Apple Inc." list="peaNameList">
+                    <datalist id="peaNameList"></datalist>
                 </div>
                 <div class="form-group">
                     <label>Ticker</label>
-                    <input type="text" id="peaTicker" placeholder="AAPL">
+                    <input type="text" id="peaTicker" placeholder="AAPL" list="peaTickerList">
+                    <datalist id="peaTickerList"></datalist>
                 </div>
                 <div class="form-group">
                     <label>Quantité</label>
@@ -820,6 +847,7 @@
             saveData();
             syncDriveData();
             updatePEAList();
+            updatePEAQuickSelect(); // Update quick select buttons
             
             document.getElementById('peaName').value = '';
             document.getElementById('peaTicker').value = '';
@@ -827,6 +855,83 @@
             document.getElementById('peaPrice').value = '';
             document.getElementById('peaFees').value = '';
         }
+        
+        // Function to fill form with existing asset data
+        function fillPEAForm(name, ticker) {
+            document.getElementById('peaName').value = name;
+            document.getElementById('peaTicker').value = ticker;
+            document.getElementById('peaQuantity').focus();
+        }
+        
+        // Function to update quick select buttons and autocomplete
+        function updatePEAQuickSelect() {
+            const container = document.getElementById('quickSelectPEA');
+            if (!container) return;
+            
+            // Get unique assets (grouped by ticker)
+            const uniqueAssets = {};
+            portfolio.pea.forEach(item => {
+                if (!uniqueAssets[item.ticker]) {
+                    uniqueAssets[item.ticker] = {
+                        name: item.name,
+                        ticker: item.ticker
+                    };
+                }
+            });
+            
+            // Update quick select buttons
+            if (Object.keys(uniqueAssets).length === 0) {
+                container.innerHTML = '<em style="color: #a0aec0;">Aucun actif existant</em>';
+            } else {
+                container.innerHTML = Object.values(uniqueAssets).map(asset => 
+                    `<button class="quick-select-btn" onclick="fillPEAForm('${asset.name}', '${asset.ticker}')">
+                        ${asset.name} (${asset.ticker})
+                    </button>`
+                ).join('');
+            }
+            
+            // Update autocomplete datalists
+            const nameList = document.getElementById('peaNameList');
+            const tickerList = document.getElementById('peaTickerList');
+            
+            if (nameList && tickerList) {
+                nameList.innerHTML = Object.values(uniqueAssets).map(asset => 
+                    `<option value="${asset.name}">`
+                ).join('');
+                
+                tickerList.innerHTML = Object.values(uniqueAssets).map(asset => 
+                    `<option value="${asset.ticker}">`
+                ).join('');
+            }
+        }
+        
+        // Auto-sync name and ticker when typing
+        document.addEventListener('DOMContentLoaded', function() {
+            const peaNameInput = document.getElementById('peaName');
+            const peaTickerInput = document.getElementById('peaTicker');
+            
+            if (peaNameInput && peaTickerInput) {
+                peaNameInput.addEventListener('input', function() {
+                    // Find matching asset by name
+                    const matchingAsset = portfolio.pea.find(item => 
+                        item.name.toLowerCase() === this.value.toLowerCase()
+                    );
+                    if (matchingAsset) {
+                        peaTickerInput.value = matchingAsset.ticker;
+                    }
+                });
+                
+                peaTickerInput.addEventListener('input', function() {
+                    // Find matching asset by ticker
+                    const matchingAsset = portfolio.pea.find(item => 
+                        item.ticker.toUpperCase() === this.value.toUpperCase()
+                    );
+                    if (matchingAsset) {
+                        peaNameInput.value = matchingAsset.name;
+                    }
+                });
+            }
+        });
 
         function addFundraising() {
             const name = document.getElementById('fundName').value;
@@ -1519,6 +1624,7 @@
             await updatePrices();
             updateCryptoList();
             updatePEAList();
+            updatePEAQuickSelect(); // Update quick select buttons
             updateFundraisingList();
             updateDashboard();
             document.getElementById('syncStatus').textContent = '✅ Synchronisé';
