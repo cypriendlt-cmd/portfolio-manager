@@ -673,20 +673,27 @@
 <body>
     <!-- Sidebar Navigation -->
     <div class="sidebar">
-        <div class="logo">finary</div>
+        <div class="logo">Portfolio Manager</div>
         
         <div class="nav-menu">
             <button class="nav-item active" onclick="showSection('dashboard')">
                 <span class="icon">📊</span>
                 <span>Dashboard</span>
             </button>
+            <button class="nav-item" onclick="showSection('portfolio')">
+                <span class="icon">💼</span>
+                <span>Portfolio</span>
+            </button>
+            
+            <div style="margin: 32px 0 12px 20px; font-size: 0.75em; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Asset categories</div>
+            
             <button class="nav-item" onclick="showSection('crypto')">
                 <span class="icon">₿</span>
                 <span>Crypto</span>
             </button>
             <button class="nav-item" onclick="showSection('pea')">
                 <span class="icon">📈</span>
-                <span>PEA</span>
+                <span>Actions</span>
             </button>
             <button class="nav-item" onclick="showSection('livrets')">
                 <span class="icon">💰</span>
@@ -696,10 +703,20 @@
                 <span class="icon">🚀</span>
                 <span>Levées</span>
             </button>
-            <button class="nav-item" onclick="showSection('settings')">
-                <span class="icon">⚙️</span>
-                <span>Paramètres</span>
-            </button>
+            
+            <div style="margin-top: auto;">
+                <button class="nav-item" onclick="showSection('insights')">
+                    <span class="icon">💡</span>
+                    <span>Insights</span>
+                </button>
+                
+                <div style="margin: 24px 0 0 0;">
+                    <button class="nav-item" onclick="showSection('settings')">
+                        <span class="icon">👤</span>
+                        <span>Profile</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -904,6 +921,39 @@
             
             <div class="chart-container">
                 <canvas id="portfolioChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Portfolio Section (NEW) -->
+        <div id="portfolio" class="section">
+            <h2 style="margin-bottom: 20px;">💼 Portfolio</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+                <!-- Quick overview cards showing all assets -->
+                <div class="fear-greed-card">
+                    <h3 style="margin-bottom: 20px;">📊 Vue globale</h3>
+                    <div id="portfolioOverview"></div>
+                </div>
+                
+                <div class="fear-greed-card">
+                    <h3 style="margin-bottom: 20px;">📈 Répartition</h3>
+                    <canvas id="portfolioAllocationChart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights Section (NEW) -->
+        <div id="insights" class="section">
+            <h2 style="margin-bottom: 20px;">💡 Insights</h2>
+            
+            <div class="fear-greed-card">
+                <h3 style="margin-bottom: 20px;">🎯 Recommandations</h3>
+                <div id="insightsContent">
+                    <div style="padding: 20px; text-align: center; color: var(--text-secondary);">
+                        <p style="margin-bottom: 12px;">Analysez votre portefeuille pour obtenir des recommandations personnalisées.</p>
+                        <button onclick="generateInsights()" class="btn-primary">🔍 Analyser mon portfolio</button>
+                    </div>
+                </div>
             </div>
         </div>
 
