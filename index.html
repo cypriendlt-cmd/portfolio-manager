@@ -399,34 +399,46 @@
                     <span class="api-status" id="binanceStatus">Non connecté</span>
                 </h3>
                 
+                <div class="warning-message" style="margin-bottom: 15px;">
+                    <strong>⚠️ PROBLÈME CORS :</strong> Les navigateurs bloquent les requêtes directes vers l'API Binance.<br>
+                    <strong>💡 Solution alternative recommandée :</strong> Import manuel via CSV (voir ci-dessous)
+                </div>
+                
                 <div class="info-message">
-                    <strong>⚠️ Configuration requise sur Binance :</strong><br>
-                    1. Allez sur <strong>Binance.com → API Management</strong><br>
-                    2. Créez une nouvelle API Key<br>
-                    3. ✅ Activez <strong>"Enable Spot & Margin Trading"</strong><br>
-                    4. 🌐 Dans "IP Access Restriction" :<br>
-                    &nbsp;&nbsp;&nbsp;• Option 1 : Ajoutez <code>0.0.0.0/0</code> (tous les IP)<br>
-                    &nbsp;&nbsp;&nbsp;• Option 2 : Désactivez la restriction IP<br>
-                    5. ⚠️ NE PAS activer "Enable Withdrawals" pour plus de sécurité<br>
+                    <strong>📥 Import CSV depuis Binance (RECOMMANDÉ) :</strong><br>
+                    1. Allez sur <strong>Binance.com → Wallet → Spot</strong><br>
+                    2. Cliquez sur <strong>"Export Complete Account Statement"</strong><br>
+                    3. Téléchargez le CSV de vos positions actuelles<br>
+                    4. Importez-le ci-dessous avec le bouton "📥 Importer CSV Binance"<br>
                     <br>
-                    <strong>🔒 Sécurité :</strong> Vos clés sont stockées localement dans votre navigateur et ne sont jamais envoyées ailleurs que sur Binance.
+                    <strong>Ou utilisez l'API (peut être bloqué par CORS) :</strong>
                 </div>
                 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>API Key Binance</label>
+                        <label>API Key Binance (optionnel)</label>
                         <input type="password" id="binanceApiKey" placeholder="Votre API Key">
                     </div>
                     <div class="form-group">
-                        <label>API Secret Binance</label>
+                        <label>API Secret Binance (optionnel)</label>
                         <input type="password" id="binanceApiSecret" placeholder="Votre API Secret">
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button onclick="saveBinanceCredentials()" class="btn-primary">💾 Sauvegarder les clés</button>
-                    <button onclick="importFromBinance()" class="btn-primary">📥 Importer les positions</button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <button class="btn-primary">
+                        <label for="binanceCSVImport" style="cursor: pointer; margin: 0;">📥 Importer CSV Binance</label>
+                        <input type="file" id="binanceCSVImport" accept=".csv" onchange="importBinanceCSV(event)" style="display: none;">
+                    </button>
+                    <button onclick="saveBinanceCredentials()" class="btn-secondary">💾 Sauvegarder les clés API</button>
+                    <button onclick="importFromBinance()" class="btn-secondary">📥 Tenter import API</button>
                     <button onclick="clearBinanceCredentials()" class="btn-danger">🗑️ Supprimer les clés</button>
+                </div>
+                
+                <div class="info-message" style="background: rgba(255, 193, 7, 0.1); border-color: rgba(255, 193, 7, 0.3); color: #ffc107;">
+                    <strong>💡 Format CSV Binance attendu :</strong><br>
+                    Le CSV doit contenir les colonnes : <code>Coin</code>, <code>Free</code>, <code>Locked</code><br>
+                    Exemple : BTC,0.5,0 | ETH,10.2,0.5
                 </div>
             </div>
 
@@ -923,12 +935,119 @@ Vous pouvez les modifier manuellement dans la liste ci-dessous.`);
 
 ${error.message}
 
-Aide au dépannage:
+💡 SOLUTION : Utilisez l'import CSV Binance (bouton "📥 Importer CSV Binance")
+
+Aide au dépannage API:
 • Vérifiez vos clés API dans les paramètres Binance
 • Assurez-vous que "Enable Spot & Margin Trading" est activé
 • Vérifiez les restrictions IP (désactivez-les temporairement pour tester)
-• Consultez la console (F12) pour plus de détails`);
+• Le problème CORS persiste malgré nos tentatives de proxies`);
             }
+        }
+        
+        // Import CSV from Binance
+        function importBinanceCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            console.log('📥 Import CSV Binance...');
+            
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    try {
+                        ensurePortfolioStructure();
+                        
+                        let imported = 0;
+                        let updated = 0;
+                        let errors = [];
+                        
+                        console.log('📊 Lignes trouvées:', results.data.length);
+                        
+                        results.data.forEach((row, index) => {
+                            // Try different possible column names
+                            const coin = row.Coin || row.coin || row.Asset || row.asset || row.Symbol || row.symbol;
+                            const free = parseFloat(row.Free || row.free || row.Available || row.available || 0);
+                            const locked = parseFloat(row.Locked || row.locked || 0);
+                            
+                            if (!coin) {
+                                errors.push(`Ligne ${index + 1}: Pas de symbole trouvé`);
+                                return;
+                            }
+                            
+                            const quantity = free + locked;
+                            
+                            // Skip if quantity is 0
+                            if (quantity <= 0) {
+                                console.log(`⏭️ ${coin}: Quantité = 0, ignoré`);
+                                return;
+                            }
+                            
+                            console.log(`💰 ${coin}: ${quantity} (Free: ${free}, Locked: ${locked})`);
+                            
+                            // Check if already exists
+                            const existingIndex = portfolio.crypto.findIndex(c => c.symbol === coin.toUpperCase());
+                            
+                            if (existingIndex >= 0) {
+                                // Update existing
+                                portfolio.crypto[existingIndex].quantity = quantity;
+                                updated++;
+                            } else {
+                                // Add new
+                                portfolio.crypto.push({
+                                    symbol: coin.toUpperCase(),
+                                    quantity: quantity,
+                                    price: 0, // Will be updated with current price
+                                    date: new Date().toISOString().split('T')[0]
+                                });
+                                imported++;
+                            }
+                        });
+                        
+                        if (imported === 0 && updated === 0) {
+                            alert(`⚠️ Aucune position valide trouvée dans le CSV.
+
+Vérifiez que votre CSV contient :
+• Une colonne "Coin" (ou "Asset"/"Symbol")
+• Une colonne "Free" (ou "Available")
+• Une colonne "Locked" (optionnel)
+
+Erreurs détectées :
+${errors.length > 0 ? errors.join('\n') : 'Aucune ligne avec quantité > 0'}`);
+                            return;
+                        }
+                        
+                        saveData();
+                        syncDriveData();
+                        updateAll();
+                        
+                        alert(`✅ Import CSV Binance réussi !
+
+Nouvelles positions : ${imported}
+Positions mises à jour : ${updated}
+Total importé : ${imported + updated} cryptos
+
+⚠️ Note : Les prix d'achat sont à 0.
+Cliquez sur "Actualiser les prix" pour obtenir les prix actuels.
+${errors.length > 0 ? '\n\n⚠️ Erreurs : ' + errors.length + ' lignes ignorées' : ''}`);
+                        
+                    } catch (err) {
+                        console.error('❌ Erreur traitement CSV:', err);
+                        alert(`❌ Erreur lors du traitement du CSV:
+
+${err.message}
+
+Vérifiez que votre fichier CSV est au bon format.`);
+                    }
+                },
+                error: function(error) {
+                    alert(`❌ Erreur lecture CSV: ${error.message}`);
+                }
+            });
+            
+            // Reset input
+            event.target.value = '';
         }
 
         async function createHmacSignature(secret, message) {
@@ -1977,16 +2096,16 @@ Aide au dépannage:
                     datasets: [{
                         data: [cryptoValue, peaValue, livretsValue, fundraisingValue],
                         backgroundColor: [
-                            'rgba(0, 255, 136, 0.8)',
-                            'rgba(52, 152, 219, 0.8)',
-                            'rgba(255, 193, 7, 0.8)',
-                            'rgba(243, 186, 47, 0.8)'
+                            'rgba(0, 255, 136, 0.8)',      // Crypto - Vert
+                            'rgba(52, 152, 219, 0.8)',     // PEA - Bleu
+                            'rgba(255, 193, 7, 0.8)',      // Livrets - Jaune/Or
+                            'rgba(156, 39, 176, 0.8)'      // Levées - Violet (CHANGÉ)
                         ],
                         borderColor: [
                             'rgba(0, 255, 136, 1)',
                             'rgba(52, 152, 219, 1)',
                             'rgba(255, 193, 7, 1)',
-                            'rgba(243, 186, 47, 1)'
+                            'rgba(156, 39, 176, 1)'        // Levées - Violet (CHANGÉ)
                         ],
                         borderWidth: 2
                     }]
