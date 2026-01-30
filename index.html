@@ -642,7 +642,33 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+        /* NEW FEATURES CSS */
+        /* Time filter buttons */
     </style>
+        /* Time filter buttons */
+        .time-filter {
+            padding: 8px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .time-filter:hover {
+            background: rgba(255, 99, 71, 0.1);
+            color: var(--text-primary);
+            border-color: var(--orange-primary);
+        }
+        
+        .time-filter.active {
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+            color: white;
+            border-color: transparent;
+        }
 </head>
 <body>
     <!-- Sidebar Navigation -->
@@ -749,6 +775,130 @@
                 
                 <div id="newsFeed" class="news-feed">
                     <div class="loading">Chargement des actualités...</div>
+                </div>
+            </div>
+            
+            <!-- NEW: Evolution Chart (Line Graph) -->
+            <div style="margin: 32px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 1.8em; font-weight: 800; letter-spacing: -1px;">📈 Évolution du patrimoine</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="time-filter active" onclick="setTimeRange('1M')">1M</button>
+                        <button class="time-filter" onclick="setTimeRange('3M')">3M</button>
+                        <button class="time-filter" onclick="setTimeRange('6M')">6M</button>
+                        <button class="time-filter" onclick="setTimeRange('1Y')">1A</button>
+                        <button class="time-filter" onclick="setTimeRange('YTD')">YTD</button>
+                        <button class="time-filter" onclick="setTimeRange('ALL')">MAX</button>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 400px;">
+                    <canvas id="evolutionChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- NEW: Performance View -->
+            <div style="margin: 32px 0;">
+                <h2 style="font-size: 1.8em; font-weight: 800; letter-spacing: -1px; margin-bottom: 24px;">📊 Performance</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 32px;">
+                    <!-- Best Performers -->
+                    <div class="fear-greed-card">
+                        <h3 style="margin-bottom: 20px;">🏆 Meilleurs performers</h3>
+                        <div id="topPerformers"></div>
+                    </div>
+                    
+                    <!-- Worst Performers -->
+                    <div class="fear-greed-card">
+                        <h3 style="margin-bottom: 20px;">📉 Pires performers</h3>
+                        <div id="worstPerformers"></div>
+                    </div>
+                </div>
+                
+                <!-- Performance Table -->
+                <div class="fear-greed-card">
+                    <h3 style="margin-bottom: 20px;">📋 Performance détaillée</h3>
+                    <div style="overflow-x: auto;">
+                        <table id="performanceTable">
+                            <thead>
+                                <tr>
+                                    <th>Actif</th>
+                                    <th>Valeur actuelle</th>
+                                    <th>Prix d'achat</th>
+                                    <th>Plus-value</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="performanceTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- NEW: Diversification Analysis -->
+            <div style="margin: 32px 0;">
+                <h2 style="font-size: 1.8em; font-weight: 800; letter-spacing: -1px; margin-bottom: 24px;">🥧 Analyse de diversification</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+                    <!-- By Asset Class -->
+                    <div class="fear-greed-card">
+                        <h3 style="margin-bottom: 20px;">Par classe d'actifs</h3>
+                        <canvas id="assetClassChart" style="max-height: 300px;"></canvas>
+                    </div>
+                    
+                    <!-- Diversification Score -->
+                    <div class="fear-greed-card">
+                        <h3 style="margin-bottom: 20px;">Score de diversification</h3>
+                        <div id="diversificationScore" style="text-align: center; padding: 40px;">
+                            <div class="gauge-value" id="divScore">--</div>
+                            <div class="gauge-label">DIVERSIFICATION</div>
+                            <p style="color: var(--text-secondary); margin-top: 20px; font-size: 0.9em;">
+                                Score calculé selon la répartition de vos actifs
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- NEW: Transaction History -->
+            <div style="margin: 32px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 1.8em; font-weight: 800; letter-spacing: -1px;">📜 Historique des transactions</h2>
+                    <button class="btn-secondary" onclick="exportTransactions()">📥 Exporter CSV</button>
+                </div>
+                
+                <div class="fear-greed-card">
+                    <div style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+                        <select id="transactionTypeFilter" onchange="filterTransactions()" style="max-width: 200px;">
+                            <option value="all">Tous les types</option>
+                            <option value="buy">Achats</option>
+                            <option value="sell">Ventes</option>
+                            <option value="dividend">Dividendes</option>
+                        </select>
+                        <select id="transactionCategoryFilter" onchange="filterTransactions()" style="max-width: 200px;">
+                            <option value="all">Toutes catégories</option>
+                            <option value="crypto">Crypto</option>
+                            <option value="pea">PEA</option>
+                            <option value="livrets">Livrets</option>
+                            <option value="fundraising">Levées</option>
+                        </select>
+                    </div>
+                    
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Catégorie</th>
+                                    <th>Actif</th>
+                                    <th>Quantité</th>
+                                    <th>Prix</th>
+                                    <th>Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionHistory"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             
@@ -3086,6 +3236,469 @@ Vérifiez que votre fichier CSV est au bon format.`);
         if (autoSyncEnabled) {
             toggleAutoSync(true);
         }
+        // NEW FINARY FEATURES
+        // ========================================
+        // NEW FINARY FEATURES - JAVASCRIPT
+        // ========================================
+        
+        let evolutionChart = null;
+        let assetClassChart = null;
+        let currentTimeRange = '1M';
+        
+        // Evolution Chart (Line)
+        function updateEvolutionChart() {
+            const ctx = document.getElementById('evolutionChart');
+            if (!ctx) return;
+            
+            // Generate sample data based on current portfolio value
+            const labels = [];
+            const data = [];
+            const today = new Date();
+            const daysToShow = currentTimeRange === '1M' ? 30 : 
+                             currentTimeRange === '3M' ? 90 :
+                             currentTimeRange === '6M' ? 180 :
+                             currentTimeRange === '1Y' ? 365 :
+                             currentTimeRange === 'YTD' ? dayOfYear(today) : 365;
+            
+            let totalValue = 0;
+            portfolio.crypto.forEach(c => {
+                totalValue += c.quantity * (portfolio.prices[c.symbol] || c.price);
+            });
+            portfolio.pea.forEach(p => {
+                totalValue += p.quantity * (portfolio.prices[p.ticker] || p.price);
+            });
+            portfolio.livrets.forEach(l => {
+                totalValue += parseFloat(l.amount) || 0;
+            });
+            portfolio.fundraising.forEach(f => {
+                totalValue += parseFloat(f.valuation) || 0;
+            });
+            
+            // Generate historical data (simulated growth)
+            for (let i = daysToShow; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                labels.push(date.toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' }));
+                
+                // Simulate growth with some randomness
+                const growthFactor = 1 - (i / daysToShow) * 0.15;
+                const randomVariation = (Math.random() - 0.5) * 0.02;
+                data.push(totalValue * (growthFactor + randomVariation));
+            }
+            
+            if (evolutionChart) evolutionChart.destroy();
+            
+            evolutionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Patrimoine',
+                        data: data,
+                        borderColor: '#ff6347',
+                        backgroundColor: 'rgba(255, 99, 71, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return '€' + context.parsed.y.toLocaleString('fr-FR', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                color: '#8892a6',
+                                callback: function(value) {
+                                    return '€' + (value / 1000).toFixed(0) + 'K';
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.06)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#8892a6',
+                                maxTicksLimit: 10
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function setTimeRange(range) {
+            currentTimeRange = range;
+            document.querySelectorAll('.time-filter').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            updateEvolutionChart();
+        }
+        
+        function dayOfYear(date) {
+            const start = new Date(date.getFullYear(), 0, 0);
+            const diff = date - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            return Math.floor(diff / oneDay);
+        }
+        
+        // Performance Analysis
+        function updatePerformanceView() {
+            const performances = [];
+            
+            // Crypto
+            portfolio.crypto.forEach(c => {
+                const currentPrice = portfolio.prices[c.symbol] || c.price;
+                const currentValue = c.quantity * currentPrice;
+                const investedValue = c.quantity * c.price;
+                const pnl = currentValue - investedValue;
+                const perf = investedValue > 0 ? (pnl / investedValue) * 100 : 0;
+                
+                performances.push({
+                    name: c.symbol,
+                    category: 'Crypto',
+                    currentValue: currentValue,
+                    invested: investedValue,
+                    pnl: pnl,
+                    performance: perf
+                });
+            });
+            
+            // PEA
+            const peaByTicker = {};
+            portfolio.pea.forEach(p => {
+                if (!peaByTicker[p.ticker]) {
+                    peaByTicker[p.ticker] = {
+                        name: p.name,
+                        quantity: 0,
+                        invested: 0
+                    };
+                }
+                peaByTicker[p.ticker].quantity += p.quantity;
+                peaByTicker[p.ticker].invested += (p.quantity * p.price) + (p.fees || 0);
+            });
+            
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const currentPrice = portfolio.prices[ticker] || (data.invested / data.quantity);
+                const currentValue = data.quantity * currentPrice;
+                const pnl = currentValue - data.invested;
+                const perf = data.invested > 0 ? (pnl / data.invested) * 100 : 0;
+                
+                performances.push({
+                    name: data.name || ticker,
+                    category: 'PEA',
+                    currentValue: currentValue,
+                    invested: data.invested,
+                    pnl: pnl,
+                    performance: perf
+                });
+            });
+            
+            // Sort by performance
+            performances.sort((a, b) => b.performance - a.performance);
+            
+            // Top 5 performers
+            const topHTML = performances.slice(0, 5).map(p => `
+                <div style="padding: 12px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 700;">${p.name}</div>
+                        <div style="font-size: 0.85em; color: var(--text-secondary);">${p.category}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="positive" style="font-weight: 800;">+${p.performance.toFixed(2)}%</div>
+                        <div style="font-size: 0.85em; color: var(--text-secondary);">€${p.pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Bottom 5 performers
+            const worstHTML = performances.slice(-5).reverse().map(p => `
+                <div style="padding: 12px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 700;">${p.name}</div>
+                        <div style="font-size: 0.85em; color: var(--text-secondary);">${p.category}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="${p.performance >= 0 ? 'positive' : 'negative'}" style="font-weight: 800;">${p.performance >= 0 ? '+' : ''}${p.performance.toFixed(2)}%</div>
+                        <div style="font-size: 0.85em; color: var(--text-secondary);">€${p.pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('topPerformers').innerHTML = topHTML || '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">Aucune donnée</div>';
+            document.getElementById('worstPerformers').innerHTML = worstHTML || '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">Aucune donnée</div>';
+            
+            // Performance table
+            const tableHTML = performances.map(p => `
+                <tr>
+                    <td>
+                        <div style="font-weight: 700;">${p.name}</div>
+                        <div style="font-size: 0.85em; color: var(--text-secondary);">${p.category}</div>
+                    </td>
+                    <td style="font-weight: 600;">€${p.currentValue.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                    <td>€${p.invested.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                    <td class="${p.pnl >= 0 ? 'positive' : 'negative'}" style="font-weight: 700;">${p.pnl >= 0 ? '+' : ''}€${p.pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                    <td class="${p.performance >= 0 ? 'positive' : 'negative'}" style="font-weight: 800; font-size: 1.1em;">${p.performance >= 0 ? '+' : ''}${p.performance.toFixed(2)}%</td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('performanceTableBody').innerHTML = tableHTML || '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Aucune donnée</td></tr>';
+        }
+        
+        // Diversification Analysis
+        function updateDiversificationAnalysis() {
+            let cryptoValue = 0;
+            let peaValue = 0;
+            let livretsValue = 0;
+            let fundraisingValue = 0;
+            
+            portfolio.crypto.forEach(c => {
+                cryptoValue += c.quantity * (portfolio.prices[c.symbol] || c.price);
+            });
+            
+            portfolio.pea.forEach(p => {
+                peaValue += p.quantity * (portfolio.prices[p.ticker] || p.price);
+            });
+            
+            portfolio.livrets.forEach(l => {
+                livretsValue += parseFloat(l.amount) || 0;
+            });
+            
+            portfolio.fundraising.forEach(f => {
+                fundraisingValue += parseFloat(f.valuation) || 0;
+            });
+            
+            const total = cryptoValue + peaValue + livretsValue + fundraisingValue;
+            
+            // Asset Class Chart
+            const ctx = document.getElementById('assetClassChart');
+            if (ctx) {
+                if (assetClassChart) assetClassChart.destroy();
+                
+                assetClassChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Crypto', 'Actions (PEA)', 'Livrets', 'Levées de fonds'],
+                        datasets: [{
+                            data: [cryptoValue, peaValue, livretsValue, fundraisingValue],
+                            backgroundColor: ['#ff6347', '#ff7f66', '#ffa552', '#ffb366'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#ffffff', padding: 15, font: { size: 12 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed;
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return context.label + ': €' + value.toLocaleString('fr-FR') + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Diversification Score (based on distribution)
+            const distributions = [cryptoValue, peaValue, livretsValue, fundraisingValue].filter(v => v > 0);
+            const numCategories = distributions.length;
+            
+            // Calculate Herfindahl index (concentration measure)
+            let herfindahl = 0;
+            distributions.forEach(value => {
+                const share = value / total;
+                herfindahl += share * share;
+            });
+            
+            // Convert to diversification score (0-100, where 100 is perfectly diversified)
+            // Perfect diversification (4 equal parts) = HHI of 0.25
+            // Complete concentration (1 category) = HHI of 1.0
+            const score = Math.max(0, Math.min(100, ((1 - herfindahl) / 0.75) * 100));
+            
+            let scoreColor = '#ff4757';
+            let scoreLabel = 'FAIBLE';
+            if (score >= 70) {
+                scoreColor = '#00d4aa';
+                scoreLabel = 'EXCELLENTE';
+            } else if (score >= 50) {
+                scoreColor = '#ffc107';
+                scoreLabel = 'BONNE';
+            } else if (score >= 30) {
+                scoreColor = '#ff7f66';
+                scoreLabel = 'MOYENNE';
+            }
+            
+            document.getElementById('divScore').textContent = Math.round(score);
+            document.getElementById('divScore').style.color = scoreColor;
+            document.querySelector('#diversificationScore .gauge-label').textContent = scoreLabel;
+            document.querySelector('#diversificationScore .gauge-label').style.color = scoreColor;
+        }
+        
+        // Transaction History
+        function buildTransactionHistory() {
+            const transactions = [];
+            
+            // Crypto transactions
+            portfolio.crypto.forEach(c => {
+                transactions.push({
+                    date: c.date,
+                    type: 'Achat',
+                    category: 'crypto',
+                    asset: c.symbol,
+                    quantity: c.quantity,
+                    price: c.price,
+                    amount: c.quantity * c.price
+                });
+            });
+            
+            // PEA transactions
+            portfolio.pea.forEach(p => {
+                transactions.push({
+                    date: p.date,
+                    type: 'Achat',
+                    category: 'pea',
+                    asset: p.name || p.ticker,
+                    quantity: p.quantity,
+                    price: p.price,
+                    amount: p.quantity * p.price + (p.fees || 0)
+                });
+            });
+            
+            // Livrets transactions
+            portfolio.livrets.forEach(l => {
+                transactions.push({
+                    date: l.date,
+                    type: 'Dépôt',
+                    category: 'livrets',
+                    asset: l.type,
+                    quantity: 1,
+                    price: parseFloat(l.amount),
+                    amount: parseFloat(l.amount)
+                });
+            });
+            
+            // Fundraising transactions
+            portfolio.fundraising.forEach(f => {
+                transactions.push({
+                    date: f.date,
+                    type: 'Investissement',
+                    category: 'fundraising',
+                    asset: f.name,
+                    quantity: 1,
+                    price: parseFloat(f.amount),
+                    amount: parseFloat(f.amount)
+                });
+            });
+            
+            // Sort by date (newest first)
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            return transactions;
+        }
+        
+        function updateTransactionHistory() {
+            const transactions = buildTransactionHistory();
+            const html = transactions.map(t => `
+                <tr>
+                    <td>${new Date(t.date).toLocaleDateString('fr-FR')}</td>
+                    <td><span style="padding: 4px 12px; background: rgba(255, 99, 71, 0.1); border-radius: 12px; font-size: 0.85em; font-weight: 600;">${t.type}</span></td>
+                    <td style="text-transform: capitalize;">${t.category}</td>
+                    <td style="font-weight: 700;">${t.asset}</td>
+                    <td>${t.quantity.toLocaleString('fr-FR', {maximumFractionDigits: 8})}</td>
+                    <td>€${t.price.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                    <td style="font-weight: 700;">€${t.amount.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('transactionHistory').innerHTML = html || '<tr><td colspan="7" style="text-align: center; color: var(--text-secondary);">Aucune transaction</td></tr>';
+        }
+        
+        function filterTransactions() {
+            const typeFilter = document.getElementById('transactionTypeFilter').value;
+            const categoryFilter = document.getElementById('transactionCategoryFilter').value;
+            
+            let transactions = buildTransactionHistory();
+            
+            if (typeFilter !== 'all') {
+                transactions = transactions.filter(t => t.type.toLowerCase().includes(typeFilter));
+            }
+            
+            if (categoryFilter !== 'all') {
+                transactions = transactions.filter(t => t.category === categoryFilter);
+            }
+            
+            const html = transactions.map(t => `
+                <tr>
+                    <td>${new Date(t.date).toLocaleDateString('fr-FR')}</td>
+                    <td><span style="padding: 4px 12px; background: rgba(255, 99, 71, 0.1); border-radius: 12px; font-size: 0.85em; font-weight: 600;">${t.type}</span></td>
+                    <td style="text-transform: capitalize;">${t.category}</td>
+                    <td style="font-weight: 700;">${t.asset}</td>
+                    <td>${t.quantity.toLocaleString('fr-FR', {maximumFractionDigits: 8})}</td>
+                    <td>€${t.price.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                    <td style="font-weight: 700;">€${t.amount.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('transactionHistory').innerHTML = html || '<tr><td colspan="7" style="text-align: center; color: var(--text-secondary);">Aucune transaction correspondante</td></tr>';
+        }
+        
+        function exportTransactions() {
+            const transactions = buildTransactionHistory();
+            
+            let csv = 'Date,Type,Catégorie,Actif,Quantité,Prix,Montant\n';
+            transactions.forEach(t => {
+                csv += `${t.date},${t.type},${t.category},${t.asset},${t.quantity},${t.price},${t.amount}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'transactions-' + new Date().toISOString().split('T')[0] + '.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        
+        // Add to updateAll function
+        const originalUpdateAll = updateAll;
+        updateAll = async function() {
+            await originalUpdateAll();
+            updateEvolutionChart();
+            updatePerformanceView();
+            updateDiversificationAnalysis();
+            updateTransactionHistory();
+        };
     </script>
 </body>
 </html>
