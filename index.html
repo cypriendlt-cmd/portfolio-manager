@@ -1831,6 +1831,8 @@ Aide au dépannage:
             
             // Delete old entry
             portfolio.livrets.splice(index, 1);
+            saveData();
+            syncDriveData();
             updateLivretsList();
         }
         
@@ -1874,8 +1876,10 @@ Aide au dépannage:
             });
 
             // Livrets calculations (both invested and value are the same)
+            let totalLivrets = 0;
             portfolio.livrets.forEach(l => {
                 const amount = parseFloat(l.amount) || 0;
+                totalLivrets += amount;
                 totalValue += amount;
                 totalInvested += amount;
             });
@@ -1892,16 +1896,16 @@ Aide au dépannage:
             const html = `
                 <div class="stat-card">
                     <div class="stat-label">💰 Valeur Totale</div>
-                    <div class="stat-value">€${totalValue.toFixed(2)}</div>
+                    <div class="stat-value">€${totalValue.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">📊 Total Investi</div>
-                    <div class="stat-value">€${totalInvested.toFixed(2)}</div>
+                    <div class="stat-value">€${totalInvested.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">📈 P&L Global</div>
                     <div class="stat-value ${totalPnL >= 0 ? 'positive' : 'negative'}">
-                        ${totalPnL >= 0 ? '+' : ''}€${totalPnL.toFixed(2)}
+                        ${totalPnL >= 0 ? '+' : ''}€${totalPnL.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                     </div>
                 </div>
                 <div class="stat-card">
@@ -1912,7 +1916,7 @@ Aide au dépannage:
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">₿ Crypto</div>
-                    <div class="stat-value">€${portfolio.crypto.reduce((sum, c) => sum + (c.quantity * (portfolio.prices[c.symbol] || 0)), 0).toFixed(2)}</div>
+                    <div class="stat-value">€${portfolio.crypto.reduce((sum, c) => sum + (c.quantity * (portfolio.prices[c.symbol] || 0)), 0).toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">📊 PEA</div>
@@ -1920,7 +1924,15 @@ Aide au dépannage:
                         const avgPrice = data.invested / data.quantity;
                         const currentPrice = portfolio.prices[ticker] || avgPrice;
                         return sum + (data.quantity * currentPrice);
-                    }, 0).toFixed(2)}</div>
+                    }, 0).toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">💰 Livrets</div>
+                    <div class="stat-value">€${totalLivrets.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🚀 Levées</div>
+                    <div class="stat-value">€${portfolio.fundraising.reduce((sum, f) => sum + f.valuation, 0).toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                 </div>
             `;
 
@@ -1934,6 +1946,7 @@ Aide au dépannage:
             
             let cryptoValue = 0;
             let peaValue = 0;
+            let livretsValue = 0;
             let fundraisingValue = 0;
 
             portfolio.crypto.forEach(c => {
@@ -1947,6 +1960,10 @@ Aide au dépannage:
                 peaValue += data.quantity * currentPrice;
             });
 
+            portfolio.livrets.forEach(l => {
+                livretsValue += parseFloat(l.amount) || 0;
+            });
+
             portfolio.fundraising.forEach(f => {
                 fundraisingValue += f.valuation;
             });
@@ -1956,17 +1973,19 @@ Aide au dépannage:
             myChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Crypto', 'PEA', 'Levées'],
+                    labels: ['Crypto', 'PEA', 'Livrets', 'Levées'],
                     datasets: [{
-                        data: [cryptoValue, peaValue, fundraisingValue],
+                        data: [cryptoValue, peaValue, livretsValue, fundraisingValue],
                         backgroundColor: [
                             'rgba(0, 255, 136, 0.8)',
                             'rgba(52, 152, 219, 0.8)',
+                            'rgba(255, 193, 7, 0.8)',
                             'rgba(243, 186, 47, 0.8)'
                         ],
                         borderColor: [
                             'rgba(0, 255, 136, 1)',
                             'rgba(52, 152, 219, 1)',
+                            'rgba(255, 193, 7, 1)',
                             'rgba(243, 186, 47, 1)'
                         ],
                         borderWidth: 2
@@ -1978,6 +1997,18 @@ Aide au dépannage:
                     plugins: {
                         legend: {
                             labels: { color: '#fff', font: { size: 14 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '€' + context.parsed.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                    return label;
+                                }
+                            }
                         }
                     }
                 }
@@ -2175,6 +2206,13 @@ Aide au dépannage:
                 console.log('⚠️ Google Drive non connecté, sauvegarde ignorée');
                 return;
             }
+            
+            // Show saving indicator
+            const statusEl = document.getElementById('syncStatus');
+            const originalText = statusEl.textContent;
+            statusEl.textContent = '💾 Sauvegarde...';
+            statusEl.classList.remove('synced');
+            
             try {
                 const fid = localStorage.getItem('portfolioFileId');
                 const data = JSON.stringify(portfolio, null, 2);
@@ -2186,6 +2224,7 @@ Aide au dépannage:
                     });
                     if (response.ok) {
                         console.log('✅ Sauvegardé sur Google Drive');
+                        showSaveConfirmation();
                     } else {
                         throw new Error('Erreur HTTP: ' + response.status);
                     }
@@ -2203,14 +2242,32 @@ Aide au dépannage:
                         const res = await r.json();
                         localStorage.setItem('portfolioFileId', res.id);
                         console.log('✅ Fichier créé sur Google Drive:', res.id);
+                        showSaveConfirmation();
                     } else {
                         throw new Error('Erreur création: ' + r.status);
                     }
                 }
+                
+                // Restore status
+                statusEl.textContent = '✅ Synchronisé';
+                statusEl.classList.add('synced');
+                
             } catch (e) {
                 console.error('❌ Erreur sauvegarde Drive:', e);
+                statusEl.textContent = '❌ Erreur Drive';
                 alert('❌ Erreur lors de la sauvegarde sur Google Drive:\n' + e.message);
             }
+        }
+        
+        function showSaveConfirmation() {
+            const statusEl = document.getElementById('syncStatus');
+            statusEl.textContent = '✅ Sauvegardé sur Drive';
+            statusEl.classList.add('synced');
+            
+            // Reset after 3 seconds
+            setTimeout(() => {
+                statusEl.textContent = '✅ Synchronisé';
+            }, 3000);
         }
 
         async function loadFromDrive() {
@@ -2241,6 +2298,7 @@ Aide au dépannage:
                     portfolio = {
                         crypto: importedData.crypto || [],
                         pea: importedData.pea || [],
+                        livrets: importedData.livrets || [],
                         fundraising: importedData.fundraising || [],
                         prices: importedData.prices || {},
                         priceTimestamps: importedData.priceTimestamps || {},
@@ -2260,7 +2318,12 @@ Aide au dépannage:
                     saveData();
                     updateAll();
                     updateBinanceStatus();
-                    alert(`✅ Données chargées depuis Google Drive!\n\nPEA: ${portfolio.pea.length} lignes\nCrypto: ${portfolio.crypto.length} lignes\nLevées: ${portfolio.fundraising.length} lignes`);
+                    alert(`✅ Données chargées depuis Google Drive!
+
+📊 PEA: ${portfolio.pea.length} ligne${portfolio.pea.length > 1 ? 's' : ''}
+₿ Crypto: ${portfolio.crypto.length} ligne${portfolio.crypto.length > 1 ? 's' : ''}
+💰 Livrets: ${portfolio.livrets.length} livret${portfolio.livrets.length > 1 ? 's' : ''}
+🚀 Levées: ${portfolio.fundraising.length} investissement${portfolio.fundraising.length > 1 ? 's' : ''}`);
                 } else {
                     alert('❌ Erreur lors du chargement: ' + r.status);
                 }
