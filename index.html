@@ -370,7 +370,8 @@
             <button class="nav-btn" onclick="showSection('dashboard')">📈 Dashboard</button>
             <button class="nav-btn" onclick="showSection('crypto')">₿ Crypto</button>
             <button class="nav-btn" onclick="showSection('pea')">📊 PEA</button>
-            <button class="nav-btn" onclick="showSection('fundraising')">💰 Levées</button>
+            <button class="nav-btn" onclick="showSection('livrets')">💰 Livrets</button>
+            <button class="nav-btn" onclick="showSection('fundraising')">🚀 Levées</button>
             <button class="nav-btn" onclick="showSection('settings')">⚙️ Paramètres</button>
         </nav>
 
@@ -496,9 +497,67 @@
             <div id="peaList"></div>
         </div>
 
+        <!-- Livrets Section -->
+        <div id="livrets" class="section">
+            <h2 style="margin-bottom: 20px;">💰 Livrets d'épargne</h2>
+            
+            <div class="info-message" style="margin-bottom: 20px;">
+                <strong>💡 Taux actuels 2025 :</strong><br>
+                • LEP (Livret d'Épargne Populaire) : 4.00% net<br>
+                • Livret A : 2.40% net<br>
+                • LDDS (Livret de Développement Durable et Solidaire) : 2.40% net<br>
+                • Livret Jeune : 2.40% à 4.00% selon les banques<br>
+                • PEL (Plan d'Épargne Logement) : 2.25% brut (après prélèvements sociaux)
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Type de livret</label>
+                    <select id="livretType">
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="LEP">LEP (Livret Épargne Populaire)</option>
+                        <option value="Livret A">Livret A</option>
+                        <option value="LDDS">LDDS (Livret Développement Durable)</option>
+                        <option value="Livret Jeune">Livret Jeune</option>
+                        <option value="PEL">PEL (Plan Épargne Logement)</option>
+                        <option value="CEL">CEL (Compte Épargne Logement)</option>
+                        <option value="CSL">CSL (Compte Sur Livret)</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Banque</label>
+                    <input type="text" id="livretBank" placeholder="Crédit Agricole">
+                </div>
+                <div class="form-group">
+                    <label>Montant actuel (€)</label>
+                    <input type="number" id="livretAmount" step="0.01" placeholder="10000">
+                </div>
+                <div class="form-group">
+                    <label>Taux d'intérêt annuel (%)</label>
+                    <input type="number" id="livretRate" step="0.01" placeholder="2.40">
+                </div>
+                <div class="form-group">
+                    <label>Plafond (€)</label>
+                    <input type="number" id="livretCeiling" step="0.01" placeholder="22950">
+                </div>
+                <div class="form-group">
+                    <label>Date d'ouverture</label>
+                    <input type="date" id="livretDate">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button onclick="addLivret()">➕ Ajouter un livret</button>
+                <button onclick="autoFillLivretRate()" class="btn-secondary">🔄 Appliquer les taux actuels</button>
+            </div>
+            
+            <div id="livretsList"></div>
+        </div>
+
         <!-- Fundraising Section -->
         <div id="fundraising" class="section">
-            <h2 style="margin-bottom: 20px;">💰 Levées de fonds / Investissements</h2>
+            <h2 style="margin-bottom: 20px;">🚀 Levées de fonds / Investissements</h2>
             <div class="form-grid">
                 <div class="form-group">
                     <label>Nom de l'entreprise</label>
@@ -798,6 +857,7 @@
         function ensurePortfolioStructure() {
             if (!portfolio.crypto) portfolio.crypto = [];
             if (!portfolio.pea) portfolio.pea = [];
+            if (!portfolio.livrets) portfolio.livrets = [];
             if (!portfolio.fundraising) portfolio.fundraising = [];
             if (!portfolio.prices) portfolio.prices = {};
             if (!portfolio.priceTimestamps) portfolio.priceTimestamps = {};
@@ -1484,6 +1544,202 @@
                 saveData();
                 syncDriveData();
                 updateFundraisingList();
+                updateAll();
+            }
+        }
+
+        // ========================================
+        // LIVRETS D'ÉPARGNE FUNCTIONS
+        // ========================================
+        
+        function addLivret() {
+            const type = document.getElementById('livretType').value;
+            const bank = document.getElementById('livretBank').value;
+            const amount = parseFloat(document.getElementById('livretAmount').value);
+            const rate = parseFloat(document.getElementById('livretRate').value);
+            const ceiling = parseFloat(document.getElementById('livretCeiling').value) || null;
+            const date = document.getElementById('livretDate').value;
+
+            if (!type || !bank || !amount || !rate || !date) {
+                alert('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+            
+            if (isNaN(amount) || isNaN(rate)) {
+                alert('Montant et taux doivent être des nombres');
+                return;
+            }
+
+            ensurePortfolioStructure();
+            
+            portfolio.livrets.push({ 
+                type, 
+                bank, 
+                amount, 
+                rate, 
+                ceiling,
+                date 
+            });
+            
+            console.log('✅ Livret ajouté:', { type, bank, amount, rate, ceiling, date });
+            
+            saveData();
+            syncDriveData();
+            updateLivretsList();
+            updateAll();
+            
+            // Clear form
+            document.getElementById('livretType').value = '';
+            document.getElementById('livretBank').value = '';
+            document.getElementById('livretAmount').value = '';
+            document.getElementById('livretRate').value = '';
+            document.getElementById('livretCeiling').value = '';
+        }
+        
+        function autoFillLivretRate() {
+            const type = document.getElementById('livretType').value;
+            const rateInput = document.getElementById('livretRate');
+            const ceilingInput = document.getElementById('livretCeiling');
+            
+            const livretData = {
+                'LEP': { rate: 4.00, ceiling: 10000 },
+                'Livret A': { rate: 2.40, ceiling: 22950 },
+                'LDDS': { rate: 2.40, ceiling: 12000 },
+                'Livret Jeune': { rate: 2.40, ceiling: 1600 },
+                'PEL': { rate: 2.25, ceiling: 61200 },
+                'CEL': { rate: 2.00, ceiling: 15300 },
+                'CSL': { rate: 0.50, ceiling: null }
+            };
+            
+            if (type && livretData[type]) {
+                rateInput.value = livretData[type].rate;
+                if (livretData[type].ceiling) {
+                    ceilingInput.value = livretData[type].ceiling;
+                }
+                alert(`✅ Taux et plafond appliqués pour ${type}`);
+            } else {
+                alert('⚠️ Sélectionnez d\'abord un type de livret');
+            }
+        }
+        
+        function updateLivretsList() {
+            const container = document.getElementById('livretsList');
+            if (!container) {
+                console.error('Container livretsList not found');
+                return;
+            }
+            
+            if (!portfolio.livrets || portfolio.livrets.length === 0) {
+                container.innerHTML = '<p style="color: #a0aec0; text-align: center; padding: 40px;">Aucun livret enregistré.</p>';
+                return;
+            }
+            
+            let totalLivrets = 0;
+            let totalInterestPerYear = 0;
+            
+            const html = portfolio.livrets.map((item, index) => {
+                const amount = parseFloat(item.amount) || 0;
+                const rate = parseFloat(item.rate) || 0;
+                const ceiling = parseFloat(item.ceiling) || null;
+                const bank = item.bank || 'N/A';
+                const type = item.type || 'Autre';
+                const date = item.date || 'N/A';
+                
+                const interestPerYear = (amount * rate) / 100;
+                const remaining = ceiling ? Math.max(0, ceiling - amount) : null;
+                const fillPercentage = ceiling ? (amount / ceiling) * 100 : null;
+                
+                totalLivrets += amount;
+                totalInterestPerYear += interestPerYear;
+                
+                return `
+                    <div class="asset-group">
+                        <div class="asset-header">
+                            <div class="asset-header-left">
+                                <div>
+                                    <div class="asset-name">${type}</div>
+                                    <div class="asset-ticker">${bank} • Ouvert le ${new Date(date).toLocaleDateString('fr-FR')}</div>
+                                </div>
+                            </div>
+                            <div class="asset-stats">
+                                <div class="asset-stat">
+                                    <div class="asset-stat-label">Montant</div>
+                                    <div class="asset-stat-value">€${amount.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                                </div>
+                                <div class="asset-stat">
+                                    <div class="asset-stat-label">Taux</div>
+                                    <div class="asset-stat-value">${rate.toFixed(2)}%</div>
+                                </div>
+                                <div class="asset-stat">
+                                    <div class="asset-stat-label">Intérêts/an</div>
+                                    <div class="asset-stat-value positive">€${interestPerYear.toFixed(2)}</div>
+                                </div>
+                                <div class="asset-stat">
+                                    <div class="asset-stat-label">Plafond</div>
+                                    <div class="asset-stat-value">${ceiling ? '€' + ceiling.toLocaleString('fr-FR') : 'Aucun'}</div>
+                                </div>
+                                <div class="asset-stat">
+                                    <div class="asset-stat-label">Restant</div>
+                                    <div class="asset-stat-value">${remaining !== null ? '€' + remaining.toLocaleString('fr-FR') : '-'}</div>
+                                </div>
+                                <div class="asset-stat">
+                                    <div class="asset-stat-label">Actions</div>
+                                    <div>
+                                        <button onclick="editLivret(${index})" class="btn-secondary">✏️</button>
+                                        <button onclick="deleteLivret(${index})" class="btn-danger">🗑️</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${fillPercentage !== null ? `
+                        <div style="padding: 10px 20px;">
+                            <div style="background: rgba(0,0,0,0.3); height: 20px; border-radius: 10px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #00ff88, #00cc6a); height: 100%; width: ${fillPercentage}%; transition: width 0.3s;"></div>
+                            </div>
+                            <p style="text-align: center; margin-top: 5px; font-size: 0.85em; color: #a0aec0;">
+                                ${fillPercentage.toFixed(1)}% du plafond atteint
+                            </p>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            const summary = `
+                <div class="info-message" style="margin-bottom: 20px;">
+                    <strong>📊 Récapitulatif :</strong><br>
+                    Total épargné : <strong>€${totalLivrets.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</strong><br>
+                    Intérêts annuels estimés : <strong class="positive">€${totalInterestPerYear.toFixed(2)}</strong><br>
+                    Intérêts mensuels estimés : <strong class="positive">€${(totalInterestPerYear / 12).toFixed(2)}</strong>
+                </div>
+            `;
+            
+            container.innerHTML = summary + html;
+        }
+        
+        function editLivret(index) {
+            const livret = portfolio.livrets[index];
+            if (!livret) return;
+            
+            document.getElementById('livretType').value = livret.type;
+            document.getElementById('livretBank').value = livret.bank;
+            document.getElementById('livretAmount').value = livret.amount;
+            document.getElementById('livretRate').value = livret.rate;
+            document.getElementById('livretCeiling').value = livret.ceiling || '';
+            document.getElementById('livretDate').value = livret.date;
+            
+            // Delete old entry
+            portfolio.livrets.splice(index, 1);
+            updateLivretsList();
+        }
+        
+        function deleteLivret(index) {
+            if (confirm('Supprimer ce livret ?')) {
+                portfolio.livrets.splice(index, 1);
+                saveData();
+                syncDriveData();
+                updateLivretsList();
+                updateAll();
             }
         }
 
@@ -1514,6 +1770,13 @@
                 const currentPrice = portfolio.prices[ticker] || avgPrice;
                 totalValue += data.quantity * currentPrice;
                 totalInvested += data.invested;
+            });
+
+            // Livrets calculations (both invested and value are the same)
+            portfolio.livrets.forEach(l => {
+                const amount = parseFloat(l.amount) || 0;
+                totalValue += amount;
+                totalInvested += amount;
             });
 
             // Fundraising calculations
@@ -1625,6 +1888,7 @@
             updateCryptoList();
             updatePEAList();
             updatePEAQuickSelect(); // Update quick select buttons
+            updateLivretsList(); // Update livrets
             updateFundraisingList();
             updateDashboard();
             document.getElementById('syncStatus').textContent = '✅ Synchronisé';
@@ -1980,6 +2244,7 @@
         initGoogleDrive();
         document.getElementById('cryptoDate').valueAsDate = new Date();
         document.getElementById('peaDate').valueAsDate = new Date();
+        document.getElementById('livretDate').valueAsDate = new Date();
         document.getElementById('fundDate').valueAsDate = new Date();
         
         const savedSheetId = localStorage.getItem('googleSheetId');
