@@ -38,7 +38,7 @@
             overflow-x: hidden;
         }
         
-        /* Sidebar Navigation - Finary Style */
+        /* Sidebar Navigation */
         .sidebar {
             position: fixed;
             left: 0;
@@ -82,6 +82,10 @@
             align-items: center;
             gap: 12px;
             cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
         }
         
         .nav-item:hover {
@@ -99,34 +103,39 @@
             font-size: 1.3em;
         }
         
-        /* Main Content Area */
+        /* Main Content */
         .main-content {
             margin-left: 260px;
             min-height: 100vh;
             padding: 40px 48px;
         }
         
+        /* Container for old HTML structure */
+        .container {
+            max-width: 100%;
+        }
+        
         /* Top Header */
-        .top-header {
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 40px;
+            background: transparent;
+            border: none;
+            padding: 0;
         }
         
-        .page-title {
+        h1 {
             font-size: 2.2em;
             font-weight: 800;
             letter-spacing: -1.5px;
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        
-        .sync-badge {
+        .sync-status {
             padding: 8px 20px;
             background: rgba(0, 212, 170, 0.12);
             border: 1px solid rgba(0, 212, 170, 0.2);
@@ -134,390 +143,36 @@
             color: var(--success);
             font-size: 0.85em;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         
-        .btn-refresh {
-            padding: 10px 24px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-refresh:hover {
-            background: var(--bg-secondary);
-            border-color: var(--orange-primary);
-        }
-        
-        /* Wealth Summary - Large Card */
-        .wealth-summary {
-            background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-dark) 100%);
-            border-radius: 24px;
-            padding: 48px;
-            margin-bottom: 32px;
-            box-shadow: 0 8px 32px rgba(255, 99, 71, 0.25);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .wealth-summary::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-        
-        .wealth-label {
-            font-size: 0.95em;
-            opacity: 0.9;
-            margin-bottom: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        
-        .wealth-amount {
-            font-size: 4em;
-            font-weight: 900;
-            letter-spacing: -3px;
-            margin-bottom: 24px;
-        }
-        
-        .wealth-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
-        }
-        
-        .wealth-stat {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .wealth-stat-label {
-            font-size: 0.85em;
-            opacity: 0.85;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        
-        .wealth-stat-value {
-            font-size: 1.8em;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-        
-        /* Grid Layout */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-        
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-        
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-        
-        /* Modern Cards */
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 20px;
-            padding: 32px;
-            transition: all 0.2s;
-        }
-        
-        .card:hover {
-            border-color: rgba(255, 99, 71, 0.3);
-            transform: translateY(-2px);
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        
-        .card-title {
-            font-size: 1.1em;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-        }
-        
-        .card-value {
-            font-size: 2.8em;
-            font-weight: 900;
-            letter-spacing: -2px;
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .card-subtitle {
-            color: var(--text-secondary);
-            font-size: 0.9em;
-            font-weight: 500;
-        }
-        
-        /* Chart Card */
-        .chart-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 20px;
-            padding: 32px;
-            height: 450px;
-        }
-        
-        /* Asset List */
-        .asset-list {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 20px;
-            overflow: hidden;
-        }
-        
-        .asset-item {
-            padding: 24px 32px;
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        
-        .asset-item:hover {
-            background: rgba(255, 99, 71, 0.05);
-        }
-        
-        .asset-item:last-child {
-            border-bottom: none;
-        }
-        
-        .asset-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex: 1;
-        }
-        
-        .asset-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-            font-weight: 700;
-        }
-        
-        .asset-details {
-            flex: 1;
-        }
-        
-        .asset-name {
-            font-size: 1.05em;
-            font-weight: 700;
-            margin-bottom: 4px;
-            letter-spacing: -0.3px;
-        }
-        
-        .asset-meta {
-            color: var(--text-secondary);
-            font-size: 0.85em;
-            font-weight: 500;
-        }
-        
-        .asset-values {
-            display: flex;
-            gap: 48px;
-            align-items: center;
-        }
-        
-        .asset-stat-group {
-            text-align: right;
-        }
-        
-        .asset-stat-label {
-            color: var(--text-secondary);
-            font-size: 0.75em;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-        
-        .asset-stat-value {
-            font-size: 1.1em;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        
-        .positive {
+        .sync-status.synced {
+            background: rgba(0, 212, 170, 0.12);
             color: var(--success);
         }
         
-        .negative {
-            color: var(--danger);
-        }
-        
-        /* Fear & Greed Gauge */
-        .gauge-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 32px;
-        }
-        
-        .gauge-value {
-            font-size: 5em;
-            font-weight: 900;
-            letter-spacing: -4px;
-            margin-bottom: 12px;
-        }
-        
-        .gauge-label {
-            font-size: 1.2em;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        
-        .gauge-bar {
-            width: 100%;
-            height: 12px;
-            background: linear-gradient(90deg, var(--danger), #ffc107, var(--success));
-            border-radius: 6px;
-            position: relative;
-            margin-top: 24px;
-        }
-        
-        .gauge-indicator {
-            position: absolute;
-            width: 4px;
-            height: 20px;
-            background: white;
-            border-radius: 2px;
-            top: -4px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* News Section */
-        .news-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 16px;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        
-        .news-card:hover {
-            border-color: var(--orange-primary);
-            transform: translateX(4px);
-        }
-        
-        .news-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-        
-        .news-title {
-            font-size: 1.05em;
-            font-weight: 700;
-            line-height: 1.4;
-            letter-spacing: -0.3px;
-        }
-        
-        .news-source {
-            color: var(--text-secondary);
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        .news-snippet {
-            color: var(--text-secondary);
-            font-size: 0.9em;
-            line-height: 1.6;
-        }
-        
-        /* AI Summary Badge */
-        .ai-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 14px;
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-        
-        /* Buttons */
-        .btn {
-            padding: 12px 28px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.95em;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn-primary {
+        .update-btn {
+            padding: 10px 24px;
             background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+            border: none;
+            border-radius: 12px;
             color: white;
-            box-shadow: 0 4px 16px rgba(255, 99, 71, 0.3);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(255, 99, 71, 0.3);
         }
         
-        .btn-primary:hover {
+        .update-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(255, 99, 71, 0.4);
+            box-shadow: 0 8px 20px rgba(255, 99, 71, 0.4);
         }
         
-        .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border-subtle);
+        /* Hide old nav */
+        nav {
+            display: none;
         }
         
-        .btn-secondary:hover {
-            border-color: var(--orange-primary);
-        }
-        
-        /* Section Visibility */
+        /* Sections */
         .section {
             display: none;
         }
@@ -526,18 +181,437 @@
             display: block;
         }
         
-        /* Loading State */
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            padding: 28px;
+            border-radius: 20px;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--orange-primary), var(--orange-light));
+        }
+        
+        .stat-card:hover {
+            border-color: var(--orange-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(255, 99, 71, 0.2);
+        }
+        
+        .stat-label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+        
+        .stat-value {
+            font-size: 2.4em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1.5px;
+        }
+        
+        /* Buttons */
+        button {
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+            font-size: 0.95em;
+            box-shadow: 0 4px 12px rgba(255, 99, 71, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 99, 71, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+            box-shadow: none;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #cc3847);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+        }
+        
+        /* Forms */
+        input, select {
+            padding: 14px 18px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 14px;
+            transition: all 0.3s;
+            font-size: 0.95em;
+            width: 100%;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--orange-primary);
+            box-shadow: 0 0 0 4px rgba(255, 99, 71, 0.12);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+        
+        label {
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            font-weight: 600;
+            display: block;
+        }
+        
+        /* Asset Groups */
+        .asset-group {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .asset-header {
+            padding: 24px 28px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .asset-header:hover {
+            background: rgba(255, 99, 71, 0.05);
+        }
+        
+        .asset-name {
+            font-size: 1.15em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .asset-ticker {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .asset-stats {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 24px;
+            text-align: right;
+            flex: 1;
+            min-width: 600px;
+        }
+        
+        .asset-stat-label {
+            font-size: 0.7em;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+        }
+        
+        .asset-stat-value {
+            font-size: 0.95em;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        /* Charts */
+        .chart-container {
+            height: 450px;
+            background: var(--bg-card);
+            padding: 36px;
+            border-radius: 20px;
+            border: 1px solid var(--border-subtle);
+            margin: 32px 0;
+        }
+        
+        /* Fear & Greed */
+        .fear-greed-card {
+            background: var(--bg-card);
+            padding: 28px;
+            border-radius: 20px;
+            border: 1px solid var(--border-subtle);
+        }
+        
+        .gauge-value {
+            font-size: 4em;
+            font-weight: 900;
+            letter-spacing: -3px;
+        }
+        
+        .gauge-label {
+            font-size: 1.3em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        
+        /* News */
+        .news-section {
+            background: var(--bg-card);
+            padding: 32px;
+            border-radius: 20px;
+            margin: 32px 0;
+            border: 1px solid var(--border-subtle);
+        }
+        
+        .ai-summary-box {
+            background: linear-gradient(135deg, rgba(255, 99, 71, 0.08), rgba(255, 127, 102, 0.08));
+            border: 1px solid var(--border-subtle);
+            padding: 28px;
+            border-radius: 16px;
+            margin-bottom: 28px;
+            position: relative;
+        }
+        
+        .ai-summary-box::before {
+            content: '🤖 Synthèse IA';
+            position: absolute;
+            top: -14px;
+            left: 28px;
+            background: var(--bg-card);
+            padding: 6px 16px;
+            color: var(--orange-primary);
+            font-weight: 800;
+            font-size: 0.85em;
+            border-radius: 10px;
+            border: 1px solid var(--border-subtle);
+        }
+        
+        .news-item {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 16px;
+            border-left: 4px solid var(--orange-primary);
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .news-item:hover {
+            transform: translateX(8px);
+            border-left-width: 6px;
+        }
+        
+        .news-title {
+            font-weight: 800;
+            font-size: 1.08em;
+            margin-bottom: 10px;
+        }
+        
+        .news-source {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .news-snippet {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            line-height: 1.7;
+        }
+        
+        /* Colors */
+        .positive {
+            color: var(--success);
+            font-weight: 700;
+        }
+        
+        .negative {
+            color: var(--danger);
+            font-weight: 700;
+        }
+        
+        .neutral {
+            color: var(--text-secondary);
+        }
+        
+        /* Messages */
+        .info-message, .warning-message, .success-message {
+            padding: 18px 24px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            font-size: 0.9em;
+            border: 1px solid;
+        }
+        
+        .info-message {
+            background: rgba(52, 152, 219, 0.12);
+            border-color: rgba(52, 152, 219, 0.3);
+            color: #3498db;
+        }
+        
+        .warning-message {
+            background: rgba(255, 193, 7, 0.12);
+            border-color: rgba(255, 193, 7, 0.3);
+            color: #ffc107;
+        }
+        
+        .success-message {
+            background: rgba(0, 212, 170, 0.12);
+            border-color: rgba(0, 212, 170, 0.3);
+            color: var(--success);
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        th {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 0.85em;
+            text-transform: uppercase;
+        }
+        
+        tr:hover {
+            background: rgba(255, 99, 71, 0.05);
+        }
+        
+        /* Loading */
         .loading {
             text-align: center;
-            padding: 60px;
+            padding: 40px;
             color: var(--text-secondary);
-            font-weight: 500;
+        }
+        
+        /* Crypto library */
+        .crypto-library, .binance-section {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 18px;
+            border: 1px solid var(--border-subtle);
+            margin-bottom: 24px;
+        }
+        
+        .crypto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        
+        .crypto-chip {
+            background: rgba(255, 99, 71, 0.08);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            font-weight: 600;
+        }
+        
+        .crypto-chip:hover {
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+            color: white;
+        }
+        
+        .crypto-chip.selected {
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+            color: white;
+        }
+        
+        /* Quick select */
+        .quick-select-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            color: var(--orange-primary);
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        
+        .quick-select-btn:hover {
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+            color: white;
+        }
+        
+        /* Binance logo */
+        .binance-logo {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        
+        .api-status {
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 700;
+            background: rgba(255, 99, 71, 0.12);
+            color: var(--orange-primary);
+            border: 1px solid var(--border-subtle);
+            margin-left: 12px;
         }
         
         /* Responsive */
         @media (max-width: 1200px) {
-            .grid-4 { grid-template-columns: repeat(2, 1fr); }
-            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .asset-stats {
+                grid-template-columns: repeat(3, 1fr);
+                min-width: auto;
+            }
         }
         
         @media (max-width: 768px) {
@@ -551,7 +625,7 @@
                 text-align: center;
             }
             
-            .nav-item span {
+            .nav-item span:not(.icon) {
                 display: none;
             }
             
@@ -560,21 +634,12 @@
                 padding: 24px 20px;
             }
             
-            .grid-2, .grid-3, .grid-4 {
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
             
-            .wealth-summary {
-                padding: 32px 24px;
-            }
-            
-            .wealth-amount {
-                font-size: 2.5em;
-            }
-            
-            .wealth-stats {
-                grid-template-columns: 1fr;
-                gap: 20px;
+            .asset-stats {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -585,174 +650,403 @@
         <div class="logo">finary</div>
         
         <div class="nav-menu">
-            <a class="nav-item active" onclick="showSection('dashboard')">
+            <button class="nav-item active" onclick="showSection('dashboard')">
                 <span class="icon">📊</span>
                 <span>Dashboard</span>
-            </a>
-            <a class="nav-item" onclick="showSection('crypto')">
+            </button>
+            <button class="nav-item" onclick="showSection('crypto')">
                 <span class="icon">₿</span>
                 <span>Crypto</span>
-            </a>
-            <a class="nav-item" onclick="showSection('pea')">
+            </button>
+            <button class="nav-item" onclick="showSection('pea')">
                 <span class="icon">📈</span>
                 <span>PEA</span>
-            </a>
-            <a class="nav-item" onclick="showSection('livrets')">
+            </button>
+            <button class="nav-item" onclick="showSection('livrets')">
                 <span class="icon">💰</span>
                 <span>Livrets</span>
-            </a>
-            <a class="nav-item" onclick="showSection('fundraising')">
+            </button>
+            <button class="nav-item" onclick="showSection('fundraising')">
                 <span class="icon">🚀</span>
                 <span>Levées</span>
-            </a>
-            <a class="nav-item" onclick="showSection('settings')">
+            </button>
+            <button class="nav-item" onclick="showSection('settings')">
                 <span class="icon">⚙️</span>
                 <span>Paramètres</span>
-            </a>
+            </button>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Dashboard Section -->
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Portfolio Manager Pro</h1>
+            <div class="sync-status" id="syncStatus">⏳ Non synchronisé</div>
+            <button class="update-btn" onclick="updateAll()">🔄 Actualiser les prix</button>
+        </header>
+
+        <nav>
+            <button class="nav-btn" onclick="showSection('dashboard')">📈 Dashboard</button>
+            <button class="nav-btn" onclick="showSection('crypto')">₿ Crypto</button>
+            <button class="nav-btn" onclick="showSection('pea')">📊 PEA</button>
+            <button class="nav-btn" onclick="showSection('livrets')">💰 Livrets</button>
+            <button class="nav-btn" onclick="showSection('fundraising')">🚀 Levées</button>
+            <button class="nav-btn" onclick="showSection('settings')">⚙️ Paramètres</button>
+        </nav>
+
+        <!-- Dashboard -->
         <div id="dashboard" class="section active">
-            <!-- Top Header -->
-            <div class="top-header">
-                <h1 class="page-title">Patrimoine brut</h1>
-                <div class="header-actions">
-                    <div class="sync-badge" id="syncStatus">
-                        <span>✓</span>
-                        <span>Synchronisé</span>
-                    </div>
-                    <button class="btn-refresh" onclick="updateAll()">
-                        🔄 Actualiser les prix
-                    </button>
-                </div>
-            </div>
-
-            <!-- Wealth Summary Card -->
-            <div class="wealth-summary">
-                <div class="wealth-label">PATRIMOINE BRUT</div>
-                <div class="wealth-amount" id="totalWealth">€0</div>
-                <div class="wealth-stats">
-                    <div class="wealth-stat">
-                        <div class="wealth-stat-label">Total investi</div>
-                        <div class="wealth-stat-value" id="totalInvested">€0</div>
-                    </div>
-                    <div class="wealth-stat">
-                        <div class="wealth-stat-label">Plus-value</div>
-                        <div class="wealth-stat-value" id="totalPnL">€0</div>
-                    </div>
-                    <div class="wealth-stat">
-                        <div class="wealth-stat-label">Performance</div>
-                        <div class="wealth-stat-value" id="totalPerf">0%</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats Grid -->
-            <div class="grid-4" id="statsGrid"></div>
-
-            <!-- Fear & Greed + Chart -->
-            <div class="grid-2">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">😱 Crypto Fear & Greed</div>
-                    </div>
-                    <div class="gauge-container" id="cryptoFearGreed">
+            <h2 style="margin-bottom: 20px;">📈 Vue d'ensemble</h2>
+            <div class="stats-grid" id="dashboardStats"></div>
+            
+            <!-- Fear & Greed Indicators -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 30px 0;">
+                <div class="fear-greed-card">
+                    <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5em;">😱</span>
+                        Crypto Fear & Greed Index
+                    </h3>
+                    <div id="cryptoFearGreed" style="text-align: center;">
                         <div class="loading">Chargement...</div>
                     </div>
+                    <p style="font-size: 0.8em; color: #a0aec0; margin-top: 10px;">
+                        Source : Alternative.me
+                    </p>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">📊 Stock Fear & Greed</div>
+                <div class="fear-greed-card">
+                    <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5em;">📊</span>
+                        CNN Fear & Greed Index (Bourse)
+                    </h3>
+                    <div id="stockFearGreed" style="text-align: center;">
+                        <div class="fear-greed-gauge">
+                            <div class="gauge-value" id="stockFGValue">--</div>
+                            <div class="gauge-label" id="stockFGLabel">Chargement...</div>
+                        </div>
                     </div>
-                    <div class="gauge-container" id="stockFearGreed">
-                        <div class="loading">Chargement...</div>
-                    </div>
+                    <p style="font-size: 0.8em; color: #a0aec0; margin-top: 10px;">
+                        Estimation basée sur les indices VIX et marchés
+                    </p>
                 </div>
             </div>
-
-            <!-- Allocation Chart -->
-            <div class="chart-card">
+            
+            <!-- Market News with AI Summary -->
+            <div class="news-section">
+                <h3 style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📰 Actualités des marchés</span>
+                    <button onclick="refreshNews()" class="btn-secondary" style="font-size: 0.9em; padding: 8px 16px;">
+                        🔄 Actualiser
+                    </button>
+                </h3>
+                
+                <div id="aiSummary" class="ai-summary-box">
+                    <div class="loading">⏳ Chargement et synthèse IA des actualités...</div>
+                </div>
+                
+                <div id="newsFeed" class="news-feed">
+                    <div class="loading">Chargement des actualités...</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
                 <canvas id="portfolioChart"></canvas>
             </div>
+        </div>
 
-            <!-- News Section -->
-            <div style="margin-top: 32px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 style="font-size: 1.8em; font-weight: 800; letter-spacing: -1px;">📰 Actualités</h2>
-                    <button class="btn-secondary" onclick="refreshNews()">🔄 Actualiser</button>
+        <!-- Crypto Section -->
+        <div id="crypto" class="section">
+            <h2 style="margin-bottom: 20px;">₿ Portefeuille Crypto</h2>
+            
+            <!-- Binance API Integration -->
+            <div class="binance-section">
+                <h3>
+                    <svg class="binance-logo" viewBox="0 0 126.61 126.61" fill="#f3ba2f">
+                        <path d="M38.73 53.2l24.59-24.58 24.6 24.6 14.3-14.31L63.32 0 24.43 38.89l14.3 14.31zM0 63.31l14.3-14.3 14.31 14.3-14.31 14.3L0 63.31zm38.73 10.11l24.59 24.58 24.6-24.6 14.31 14.29-38.9 38.91-38.9-38.88 14.3-14.3zM88.58 63.31l14.3-14.3 14.31 14.3-14.31 14.3-14.3-14.3z"/>
+                        <path d="M77.83 63.3l-14.51-14.52-10.73 10.73-1.24 1.23-2.54 2.54-.01.02 14.51 14.5 14.51-14.5z"/>
+                    </svg>
+                    Importer depuis Binance
+                    <span class="api-status" id="binanceStatus">Non connecté</span>
+                </h3>
+                
+                <div class="warning-message" style="margin-bottom: 15px;">
+                    <strong>⚠️ PROBLÈME CORS :</strong> Les navigateurs bloquent les requêtes directes vers l'API Binance.<br>
+                    <strong>💡 Solution alternative recommandée :</strong> Import manuel via CSV (voir ci-dessous)
                 </div>
                 
-                <div class="card" style="margin-bottom: 24px;">
-                    <span class="ai-badge">🤖 Synthèse IA</span>
-                    <div id="aiSummary" style="color: var(--text-secondary); line-height: 1.8;">
-                        <div class="loading">Génération de la synthèse...</div>
+                <div class="info-message">
+                    <strong>📥 Import CSV depuis Binance (RECOMMANDÉ) :</strong><br>
+                    1. Allez sur <strong>Binance.com → Wallet → Spot</strong><br>
+                    2. Cliquez sur <strong>"Export Complete Account Statement"</strong><br>
+                    3. Téléchargez le CSV de vos positions actuelles<br>
+                    4. Importez-le ci-dessous avec le bouton "📥 Importer CSV Binance"<br>
+                    <br>
+                    <strong>Ou utilisez l'API (peut être bloqué par CORS) :</strong>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>API Key Binance (optionnel)</label>
+                        <input type="password" id="binanceApiKey" placeholder="Votre API Key">
+                    </div>
+                    <div class="form-group">
+                        <label>API Secret Binance (optionnel)</label>
+                        <input type="password" id="binanceApiSecret" placeholder="Votre API Secret">
                     </div>
                 </div>
                 
-                <div id="newsFeed"></div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <button class="btn-primary">
+                        <label for="binanceCSVImport" style="cursor: pointer; margin: 0;">📥 Importer CSV Binance</label>
+                        <input type="file" id="binanceCSVImport" accept=".csv" onchange="importBinanceCSV(event)" style="display: none;">
+                    </button>
+                    <button onclick="saveBinanceCredentials()" class="btn-secondary">💾 Sauvegarder les clés API</button>
+                    <button onclick="importFromBinance()" class="btn-secondary">📥 Tenter import API</button>
+                    <button onclick="clearBinanceCredentials()" class="btn-danger">🗑️ Supprimer les clés</button>
+                </div>
+                
+                <div class="info-message" style="background: rgba(255, 193, 7, 0.1); border-color: rgba(255, 193, 7, 0.3); color: #ffc107;">
+                    <strong>💡 Format CSV Binance attendu :</strong><br>
+                    Le CSV doit contenir les colonnes : <code>Coin</code>, <code>Free</code>, <code>Locked</code><br>
+                    Exemple : BTC,0.5,0 | ETH,10.2,0.5
+                </div>
             </div>
+
+            <!-- Crypto Library -->
+            <div class="crypto-library">
+                <h3>📚 Bibliothèque de Cryptos</h3>
+                <div class="info-message" style="margin-bottom: 15px;">
+                    Cliquez sur une crypto pour remplir automatiquement le symbole
+                </div>
+                <div class="crypto-grid" id="cryptoLibrary"></div>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Symbole (ex: BTC, ETH)</label>
+                    <input type="text" id="cryptoSymbol" placeholder="BTC">
+                </div>
+                <div class="form-group">
+                    <label>Quantité</label>
+                    <input type="number" id="cryptoQuantity" step="0.00000001" placeholder="0.5">
+                </div>
+                <div class="form-group">
+                    <label>Prix d'achat ($)</label>
+                    <input type="number" id="cryptoPrice" step="0.01" placeholder="50000">
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="cryptoDate">
+                </div>
+            </div>
+            <button onclick="addCrypto()">➕ Ajouter une position</button>
+            
+            <div id="cryptoList"></div>
         </div>
 
-        <!-- Other Sections (Crypto, PEA, etc.) -->
-        <div id="crypto" class="section">
-            <div class="top-header">
-                <h1 class="page-title">Portefeuille Crypto</h1>
-            </div>
-            <div class="loading">Section Crypto - Design identique avec nouveau style</div>
-        </div>
-
+        <!-- PEA Section -->
         <div id="pea" class="section">
-            <div class="top-header">
-                <h1 class="page-title">Plan d'Épargne en Actions</h1>
+            <h2 style="margin-bottom: 20px;">📊 Plan d'Épargne en Actions (PEA)</h2>
+            
+            <!-- Quick Select for existing assets -->
+            <div class="info-message" style="margin-bottom: 20px;">
+                <strong>💡 Astuce :</strong> Pour ajouter une ligne sur un actif existant, sélectionnez-le ci-dessous :
+                <div id="quickSelectPEA" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px;"></div>
             </div>
-            <div class="loading">Section PEA - Design identique avec nouveau style</div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nom de l'action</label>
+                    <input type="text" id="peaName" placeholder="Apple Inc." list="peaNameList">
+                    <datalist id="peaNameList"></datalist>
+                </div>
+                <div class="form-group">
+                    <label>Ticker</label>
+                    <input type="text" id="peaTicker" placeholder="AAPL" list="peaTickerList">
+                    <datalist id="peaTickerList"></datalist>
+                </div>
+                <div class="form-group">
+                    <label>Quantité</label>
+                    <input type="number" id="peaQuantity" step="1" placeholder="10">
+                </div>
+                <div class="form-group">
+                    <label>Prix d'achat (€)</label>
+                    <input type="number" id="peaPrice" step="0.01" placeholder="150.50">
+                </div>
+                <div class="form-group">
+                    <label>Frais (€)</label>
+                    <input type="number" id="peaFees" step="0.01" placeholder="5.00">
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="peaDate">
+                </div>
+            </div>
+            <button onclick="addPEA()">➕ Ajouter une position</button>
+            
+            <div id="peaList"></div>
         </div>
 
+        <!-- Livrets Section -->
         <div id="livrets" class="section">
-            <div class="top-header">
-                <h1 class="page-title">Livrets d'épargne</h1>
+            <h2 style="margin-bottom: 20px;">💰 Livrets d'épargne</h2>
+            
+            <div class="info-message" style="margin-bottom: 20px;">
+                <strong>💡 Taux actuels 2025 :</strong><br>
+                • LEP (Livret d'Épargne Populaire) : 4.00% net<br>
+                • Livret A : 2.40% net<br>
+                • LDDS (Livret de Développement Durable et Solidaire) : 2.40% net<br>
+                • Livret Jeune : 2.40% à 4.00% selon les banques<br>
+                • PEL (Plan d'Épargne Logement) : 2.25% brut (après prélèvements sociaux)
             </div>
-            <div class="loading">Section Livrets - Design identique avec nouveau style</div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Type de livret</label>
+                    <select id="livretType">
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="LEP">LEP (Livret Épargne Populaire)</option>
+                        <option value="Livret A">Livret A</option>
+                        <option value="LDDS">LDDS (Livret Développement Durable)</option>
+                        <option value="Livret Jeune">Livret Jeune</option>
+                        <option value="PEL">PEL (Plan Épargne Logement)</option>
+                        <option value="CEL">CEL (Compte Épargne Logement)</option>
+                        <option value="CSL">CSL (Compte Sur Livret)</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Banque</label>
+                    <input type="text" id="livretBank" placeholder="Crédit Agricole">
+                </div>
+                <div class="form-group">
+                    <label>Montant actuel (€)</label>
+                    <input type="number" id="livretAmount" step="0.01" placeholder="10000">
+                </div>
+                <div class="form-group">
+                    <label>Taux d'intérêt annuel (%)</label>
+                    <input type="number" id="livretRate" step="0.01" placeholder="2.40">
+                </div>
+                <div class="form-group">
+                    <label>Plafond (€)</label>
+                    <input type="number" id="livretCeiling" step="0.01" placeholder="22950">
+                </div>
+                <div class="form-group">
+                    <label>Date d'ouverture</label>
+                    <input type="date" id="livretDate">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button onclick="addLivret()">➕ Ajouter un livret</button>
+                <button onclick="autoFillLivretRate()" class="btn-secondary">🔄 Appliquer les taux actuels</button>
+            </div>
+            
+            <div id="livretsList"></div>
         </div>
 
+        <!-- Fundraising Section -->
         <div id="fundraising" class="section">
-            <div class="top-header">
-                <h1 class="page-title">Levées de fonds</h1>
+            <h2 style="margin-bottom: 20px;">🚀 Levées de fonds / Investissements</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nom de l'entreprise</label>
+                    <input type="text" id="fundName" placeholder="StartupXYZ">
+                </div>
+                <div class="form-group">
+                    <label>Montant investi (€)</label>
+                    <input type="number" id="fundAmount" step="0.01" placeholder="10000">
+                </div>
+                <div class="form-group">
+                    <label>Valuation (€)</label>
+                    <input type="number" id="fundValuation" step="0.01" placeholder="1000000">
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="fundDate">
+                </div>
             </div>
-            <div class="loading">Section Levées - Design identique avec nouveau style</div>
+            <button onclick="addFundraising()">➕ Ajouter un investissement</button>
+            
+            <div id="fundraisingList"></div>
         </div>
 
+        <!-- Settings Section -->
         <div id="settings" class="section">
-            <div class="top-header">
-                <h1 class="page-title">Paramètres</h1>
+            <h2 style="margin-bottom: 20px;">⚙️ Paramètres</h2>
+            
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px;">☁️ Synchronisation Google Drive</h3>
+                
+                <div class="form-group" style="max-width: 600px; margin-top: 15px;">
+                    <label>Google Client ID</label>
+                    <input type="text" id="clientId" placeholder="Votre Client ID Google">
+                    <button onclick="saveClientId()" style="margin-top: 10px;">💾 Enregistrer</button>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                    <button onclick="connectGoogleDrive()">🔗 Connecter</button>
+                    <button class="btn-danger" onclick="disconnectGoogleDrive()">❌ Déconnecter</button>
+                    <button class="btn-secondary" onclick="loadFromDrive()">📥 Charger</button>
+                    <button class="btn-secondary" onclick="syncDriveData()">📤 Sauvegarder</button>
+                </div>
             </div>
-            <div class="loading">Section Paramètres - Design identique avec nouveau style</div>
+
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px;">📊 Synchronisation Google Sheets</h3>
+                <div class="info-message">
+                    <strong>Configuration :</strong><br>
+                    1. Créez une Google Sheet avec 2 colonnes : <code>ticker</code> et <code>prix</code><br>
+                    2. Fichier → Partager → Publier sur le Web → Publier<br>
+                    3. Copiez l'ID de la feuille (dans l'URL : /d/<strong>ID_ICI</strong>/edit)<br>
+                    4. Collez l'ID ci-dessous<br><br>
+                    
+                    <strong>Exemple d'URL :</strong><br>
+                    <code>https://docs.google.com/spreadsheets/d/<span style="color: #00ff88;">1A2B3C4D5E6F7G8H9I0J</span>/edit</code><br><br>
+                    
+                    <strong>Format de votre feuille :</strong><br>
+                    <table style="margin-top: 10px; max-width: 300px;">
+                        <tr><th>ticker</th><th>prix</th></tr>
+                        <tr><td>FR0013451333</td><td>87.37</td></tr>
+                        <tr><td>AAPL</td><td>182.50</td></tr>
+                    </table>
+                </div>
+                
+                <div class="form-group" style="max-width: 600px; margin-top: 15px;">
+                    <label>Google Sheet ID</label>
+                    <input type="text" id="googleSheetId" placeholder="1A2B3C4D5E6F7G8H9I0J">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                    <button onclick="saveGoogleSheetId()">💾 Enregistrer l'ID</button>
+                    <button onclick="syncPricesFromGoogleSheets()" class="btn-primary">🔄 Synchroniser les prix</button>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="autoSyncCheckbox" onchange="toggleAutoSync(this.checked)">
+                        <span>🔄 Synchronisation automatique (toutes les 5 minutes)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px;">
+                <h3 style="margin-bottom: 15px;">💾 Import / Export Local</h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="exportData()" class="btn-secondary">📥 Exporter JSON</button>
+                    <label class="btn-secondary" style="margin: 0; cursor: pointer;">
+                        📤 Importer JSON
+                        <input type="file" accept=".json" onchange="importData(event)" style="display: none;">
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        let portfolio = {
-            crypto: [],
-            pea: [],
-            livrets: [],
-            fundraising: [],
-            prices: {},
-            priceTimestamps: {},
-            binanceCredentials: null
-        };
-
-        function showSection(id) {
-            // Update nav items
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.target.closest('.nav-item').classList.add('active');
-            
-            // Show section
+    </div>
     <script>
         // Popular cryptocurrencies library
         const cryptoLibrary = [
@@ -2793,7 +3087,5 @@ Vérifiez que votre fichier CSV est au bon format.`);
             toggleAutoSync(true);
         }
     </script>
-</body>
-</html>
 </body>
 </html>
