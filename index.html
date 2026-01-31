@@ -3757,6 +3757,249 @@ Vérifiez que votre fichier CSV est au bon format.`);
             updateDiversificationAnalysis();
             updateTransactionHistory();
         };
+
+        // ========================================
+        // INSIGHTS - PORTFOLIO ANALYSIS
+        // ========================================
+        
+        function analyzePortfolio() {
+            const resultsEl = document.getElementById('insightsResults');
+            
+            if (!resultsEl) {
+                alert('Section Insights non trouvée');
+                return;
+            }
+            
+            resultsEl.innerHTML = '<div class="loading">Analyse en cours...</div>';
+            
+            // Calculate portfolio stats
+            let totalValue = 0;
+            let totalInvested = 0;
+            let cryptoCount = portfolio.crypto.length;
+            let cryptoValue = 0;
+            let peaCount = 0;
+            let peaValue = 0;
+            let livretsCount = portfolio.livrets.length;
+            let livretsValue = 0;
+            let fundraisingValue = 0;
+            
+            // Crypto totals
+            portfolio.crypto.forEach(c => {
+                const currentPrice = portfolio.prices[c.symbol] || c.price;
+                const current = c.quantity * currentPrice;
+                const invested = c.quantity * c.price;
+                cryptoValue += current;
+                totalValue += current;
+                totalInvested += invested;
+            });
+            
+            // PEA totals
+            const uniquePEA = new Set();
+            portfolio.pea.forEach(p => {
+                uniquePEA.add(p.ticker);
+                const currentPrice = portfolio.prices[p.ticker] || p.price;
+                const current = p.quantity * currentPrice;
+                const invested = p.quantity * p.price + (p.fees || 0);
+                peaValue += current;
+                totalValue += current;
+                totalInvested += invested;
+            });
+            peaCount = uniquePEA.size;
+            
+            // Livrets totals
+            portfolio.livrets.forEach(l => {
+                const amount = parseFloat(l.amount) || 0;
+                livretsValue += amount;
+                totalValue += amount;
+                totalInvested += amount;
+            });
+            
+            // Fundraising totals
+            portfolio.fundraising.forEach(f => {
+                const valuation = parseFloat(f.valuation) || 0;
+                fundraisingValue += valuation;
+                totalValue += valuation;
+                totalInvested += parseFloat(f.amount) || 0;
+            });
+            
+            const pnl = totalValue - totalInvested;
+            const performance = totalInvested > 0 ? (pnl / totalInvested) * 100 : 0;
+            const totalAssets = cryptoCount + peaCount;
+            
+            // Generate recommendations
+            let recommendations = [];
+            
+            // 1. Diversification Analysis
+            if (totalAssets < 5) {
+                recommendations.push({
+                    icon: '⚠️',
+                    title: 'Diversification faible',
+                    desc: `Vous avez seulement ${totalAssets} actifs différents. Une bonne diversification nécessite au moins 10-15 actifs pour réduire le risque. Considérez d'ajouter des actions de différents secteurs ou des cryptomonnaies établies.`,
+                    type: 'warning'
+                });
+            } else if (totalAssets < 10) {
+                recommendations.push({
+                    icon: '📊',
+                    title: 'Diversification moyenne',
+                    desc: `Vous avez ${totalAssets} actifs. C'est un bon début ! Pour améliorer votre diversification, visez 15-20 actifs répartis sur différents secteurs (tech, santé, finance, énergie).`,
+                    type: 'info'
+                });
+            } else {
+                recommendations.push({
+                    icon: '✅',
+                    title: 'Excellente diversification',
+                    desc: `Vous avez ${totalAssets} actifs différents. Votre portefeuille est bien diversifié ! Continuez à maintenir cette répartition.`,
+                    type: 'success'
+                });
+            }
+            
+            // 2. Performance Analysis
+            if (performance > 20) {
+                recommendations.push({
+                    icon: '🎉',
+                    title: 'Performance exceptionnelle',
+                    desc: `Votre portfolio a gagné ${performance.toFixed(1)}% (€${pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}) ! Excellent travail ! Pensez à sécuriser une partie de vos gains en rééquilibrant vers des actifs moins volatils.`,
+                    type: 'success'
+                });
+            } else if (performance > 10) {
+                recommendations.push({
+                    icon: '📈',
+                    title: 'Bonne performance',
+                    desc: `Votre portfolio est en hausse de ${performance.toFixed(1)}% (€${pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}). Très bien ! Continuez sur cette lancée.`,
+                    type: 'success'
+                });
+            } else if (performance > 0) {
+                recommendations.push({
+                    icon: '➡️',
+                    title: 'Performance positive',
+                    desc: `Votre portfolio a gagné ${performance.toFixed(1)}% (€${pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}). Performance stable.`,
+                    type: 'info'
+                });
+            } else if (performance > -10) {
+                recommendations.push({
+                    icon: '⚠️',
+                    title: 'Légère baisse',
+                    desc: `Votre portfolio est en baisse de ${Math.abs(performance).toFixed(1)}% (€${pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}). Les marchés fluctuent, c'est normal. Gardez votre stratégie long terme.`,
+                    type: 'warning'
+                });
+            } else {
+                recommendations.push({
+                    icon: '📉',
+                    title: 'Performance négative',
+                    desc: `Votre portfolio est en baisse de ${Math.abs(performance).toFixed(1)}% (€${pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}). Considérez un rééquilibrage ou une stratégie DCA pour moyenner votre prix d'entrée.`,
+                    type: 'danger'
+                });
+            }
+            
+            // 3. Asset Allocation Analysis
+            const cryptoPercent = totalValue > 0 ? (cryptoValue / totalValue) * 100 : 0;
+            const peaPercent = totalValue > 0 ? (peaValue / totalValue) * 100 : 0;
+            const livretsPercent = totalValue > 0 ? (livretsValue / totalValue) * 100 : 0;
+            
+            if (cryptoPercent > 50) {
+                recommendations.push({
+                    icon: '⚡',
+                    title: 'Forte exposition crypto',
+                    desc: `${cryptoPercent.toFixed(1)}% de votre portfolio est en crypto. C'est un actif très volatil. Considérez de rééquilibrer vers des actions (PEA) pour réduire le risque.`,
+                    type: 'warning'
+                });
+            }
+            
+            if (livretsPercent > 40) {
+                recommendations.push({
+                    icon: '💤',
+                    title: 'Trop d'épargne dormante',
+                    desc: `${livretsPercent.toFixed(1)}% de votre patrimoine est en livrets. Ces placements sont sûrs mais peu rentables (2-4%). Envisagez d'investir une partie en actions ou ETF pour augmenter votre rendement.`,
+                    type: 'info'
+                });
+            } else if (livretsCount > 0) {
+                recommendations.push({
+                    icon: '💰',
+                    title: 'Épargne de sécurité',
+                    desc: `Vous avez ${livretsCount} livret${livretsCount > 1 ? 's' : ''} d'épargne (${livretsPercent.toFixed(1)}% du portfolio). Excellent ! C'est votre coussin de sécurité pour les urgences.`,
+                    type: 'success'
+                });
+            } else {
+                recommendations.push({
+                    icon: '🚨',
+                    title: 'Pas d'épargne de sécurité',
+                    desc: `Vous n'avez aucun livret d'épargne. Il est recommandé d'avoir 3-6 mois de dépenses en épargne liquide (Livret A, LDDS, LEP) pour faire face aux imprévus.`,
+                    type: 'danger'
+                });
+            }
+            
+            // 4. Investment Strategy Recommendations
+            if (totalAssets > 0 && peaCount === 0) {
+                recommendations.push({
+                    icon: '📈',
+                    title: 'Ouvrez un PEA',
+                    desc: `Vous n'avez pas de PEA. C'est une excellente enveloppe fiscale pour investir en actions européennes avec une fiscalité avantageuse après 5 ans (flat tax de 17.2% au lieu de 30%).`,
+                    type: 'info'
+                });
+            }
+            
+            if (totalValue < 10000 && cryptoCount > 5) {
+                recommendations.push({
+                    icon: '💡',
+                    title: 'Simplifiez votre portfolio',
+                    desc: `Avec un portfolio de €${totalValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}, avoir ${cryptoCount} cryptos différentes peut être complexe à gérer. Concentrez-vous sur 3-5 cryptos de qualité (BTC, ETH, SOL, etc.).`,
+                    type: 'info'
+                });
+            }
+            
+            // 5. Risk Analysis
+            if (cryptoPercent > 30 && livretsPercent < 10) {
+                recommendations.push({
+                    icon: '⚠️',
+                    title: 'Profil risqué',
+                    desc: `Votre allocation est risquée (${cryptoPercent.toFixed(0)}% crypto, ${livretsPercent.toFixed(0)}% épargne). Augmentez votre épargne de sécurité à au moins 10-15% du portfolio.`,
+                    type: 'warning'
+                });
+            }
+            
+            // Display recommendations
+            const html = `
+                <div style="margin-bottom: 24px;">
+                    <h2 style="font-size: 1.5em; margin-bottom: 16px;">📊 Résumé de votre portfolio</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
+                        <div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+                            <div style="color: var(--text-secondary); font-size: 0.85em; margin-bottom: 8px;">Valeur totale</div>
+                            <div style="font-size: 1.8em; font-weight: 800; color: var(--orange-primary);">€${totalValue.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                        </div>
+                        <div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+                            <div style="color: var(--text-secondary); font-size: 0.85em; margin-bottom: 8px;">Performance</div>
+                            <div style="font-size: 1.8em; font-weight: 800;" class="${performance >= 0 ? 'positive' : 'negative'}">${performance >= 0 ? '+' : ''}${performance.toFixed(1)}%</div>
+                        </div>
+                        <div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+                            <div style="color: var(--text-secondary); font-size: 0.85em; margin-bottom: 8px;">Actifs</div>
+                            <div style="font-size: 1.8em; font-weight: 800; color: var(--text-primary);">${totalAssets}</div>
+                        </div>
+                        <div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+                            <div style="color: var(--text-secondary); font-size: 0.85em; margin-bottom: 8px;">Plus-value</div>
+                            <div style="font-size: 1.8em; font-weight: 800;" class="${pnl >= 0 ? 'positive' : 'negative'}">${pnl >= 0 ? '+' : ''}€${pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 style="font-size: 1.5em; margin-bottom: 24px;">🎯 Recommandations personnalisées</h2>
+                ${recommendations.map(r => `
+                    <div class="portfolio-card" style="border-left: 4px solid ${
+                        r.type === 'success' ? 'var(--success)' :
+                        r.type === 'warning' ? '#ffc107' :
+                        r.type === 'danger' ? 'var(--danger)' : '#3498db'
+                    }; margin-bottom: 20px;">
+                        <h3 style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 1.2em;">
+                            <span style="font-size: 1.5em;">${r.icon}</span>
+                            ${r.title}
+                        </h3>
+                        <p style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95em;">${r.desc}</p>
+                    </div>
+                `).join('')}
+            `;
+            
+            resultsEl.innerHTML = html;
+        }
+
     </script>
 </body>
 </html>
