@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Manager - Finary Design</title>
+    <title>Portfolio Manager Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
             --orange-primary: #ff6347;
@@ -31,14 +27,14 @@
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg-main);
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
         }
         
-        /* Sidebar Navigation */
+        /* Sidebar */
         .sidebar {
             position: fixed;
             left: 0;
@@ -54,13 +50,25 @@
         }
         
         .logo {
-            font-size: 1.8em;
+            font-size: 1.5em;
             font-weight: 900;
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--orange-primary);
             margin-bottom: 48px;
             letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
         }
         
         .nav-menu {
@@ -70,11 +78,20 @@
             gap: 8px;
         }
         
+        .nav-section-title {
+            color: var(--text-secondary);
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 24px 0 12px 0;
+            padding: 0 20px;
+        }
+        
         .nav-item {
             padding: 14px 20px;
             border-radius: 12px;
             color: var(--text-secondary);
-            text-decoration: none;
             font-weight: 600;
             font-size: 0.95em;
             transition: all 0.2s;
@@ -99,9 +116,7 @@
             box-shadow: 0 4px 16px rgba(255, 99, 71, 0.3);
         }
         
-        .nav-item .icon {
-            font-size: 1.3em;
-        }
+        .nav-item .icon { font-size: 1.3em; }
         
         /* Main Content */
         .main-content {
@@ -110,47 +125,62 @@
             padding: 40px 48px;
         }
         
-        /* Container for old HTML structure */
-        .container {
-            max-width: 100%;
-        }
-        
         /* Top Header */
-        header {
+        .top-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
-            background: transparent;
-            border: none;
-            padding: 0;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
         
-        h1 {
+        .page-title {
             font-size: 2.2em;
             font-weight: 800;
             letter-spacing: -1.5px;
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
         
-        .sync-status {
-            padding: 8px 20px;
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .sync-badge {
+            padding: 10px 20px;
             background: rgba(0, 212, 170, 0.12);
             border: 1px solid rgba(0, 212, 170, 0.2);
             border-radius: 20px;
             color: var(--success);
             font-size: 0.85em;
             font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
         }
         
-        .sync-status.synced {
-            background: rgba(0, 212, 170, 0.12);
-            color: var(--success);
+        .btn-cloud {
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9em;
+            white-space: nowrap;
         }
         
-        .update-btn {
+        .btn-cloud:hover {
+            border-color: var(--orange-primary);
+            background: rgba(255, 99, 71, 0.1);
+        }
+        
+        .btn-refresh {
             padding: 10px 24px;
             background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
             border: none;
@@ -160,26 +190,17 @@
             cursor: pointer;
             transition: all 0.2s;
             box-shadow: 0 4px 12px rgba(255, 99, 71, 0.3);
+            white-space: nowrap;
         }
         
-        .update-btn:hover {
+        .btn-refresh:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(255, 99, 71, 0.4);
         }
         
-        /* Hide old nav */
-        nav {
-            display: none;
-        }
-        
         /* Sections */
-        .section {
-            display: none;
-        }
-        
-        .section.active {
-            display: block;
-        }
+        .section { display: none; }
+        .section.active { display: block; }
         
         /* Stats Grid */
         .stats-grid {
@@ -259,13 +280,8 @@
             box-shadow: none;
         }
         
-        .btn-danger {
-            background: linear-gradient(135deg, var(--danger), #cc3847);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
-        }
+        .btn-danger { background: linear-gradient(135deg, var(--danger), #cc3847); }
+        .btn-primary { background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark)); }
         
         /* Forms */
         input, select {
@@ -300,67 +316,6 @@
             display: block;
         }
         
-        /* Asset Groups */
-        .asset-group {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 18px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        
-        .asset-header {
-            padding: 24px 28px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .asset-header:hover {
-            background: rgba(255, 99, 71, 0.05);
-        }
-        
-        .asset-name {
-            font-size: 1.15em;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .asset-ticker {
-            color: var(--text-secondary);
-            font-size: 0.85em;
-            font-weight: 600;
-        }
-        
-        .asset-stats {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 24px;
-            text-align: right;
-            flex: 1;
-            min-width: 600px;
-        }
-        
-        .asset-stat-label {
-            font-size: 0.7em;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            font-weight: 700;
-        }
-        
-        .asset-stat-value {
-            font-size: 0.95em;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        
         /* Charts */
         .chart-container {
             height: 450px;
@@ -371,107 +326,26 @@
             margin: 32px 0;
         }
         
-        /* Fear & Greed */
-        .fear-greed-card {
-            background: var(--bg-card);
-            padding: 28px;
-            border-radius: 20px;
-            border: 1px solid var(--border-subtle);
-        }
-        
-        .gauge-value {
-            font-size: 4em;
-            font-weight: 900;
-            letter-spacing: -3px;
-        }
-        
-        .gauge-label {
-            font-size: 1.3em;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-        
-        /* News */
-        .news-section {
+        /* Cards */
+        .fear-greed-card, .portfolio-card {
             background: var(--bg-card);
             padding: 32px;
             border-radius: 20px;
-            margin: 32px 0;
             border: 1px solid var(--border-subtle);
+            margin-bottom: 24px;
         }
         
-        .ai-summary-box {
-            background: linear-gradient(135deg, rgba(255, 99, 71, 0.08), rgba(255, 127, 102, 0.08));
-            border: 1px solid var(--border-subtle);
-            padding: 28px;
-            border-radius: 16px;
-            margin-bottom: 28px;
-            position: relative;
-        }
-        
-        .ai-summary-box::before {
-            content: '🤖 Synthèse IA';
-            position: absolute;
-            top: -14px;
-            left: 28px;
-            background: var(--bg-card);
-            padding: 6px 16px;
-            color: var(--orange-primary);
-            font-weight: 800;
-            font-size: 0.85em;
-            border-radius: 10px;
-            border: 1px solid var(--border-subtle);
-        }
-        
-        .news-item {
-            background: var(--bg-card);
-            padding: 24px;
-            border-radius: 16px;
-            border-left: 4px solid var(--orange-primary);
-            margin-bottom: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .news-item:hover {
-            transform: translateX(8px);
-            border-left-width: 6px;
-        }
-        
-        .news-title {
-            font-weight: 800;
-            font-size: 1.08em;
-            margin-bottom: 10px;
-        }
-        
-        .news-source {
-            font-size: 0.85em;
-            color: var(--text-secondary);
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        
-        .news-snippet {
-            color: var(--text-secondary);
-            font-size: 0.9em;
-            line-height: 1.7;
+        .portfolio-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            font-size: 1.3em;
         }
         
         /* Colors */
-        .positive {
-            color: var(--success);
-            font-weight: 700;
-        }
-        
-        .negative {
-            color: var(--danger);
-            font-weight: 700;
-        }
-        
-        .neutral {
-            color: var(--text-secondary);
-        }
+        .positive { color: var(--success); font-weight: 700; }
+        .negative { color: var(--danger); font-weight: 700; }
         
         /* Messages */
         .info-message, .warning-message, .success-message {
@@ -494,12 +368,6 @@
             color: #ffc107;
         }
         
-        .success-message {
-            background: rgba(0, 212, 170, 0.12);
-            border-color: rgba(0, 212, 170, 0.3);
-            color: var(--success);
-        }
-        
         /* Tables */
         table {
             width: 100%;
@@ -520,15 +388,35 @@
             text-transform: uppercase;
         }
         
-        tr:hover {
-            background: rgba(255, 99, 71, 0.05);
+        tr:hover { background: rgba(255, 99, 71, 0.05); }
+        
+        /* Asset Groups */
+        .asset-group {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            margin-bottom: 20px;
+            overflow: hidden;
         }
         
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
+        .asset-header {
+            padding: 24px 28px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .asset-header:hover { background: rgba(255, 99, 71, 0.05); }
+        
+        .asset-name {
+            font-size: 1.15em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         /* Crypto library */
@@ -562,56 +450,40 @@
             color: white;
         }
         
-        .crypto-chip.selected {
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
-            color: white;
-        }
-        
-        /* Quick select */
-        .quick-select-btn {
+        /* Insights section */
+        .recommendation-card {
             background: var(--bg-card);
+            padding: 40px;
+            border-radius: 20px;
             border: 1px solid var(--border-subtle);
-            color: var(--orange-primary);
-            padding: 10px 20px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: all 0.2s;
+            text-align: center;
         }
         
-        .quick-select-btn:hover {
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
-            color: white;
+        .recommendation-card h3 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            font-size: 1.5em;
         }
         
-        /* Binance logo */
-        .binance-logo {
-            width: 24px;
-            height: 24px;
-            vertical-align: middle;
-            margin-right: 8px;
+        .recommendation-card p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.8;
         }
         
-        .api-status {
-            padding: 6px 14px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: 700;
-            background: rgba(255, 99, 71, 0.12);
-            color: var(--orange-primary);
-            border: 1px solid var(--border-subtle);
-            margin-left: 12px;
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
         }
         
         /* Responsive */
         @media (max-width: 1200px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .asset-stats {
-                grid-template-columns: repeat(3, 1fr);
-                min-width: auto;
-            }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
         
         @media (max-width: 768px) {
@@ -620,127 +492,71 @@
                 padding: 24px 12px;
             }
             
-            .logo {
-                font-size: 1.2em;
-                text-align: center;
-            }
-            
-            .nav-item span:not(.icon) {
-                display: none;
-            }
+            .logo-text { display: none; }
+            .nav-item span:not(.icon) { display: none; }
+            .nav-section-title { display: none; }
             
             .main-content {
                 margin-left: 80px;
                 padding: 24px 20px;
             }
             
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .asset-stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .stats-grid { grid-template-columns: 1fr; }
         }
-        /* NEW FEATURES CSS */
-        /* Time filter buttons */
     </style>
-        /* Time filter buttons */
-        .time-filter {
-            padding: 8px 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 10px;
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 0.9em;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .time-filter:hover {
-            background: rgba(255, 99, 71, 0.1);
-            color: var(--text-primary);
-            border-color: var(--orange-primary);
-        }
-        
-        .time-filter.active {
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
-            color: white;
-            border-color: transparent;
-        }
 </head>
 <body>
-    <!-- Sidebar Navigation -->
+
+    <!-- Sidebar -->
     <div class="sidebar">
-        <div class="logo">Portfolio Manager</div>
+        <div class="logo">
+            <div class="logo-icon">📊</div>
+            <span class="logo-text">Portfolio Manager Pro</span>
+        </div>
         
         <div class="nav-menu">
-            <button class="nav-item active" onclick="showSection('dashboard')">
+            <button class="nav-item active" data-section="dashboard" onclick="showSection('dashboard')">
                 <span class="icon">📊</span>
                 <span>Dashboard</span>
             </button>
-            <button class="nav-item" onclick="showSection('portfolio')">
+            <button class="nav-item" data-section="portfolio" onclick="showSection('portfolio')">
                 <span class="icon">💼</span>
                 <span>Portfolio</span>
             </button>
             
-            <div style="margin: 32px 0 12px 20px; font-size: 0.75em; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Asset categories</div>
-            
-            <button class="nav-item" onclick="showSection('crypto')">
+            <div class="nav-section-title">ASSET CATEGORIES</div>
+            <button class="nav-item" data-section="crypto" onclick="showSection('crypto')">
                 <span class="icon">₿</span>
                 <span>Crypto</span>
             </button>
-            <button class="nav-item" onclick="showSection('pea')">
+            <button class="nav-item" data-section="pea" onclick="showSection('pea')">
                 <span class="icon">📈</span>
                 <span>Actions</span>
             </button>
-            <button class="nav-item" onclick="showSection('livrets')">
+            <button class="nav-item" data-section="livrets" onclick="showSection('livrets')">
                 <span class="icon">💰</span>
                 <span>Livrets</span>
             </button>
-            <button class="nav-item" onclick="showSection('fundraising')">
+            <button class="nav-item" data-section="fundraising" onclick="showSection('fundraising')">
                 <span class="icon">🚀</span>
                 <span>Levées</span>
             </button>
             
-            <div style="margin-top: auto;">
-                <button class="nav-item" onclick="showSection('insights')">
-                    <span class="icon">💡</span>
-                    <span>Insights</span>
-                </button>
-                
-                <div style="margin: 24px 0 0 0;">
-                    <button class="nav-item" onclick="showSection('settings')">
-                        <span class="icon">👤</span>
-                        <span>Profile</span>
-                    </button>
-                </div>
-            </div>
+            <button class="nav-item" data-section="insights" onclick="showSection('insights')" style="margin-top: 24px;">
+                <span class="icon">💡</span>
+                <span>Insights</span>
+            </button>
+            
+            <button class="nav-item" data-section="settings" onclick="showSection('settings')" style="margin-top: auto;">
+                <span class="icon">👤</span>
+                <span>Profile</span>
+            </button>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>📊 Portfolio Manager Pro</h1>
-            <div class="sync-status" id="syncStatus">⏳ Non synchronisé</div>
-            <button class="update-btn" onclick="updateAll()">🔄 Actualiser les prix</button>
-        </header>
-
-        <nav>
-            <button class="nav-btn" onclick="showSection('dashboard')">📈 Dashboard</button>
-            <button class="nav-btn" onclick="showSection('crypto')">₿ Crypto</button>
-            <button class="nav-btn" onclick="showSection('pea')">📊 PEA</button>
-            <button class="nav-btn" onclick="showSection('livrets')">💰 Livrets</button>
-            <button class="nav-btn" onclick="showSection('fundraising')">🚀 Levées</button>
-            <button class="nav-btn" onclick="showSection('settings')">⚙️ Paramètres</button>
-        </nav>
-
-        <!-- Dashboard -->
+<!-- Dashboard -->
         <div id="dashboard" class="section active">
             <h2 style="margin-bottom: 20px;">📈 Vue d'ensemble</h2>
             <div class="stats-grid" id="dashboardStats"></div>
@@ -1247,7 +1063,9 @@
     </div>
 
     </div>
-    <script>
+    
+    </div>
+<script>
         // Popular cryptocurrencies library
         const cryptoLibrary = [
             { symbol: 'BTC', name: 'Bitcoin' },
@@ -1643,7 +1461,21 @@ Vérifiez que votre fichier CSV est au bon format.`);
                 .join('');
         }
 
-        function showSection(section) {
+        function showSection(sectionId) {
+            // Update nav items - FIXED
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-section') === sectionId) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Show section
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+        }
+        
+        function showSectionOld(section) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(section).classList.add('active');
         }
@@ -3749,6 +3581,104 @@ Vérifiez que votre fichier CSV est au bon format.`);
             updateDiversificationAnalysis();
             updateTransactionHistory();
         };
+    </script>
+
+
+        // Analyze Portfolio for Insights
+        function analyzePortfolio() {
+            const resultsEl = document.getElementById('insightsResults');
+            
+            let totalValue = 0;
+            let totalInvested = 0;
+            let cryptoCount = portfolio.crypto.length;
+            let peaCount = 0;
+            let livretsCount = portfolio.livrets.length;
+            
+            // Count unique PEA tickers
+            const uniquePEA = new Set(portfolio.pea.map(p => p.ticker));
+            peaCount = uniquePEA.size;
+            
+            // Calculate totals
+            portfolio.crypto.forEach(c => {
+                const currentPrice = portfolio.prices[c.symbol] || c.price;
+                totalValue += c.quantity * currentPrice;
+                totalInvested += c.quantity * c.price;
+            });
+            
+            portfolio.pea.forEach(p => {
+                const currentPrice = portfolio.prices[p.ticker] || p.price;
+                totalValue += p.quantity * currentPrice;
+                totalInvested += p.quantity * p.price + (p.fees || 0);
+            });
+            
+            portfolio.livrets.forEach(l => {
+                const amount = parseFloat(l.amount) || 0;
+                totalValue += amount;
+                totalInvested += amount;
+            });
+            
+            const pnl = totalValue - totalInvested;
+            const performance = totalInvested > 0 ? (pnl / totalInvested) * 100 : 0;
+            
+            // Generate recommendations
+            let recommendations = [];
+            
+            if (cryptoCount + peaCount < 5) {
+                recommendations.push({
+                    icon: '⚠️',
+                    title: 'Diversification faible',
+                    desc: `Vous avez seulement ${cryptoCount + peaCount} actifs. Considérez d'augmenter votre diversification.`,
+                    type: 'warning'
+                });
+            } else {
+                recommendations.push({
+                    icon: '✅',
+                    title: 'Bonne diversification',
+                    desc: `Vous avez ${cryptoCount + peaCount} actifs différents.`,
+                    type: 'success'
+                });
+            }
+            
+            if (performance > 20) {
+                recommendations.push({
+                    icon: '🎉',
+                    title: 'Excellente performance',
+                    desc: `Votre portfolio a gagné ${performance.toFixed(1)}% ! Excellent travail !`,
+                    type: 'success'
+                });
+            } else if (performance < -10) {
+                recommendations.push({
+                    icon: '📉',
+                    title: 'Performance négative',
+                    desc: `Votre portfolio est en baisse de ${Math.abs(performance).toFixed(1)}%. Considérez un rééquilibrage.`,
+                    type: 'danger'
+                });
+            }
+            
+            if (livretsCount > 0) {
+                recommendations.push({
+                    icon: '💰',
+                    title: 'Épargne sécurisée',
+                    desc: `Vous avez ${livretsCount} livrets d'épargne pour sécuriser votre capital.`,
+                    type: 'info'
+                });
+            }
+            
+            // Display recommendations
+            const html = recommendations.map(r => `
+                <div class="portfolio-card" style="border-left: 4px solid ${
+                    r.type === 'success' ? 'var(--success)' :
+                    r.type === 'warning' ? '#ffc107' :
+                    r.type === 'danger' ? 'var(--danger)' : '#3498db'
+                };">
+                    <h3>${r.icon} ${r.title}</h3>
+                    <p style="color: var(--text-secondary); line-height: 1.8;">${r.desc}</p>
+                </div>
+            `).join('');
+            
+            resultsEl.innerHTML = html;
+        }
+
     </script>
 </body>
 </html>
