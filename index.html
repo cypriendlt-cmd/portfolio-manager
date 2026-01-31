@@ -1,193 +1,38 @@
-// ========================================
-// INSIGHTS FUNCTION - VERSION CORRIGÉE
-// ========================================
+Pour supprimer la section Insights de votre fichier HTML, supprimez ces 3 parties :
 
-function generateInsights() {
-    const container = document.getElementById('insightsContent');
-    if (!container) return;
-    
-    container.innerHTML = '<div class="loading">Analyse en cours...</div>';
-    
-    // Calculate portfolio stats
-    let totalValue = 0, totalInvested = 0;
-    let cryptoCount = portfolio.crypto.length, cryptoValue = 0;
-    let peaCount = 0, peaValue = 0;
-    let livretsCount = portfolio.livrets.length, livretsValue = 0;
-    
-    portfolio.crypto.forEach(c => {
-        const current = c.quantity * (portfolio.prices[c.symbol] || c.price);
-        cryptoValue += current;
-        totalValue += current;
-        totalInvested += c.quantity * c.price;
-    });
-    
-    const uniquePEA = new Set(portfolio.pea.map(p => p.ticker));
-    peaCount = uniquePEA.size;
-    portfolio.pea.forEach(p => {
-        const current = p.quantity * (portfolio.prices[p.ticker] || p.price);
-        peaValue += current;
-        totalValue += current;
-        totalInvested += p.quantity * p.price + (p.fees || 0);
-    });
-    
-    portfolio.livrets.forEach(l => {
-        const amount = parseFloat(l.amount) || 0;
-        livretsValue += amount;
-        totalValue += amount;
-        totalInvested += amount;
-    });
-    
-    portfolio.fundraising.forEach(f => {
-        totalValue += parseFloat(f.valuation) || 0;
-        totalInvested += parseFloat(f.amount) || 0;
-    });
-    
-    const pnl = totalValue - totalInvested;
-    const performance = totalInvested > 0 ? (pnl / totalInvested) * 100 : 0;
-    const totalAssets = cryptoCount + peaCount;
-    const cryptoPercent = totalValue > 0 ? (cryptoValue / totalValue) * 100 : 0;
-    const livretsPercent = totalValue > 0 ? (livretsValue / totalValue) * 100 : 0;
-    
-    // Generate recommendations
-    let recommendations = [];
-    
-    if (totalAssets < 5) {
-        recommendations.push({
-            icon: '⚠️', 
-            title: 'Diversification faible', 
-            desc: 'Vous avez seulement ' + totalAssets + ' actifs. Visez 10-15 actifs pour réduire le risque.', 
-            type: 'warning'
-        });
-    } else if (totalAssets < 10) {
-        recommendations.push({
-            icon: '📊', 
-            title: 'Diversification moyenne', 
-            desc: 'Vous avez ' + totalAssets + ' actifs. Visez 15-20 pour améliorer la diversification.', 
-            type: 'info'
-        });
-    } else {
-        recommendations.push({
-            icon: '✅', 
-            title: 'Excellente diversification', 
-            desc: 'Vous avez ' + totalAssets + ' actifs différents. Excellent !', 
-            type: 'success'
-        });
-    }
-    
-    if (performance > 20) {
-        recommendations.push({
-            icon: '🎉', 
-            title: 'Performance exceptionnelle', 
-            desc: '+' + performance.toFixed(1) + '% (€' + pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ') ! Pensez à sécuriser vos gains.', 
-            type: 'success'
-        });
-    } else if (performance > 10) {
-        recommendations.push({
-            icon: '📈', 
-            title: 'Bonne performance', 
-            desc: '+' + performance.toFixed(1) + '% (€' + pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + '). Très bien !', 
-            type: 'success'
-        });
-    } else if (performance > 0) {
-        recommendations.push({
-            icon: '➡️', 
-            title: 'Performance positive', 
-            desc: '+' + performance.toFixed(1) + '% (€' + pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + '). Performance stable.', 
-            type: 'info'
-        });
-    } else if (performance < -10) {
-        recommendations.push({
-            icon: '📉', 
-            title: 'Performance négative', 
-            desc: performance.toFixed(1) + '% (€' + pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + '). Considérez un rééquilibrage.', 
-            type: 'danger'
-        });
-    }
-    
-    if (cryptoPercent > 50) {
-        recommendations.push({
-            icon: '⚡', 
-            title: 'Forte exposition crypto', 
-            desc: cryptoPercent.toFixed(1) + '% en crypto. Rééquilibrez vers des actions pour réduire le risque.', 
-            type: 'warning'
-        });
-    }
-    
-    if (livretsCount > 0) {
-        recommendations.push({
-            icon: '💰', 
-            title: 'Épargne de sécurité', 
-            desc: livretsCount + ' livret(s) d\'épargne (' + livretsPercent.toFixed(1) + '%). Excellent coussin de sécurité !', 
-            type: 'success'
-        });
-    } else {
-        recommendations.push({
-            icon: '🚨', 
-            title: 'Pas d\'épargne de sécurité', 
-            desc: 'Aucun livret. Gardez 3-6 mois de dépenses en épargne liquide.', 
-            type: 'danger'
-        });
-    }
-    
-    if (peaCount === 0 && totalAssets > 0) {
-        recommendations.push({
-            icon: '📈', 
-            title: 'Ouvrez un PEA', 
-            desc: 'Pas de PEA. C\'est une enveloppe fiscale avantageuse (17.2% après 5 ans vs 30%).', 
-            type: 'info'
-        });
-    }
-    
-    // Build HTML - FIXED: Using proper string concatenation
-    let html = '<div style="margin-bottom: 24px;">';
-    html += '<h3 style="font-size: 1.3em; margin-bottom: 16px;">📊 Résumé de votre portfolio</h3>';
-    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">';
-    
-    // Valeur totale
-    html += '<div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-subtle);">';
-    html += '<div style="color: var(--text-secondary); font-size: 0.85em; margin-bottom: 8px;">Valeur totale</div>';
-    html += '<div style="font-size: 1.8em; font-weight: 800; color: var(--orange-primary);">€' + totalValue.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + '</div>';
-    html += '</div>';
-    
-    // Performance
-    html += '<div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-subtle);">';
-    html += '<div style="color: var(--text-secondary); font-size: 0.85em; margin-bottom: 8px;">Performance</div>';
-    html += '<div style="font-size: 1.8em; font-weight: 800;" class="' + (performance >= 0 ? 'positive' : 'negative') + '">';
-    html += (performance >= 0 ? '+' : '') + performance.toFixed(1) + '%</div>';
-    html += '</div>';
-    
-    // Actifs
-    html += '<div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-subtle);">';
-    html += '<div style="color: var(--text-secondary); font-size: 0.85em; margin-bottom: 8px;">Actifs</div>';
-    html += '<div style="font-size: 1.8em; font-weight: 800; color: var(--text-primary);">' + totalAssets + '</div>';
-    html += '</div>';
-    
-    // Plus-value
-    html += '<div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-subtle);">';
-    html += '<div style="color: var(--text-secondary); font-size: 0.85em; margin-bottom: 8px;">Plus-value</div>';
-    html += '<div style="font-size: 1.8em; font-weight: 800;" class="' + (pnl >= 0 ? 'positive' : 'negative') + '">';
-    html += (pnl >= 0 ? '+' : '') + '€' + pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + '</div>';
-    html += '</div>';
-    
-    html += '</div></div>';
-    
-    // Recommendations
-    html += '<h3 style="font-size: 1.3em; margin-bottom: 24px;">🎯 Recommandations personnalisées</h3>';
-    
-    recommendations.forEach(function(r) {
-        let borderColor = '#3498db';
-        if (r.type === 'success') borderColor = 'var(--success)';
-        else if (r.type === 'warning') borderColor = '#ffc107';
-        else if (r.type === 'danger') borderColor = 'var(--danger)';
-        
-        html += '<div class="fear-greed-card" style="border-left: 4px solid ' + borderColor + '; margin-bottom: 20px;">';
-        html += '<h4 style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 1.1em;">';
-        html += '<span style="font-size: 1.5em;">' + r.icon + '</span>';
-        html += r.title;
-        html += '</h4>';
-        html += '<p style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95em;">' + r.desc + '</p>';
-        html += '</div>';
-    });
-    
-    container.innerHTML = html;
-}
+1. DANS LA SIDEBAR (vers ligne 1010) - SUPPRIMER CE BLOC :
+            <div style="margin-top: auto;">
+                <button class="nav-item" onclick="showSection('insights')">
+                    <span class="icon">💡</span>
+                    <span>Insights</span>
+                </button>
+                
+                <div style="margin: 24px 0 0 0;">
+
+ET REMPLACER PAR :
+            <div style="margin-top: auto;">
+                <button class="nav-item" data-section="settings" onclick="showSection('settings')">
+                    <span class="icon">👤</span>
+                    <span>Profile</span>
+                </button>
+            </div>
+
+2. DANS LE HTML (vers ligne 1400) - SUPPRIMER TOUT CE BLOC :
+        <!-- Insights Section (NEW) -->
+        <div id="insights" class="section">
+            <h2 style="margin-bottom: 20px;">💡 Insights</h2>
+            
+            <div class="fear-greed-card">
+                <h3 style="margin-bottom: 20px;">🎯 Recommandations</h3>
+                <div id="insightsContent">
+                    <div style="padding: 20px; text-align: center; color: var(--text-secondary);">
+                        <p style="margin-bottom: 12px;">Analysez votre portefeuille pour obtenir des recommandations personnalisées.</p>
+                        <button onclick="generateInsights()" class="btn-primary">🔍 Analyser mon portfolio</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+3. DANS LE JAVASCRIPT - SI LA FONCTION generateInsights() EXISTE, LA SUPPRIMER
+
+C'est tout ! Votre fichier n'aura plus d'Insights.
