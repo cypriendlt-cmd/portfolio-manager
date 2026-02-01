@@ -1,0 +1,13 @@
+{
+  "date": "dimanche 2 février 2025",
+  "updated": "02/02/2025 09:00:00",
+  "summary": "<p style=\"margin-bottom: 12px;\"><strong>📊 Marchés aujourd'hui :</strong> Exemple de synthèse générée automatiquement. Ce fichier sera remplacé par la vraie synthèse une fois GitHub Actions configuré.</p><p style=\"margin-bottom: 12px;\"><strong>💡 Crypto :</strong> Bitcoin et Ethereum montrent des signes de stabilisation après une période de volatilité.</p><p><strong>📈 Bourse :</strong> Les marchés surveillent les données économiques et les décisions de politique monétaire.</p>",
+  "news": [
+    {
+      "title": "Configuration requise",
+      "source": "System",
+      "snippet": "Configurez GitHub Actions pour activer la génération automatique de cette synthèse. Voir SETUP_GITHUB_ACTIONS.md",
+      "url": "#"
+    }
+  ]
+}
