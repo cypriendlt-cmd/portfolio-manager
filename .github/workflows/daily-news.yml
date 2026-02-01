@@ -1,0 +1,40 @@
+name: Daily Market Summary
+
+on:
+  schedule:
+    # Exécution quotidienne à 8h00 UTC (9h Paris hiver, 10h Paris été)
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Permet de lancer manuellement le workflow
+
+jobs:
+  generate-summary:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: |
+          npm install axios
+      
+      - name: Generate market summary
+        env:
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/generate-summary.js
+      
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/market-summary.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "📊 Mise à jour quotidienne de la synthèse marché [$(date +'%Y-%m-%d')]"
+          git push
