@@ -3385,15 +3385,21 @@ Vérifiez que votre fichier CSV est au bon format.`);
                     scales: {
                         y: {
                             beginAtZero: false,
-                            grace: '5%',
                             ticks: {
                                 color: '#8892a6',
                                 callback: function(value) {
-                                    return '€' + (value / 1000).toFixed(0) + 'K';
+                                    // Afficher avec 1 décimale pour plus de précision
+                                    return '€' + (value / 1000).toFixed(1) + 'K';
                                 }
                             },
                             grid: {
                                 color: 'rgba(255, 255, 255, 0.06)'
+                            },
+                            // Forcer une marge de 10% en haut et en bas
+                            afterDataLimits: function(axis) {
+                                const range = axis.max - axis.min;
+                                axis.max = axis.max + (range * 0.10);
+                                axis.min = axis.min - (range * 0.10);
                             }
                         },
                         x: {
