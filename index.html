@@ -736,7 +736,24 @@
         <!-- Dashboard -->
         <div id="dashboard" class="section active">
             <h2 style="margin-bottom: 20px;">📈 Vue d'ensemble</h2>
-            <div class="stats-grid" id="dashboardStats"></div>
+            
+            <!-- Market News with AI Summary - EN HAUT -->
+            <div class="news-section">
+                <h3 style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📰 Synthèse IA - Actualités des marchés</span>
+                    <button onclick="refreshMarketNews()" class="btn-secondary" style="font-size: 0.9em; padding: 8px 16px;">
+                        🔄 Actualiser
+                    </button>
+                </h3>
+                
+                <div id="marketAISummary" class="ai-summary-box">
+                    <div class="loading">⏳ Chargement et synthèse IA des actualités...</div>
+                </div>
+                
+                <div id="newsFeed" class="news-feed">
+                    <div class="loading">Chargement des actualités...</div>
+                </div>
+            </div>
             
             <!-- Fear & Greed Indicators -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 30px 0;">
@@ -767,24 +784,6 @@
                     <p style="font-size: 0.8em; color: #a0aec0; margin-top: 10px;">
                         Estimation basée sur les indices VIX et marchés
                     </p>
-                </div>
-            </div>
-            
-            <!-- Market News with AI Summary -->
-            <div class="news-section">
-                <h3 style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                    <span>📰 Actualités des marchés</span>
-                    <button onclick="refreshNews()" class="btn-secondary" style="font-size: 0.9em; padding: 8px 16px;">
-                        🔄 Actualiser
-                    </button>
-                </h3>
-                
-                <div id="aiSummary" class="ai-summary-box">
-                    <div class="loading">⏳ Chargement et synthèse IA des actualités...</div>
-                </div>
-                
-                <div id="newsFeed" class="news-feed">
-                    <div class="loading">Chargement des actualités...</div>
                 </div>
             </div>
             
@@ -908,6 +907,18 @@
                             </thead>
                             <tbody id="transactionHistory"></tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Synthèse IA de votre Portfolio - EN BAS -->
+            <div style="margin: 32px 0;">
+                <h2 style="font-size: 1.8em; font-weight: 800; letter-spacing: -1px; margin-bottom: 24px;">
+                    🤖 Synthèse IA de votre Portfolio
+                </h2>
+                <div class="fear-greed-card">
+                    <div id="portfolioAISummary" class="ai-summary-box">
+                        <div class="loading">⏳ Analyse de votre patrimoine en cours...</div>
                     </div>
                 </div>
             </div>
@@ -2784,41 +2795,101 @@ Vérifiez que votre fichier CSV est au bon format.`);
             }
         }
         
-        async function refreshNews() {
-            const summaryEl = document.getElementById('aiSummary');
+        // ===== SYNTHÈSE IA DES ACTUALITÉS MARCHÉ =====
+        async function refreshMarketNews() {
+            const summaryEl = document.getElementById('marketAISummary');
             const feedEl = document.getElementById('newsFeed');
             
-            summaryEl.innerHTML = '<div class="loading">⏳ Analyse de votre patrimoine en cours...</div>';
+            summaryEl.innerHTML = '<div class="loading">⏳ Recherche et synthèse IA des actualités en cours...</div>';
             feedEl.innerHTML = '<div class="loading">Chargement...</div>';
             
             try {
-                // Générer la synthèse IA basée sur les données réelles du portfolio
-                const aiSummary = generatePortfolioAISummary();
-                summaryEl.innerHTML = `<div class="ai-summary-text">${aiSummary}</div>`;
+                const today = new Date().toLocaleDateString('fr-FR', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
                 
-                // Rechercher les actualités crypto et bourse
+                // Appel à l'API Claude pour générer une synthèse des actualités
+                summaryEl.innerHTML = '<div class="loading">⏳ Claude analyse les actualités du marché...</div>';
+                
+                const prompt = `Tu es un analyste financier expert. Analyse les dernières actualités des marchés financiers (crypto et bourse) du ${today}.
+
+Fournis une synthèse concise en français avec :
+1. Les événements majeurs du jour sur les marchés crypto (Bitcoin, Ethereum, etc.)
+2. Les mouvements importants sur les marchés actions (S&P 500, Nasdaq, etc.)
+3. Les décisions de politique monétaire ou économique importantes
+4. Une perspective pour les jours à venir
+
+Format : 3-4 paragraphes courts avec des émojis pour illustrer.`;
+
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 1000,
+                        messages: [
+                            { 
+                                role: "user", 
+                                content: prompt
+                            }
+                        ],
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.content && data.content[0] && data.content[0].text) {
+                    const aiText = data.content[0].text;
+                    
+                    summaryEl.innerHTML = `
+                        <div style="background: rgba(255, 99, 71, 0.05); padding: 12px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid var(--orange-primary);">
+                            <div style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 4px;">
+                                📅 Synthèse du ${today}
+                            </div>
+                            <div style="font-size: 0.9em; color: var(--text-secondary);">
+                                Dernière mise à jour : ${new Date().toLocaleTimeString('fr-FR')}
+                            </div>
+                        </div>
+                        
+                        <div class="ai-summary-text">
+                            ${aiText.split('\n').map(p => p.trim() ? `<p style="margin-bottom: 12px;">${p}</p>` : '').join('')}
+                        </div>
+                        
+                        <div style="margin-top: 16px; padding: 12px; background: rgba(255, 255, 255, 0.02); border-radius: 8px; font-size: 0.9em; color: var(--text-secondary);">
+                            🤖 <em>Synthèse générée par Claude AI - Mise à jour quotidienne automatique</em>
+                        </div>
+                    `;
+                } else {
+                    throw new Error('Réponse API invalide');
+                }
+                
+                // Afficher des actualités exemple
                 const newsItems = [
                     {
                         title: "Bitcoin franchit les $100,000",
                         source: "CoinDesk",
                         snippet: "Le Bitcoin a atteint un nouveau sommet historique aujourd'hui...",
-                        url: "#"
+                        url: "https://www.coindesk.com"
                     },
                     {
                         title: "La Fed maintient ses taux directeurs",
                         source: "Bloomberg",
                         snippet: "La Réserve Fédérale américaine a décidé de maintenir...",
-                        url: "#"
+                        url: "https://www.bloomberg.com"
                     },
                     {
                         title: "Les actions tech en hausse de 3%",
                         source: "Reuters",
                         snippet: "Le secteur technologique poursuit sa progression avec...",
-                        url: "#"
+                        url: "https://www.reuters.com"
                     }
                 ];
                 
-                // Afficher les actualités
                 feedEl.innerHTML = newsItems.map(news => `
                     <div class="news-item" onclick="window.open('${news.url}', '_blank')">
                         <div class="news-title">${news.title}</div>
@@ -2828,9 +2899,31 @@ Vérifiez que votre fichier CSV est au bon format.`);
                 `).join('');
                 
             } catch (error) {
-                console.error('Error loading news:', error);
-                summaryEl.innerHTML = '<div class="ai-summary-text" style="color: #ff4757;">❌ Erreur lors du chargement des actualités</div>';
+                console.error('Error loading market news:', error);
+                summaryEl.innerHTML = `
+                    <div class="ai-summary-text" style="color: #ff4757;">
+                        ❌ Erreur lors de la génération de la synthèse IA. 
+                        <br><br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
                 feedEl.innerHTML = '<div style="color: #ff4757; text-align: center;">Erreur de chargement</div>';
+            }
+        }
+        
+        // ===== SYNTHÈSE IA DU PORTFOLIO =====
+        function refreshPortfolioSummary() {
+            const summaryEl = document.getElementById('portfolioAISummary');
+            if (!summaryEl) return;
+            
+            summaryEl.innerHTML = '<div class="loading">⏳ Analyse de votre patrimoine en cours...</div>';
+            
+            try {
+                const aiSummary = generatePortfolioAISummary();
+                summaryEl.innerHTML = `<div class="ai-summary-text">${aiSummary}</div>`;
+            } catch (error) {
+                console.error('Error generating portfolio summary:', error);
+                summaryEl.innerHTML = '<div class="ai-summary-text" style="color: #ff4757;">❌ Erreur lors de la génération de la synthèse</div>';
             }
         }
         
@@ -2971,15 +3064,22 @@ Vérifiez que votre fichier CSV est au bon format.`);
             `;
         }
         
-        // Fonction pour vérifier et régénérer la synthèse quotidiennement
+        // Fonction pour vérifier et régénérer les synthèses quotidiennement
         function checkDailySynthesis() {
-            const lastSynthesisDate = localStorage.getItem('lastSynthesisDate');
+            const lastMarketSynthesisDate = localStorage.getItem('lastMarketSynthesisDate');
+            const lastPortfolioSynthesisDate = localStorage.getItem('lastPortfolioSynthesisDate');
             const today = new Date().toDateString();
             
-            if (lastSynthesisDate !== today) {
-                // Nouvelle journée, régénérer la synthèse
-                localStorage.setItem('lastSynthesisDate', today);
-                refreshNews();
+            // Régénérer la synthèse marché si nécessaire
+            if (lastMarketSynthesisDate !== today) {
+                localStorage.setItem('lastMarketSynthesisDate', today);
+                refreshMarketNews();
+            }
+            
+            // Régénérer la synthèse portfolio si nécessaire
+            if (lastPortfolioSynthesisDate !== today) {
+                localStorage.setItem('lastPortfolioSynthesisDate', today);
+                refreshPortfolioSummary();
             }
         }
         
@@ -3000,7 +3100,8 @@ Vérifiez que votre fichier CSV est au bon format.`);
             // Load market indicators and news
             loadCryptoFearGreed();
             loadStockFearGreed();
-            refreshNews();
+            refreshMarketNews();
+            refreshPortfolioSummary();
             
             document.getElementById('syncStatus').textContent = '✅ Synchronisé';
             document.getElementById('syncStatus').classList.add('synced');
@@ -3869,6 +3970,7 @@ Vérifiez que votre fichier CSV est au bon format.`);
             updatePerformanceView();
             updateDiversificationAnalysis();
             updateTransactionHistory();
+            refreshPortfolioSummary();
         };
     </script>
 </body>
