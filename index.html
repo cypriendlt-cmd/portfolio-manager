@@ -167,6 +167,45 @@
             box-shadow: 0 8px 20px rgba(255, 99, 71, 0.4);
         }
         
+        /* Privacy Button */
+        .privacy-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+        
+        .privacy-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--orange-primary);
+        }
+        
+        .privacy-btn.active {
+            background: rgba(255, 99, 71, 0.1);
+            border-color: var(--orange-primary);
+            color: var(--orange-primary);
+        }
+        
+        /* Privacy Mode - Blur values */
+        .privacy-mode .value-hidden {
+            filter: blur(8px);
+            user-select: none;
+            pointer-events: none;
+            transition: filter 0.3s ease;
+        }
+        
+        .privacy-mode .value-hidden:hover {
+            filter: blur(8px);
+        }
+        
         /* Hide old nav */
         nav {
             display: none;
@@ -720,8 +759,14 @@
     <div class="container">
         <header>
             <h1>📊 Portfolio Manager Pro</h1>
-            <div class="sync-status" id="syncStatus">⏳ Non synchronisé</div>
-            <button class="update-btn" onclick="updateAll()">🔄 Actualiser les prix</button>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="privacy-btn" id="privacyToggle" onclick="togglePrivacy()">
+                    <span id="privacyIcon">👁️</span>
+                    <span id="privacyText">Masquer</span>
+                </button>
+                <div class="sync-status" id="syncStatus">⏳ Non synchronisé</div>
+                <button class="update-btn" onclick="updateAll()">🔄 Actualiser les prix</button>
+            </div>
         </header>
 
         <nav>
@@ -1635,6 +1680,75 @@ Vérifiez que votre fichier CSV est au bon format.`);
             document.getElementById(sectionId).classList.add('active');
         }
 
+        // ===== PRIVACY MODE =====
+        let isPrivacyMode = false;
+
+        function togglePrivacy() {
+            isPrivacyMode = !isPrivacyMode;
+            const body = document.body;
+            const icon = document.getElementById('privacyIcon');
+            const text = document.getElementById('privacyText');
+            const btn = document.getElementById('privacyToggle');
+            
+            if (isPrivacyMode) {
+                body.classList.add('privacy-mode');
+                icon.textContent = '🙈';
+                text.textContent = 'Afficher';
+                btn.classList.add('active');
+                
+                // Ajouter la classe aux valeurs à masquer
+                applyPrivacyMode();
+            } else {
+                body.classList.remove('privacy-mode');
+                icon.textContent = '👁️';
+                text.textContent = 'Masquer';
+                btn.classList.remove('active');
+            }
+            
+            // Sauvegarder la préférence
+            localStorage.setItem('privacyMode', isPrivacyMode);
+        }
+
+        function applyPrivacyMode() {
+            // Sélectionner tous les éléments contenant des valeurs à masquer
+            const selectors = [
+                '.stat-value',           // Valeurs dans les cartes stats
+                '.portfolio-value',      // Valeurs du portfolio
+                'td:nth-child(2)',       // Colonnes de valeurs dans les tableaux
+                'td:nth-child(3)',
+                'td:nth-child(5)',
+                'td:nth-child(6)',
+                'td:nth-child(7)',
+                '.gauge-value',          // Valeurs des jauges
+                '[data-value]',          // Éléments avec attribut data-value
+            ];
+            
+            // Retirer les anciennes classes
+            document.querySelectorAll('.value-hidden').forEach(el => {
+                el.classList.remove('value-hidden');
+            });
+            
+            if (isPrivacyMode) {
+                selectors.forEach(selector => {
+                    document.querySelectorAll(selector).forEach(element => {
+                        // Ne masquer que si ça contient un nombre ou un symbole €
+                        const text = element.textContent;
+                        if (text.match(/[€$0-9,]/)) {
+                            element.classList.add('value-hidden');
+                        }
+                    });
+                });
+            }
+        }
+
+        // Charger la préférence au démarrage
+        window.addEventListener('load', () => {
+            const savedPrivacy = localStorage.getItem('privacyMode') === 'true';
+            if (savedPrivacy) {
+                togglePrivacy();
+            }
+        });
+
         function ensurePortfolioStructure() {
             if (!portfolio.crypto) portfolio.crypto = [];
             if (!portfolio.pea) portfolio.pea = [];
@@ -1967,6 +2081,11 @@ Vérifiez que votre fichier CSV est au bon format.`);
             }).join('');
 
             document.getElementById('cryptoList').innerHTML = html;
+            
+            // Appliquer le mode privacy si activé
+            if (isPrivacyMode) {
+                applyPrivacyMode();
+            }
         }
 
         function updatePEAList() {
@@ -2094,6 +2213,11 @@ Vérifiez que votre fichier CSV est au bon format.`);
                 const currentPrice = portfolio.prices[ticker] || 0;
                 setTimeout(() => createAssetChart(ticker, asset.purchases, currentPrice), 100);
             });
+            
+            // Appliquer le mode privacy si activé
+            if (isPrivacyMode) {
+                setTimeout(() => applyPrivacyMode(), 200);
+            }
         }
 
         function updateFundraisingList() {
@@ -2618,6 +2742,11 @@ Vérifiez que votre fichier CSV est au bon format.`);
 
             document.getElementById('dashboardStats').innerHTML = html;
             updateChart(peaByTicker);
+            
+            // Appliquer le mode privacy si activé
+            if (isPrivacyMode) {
+                applyPrivacyMode();
+            }
         }
 
         function updateChart(peaByTicker) {
