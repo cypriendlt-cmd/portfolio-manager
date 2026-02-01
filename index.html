@@ -1710,12 +1710,10 @@ Vérifiez que votre fichier CSV est au bon format.`);
         }
 
         function applyPrivacyMode() {
-            // Retirer les anciennes classes
+            // Retirer les anciennes classes et filtres
             document.querySelectorAll('.value-hidden').forEach(el => {
                 el.classList.remove('value-hidden');
             });
-            
-            // Retirer le flou des graphiques
             document.querySelectorAll('canvas').forEach(canvas => {
                 canvas.style.filter = 'none';
             });
@@ -1725,87 +1723,102 @@ Vérifiez que votre fichier CSV est au bon format.`);
             
             if (!isPrivacyMode) return;
             
-            // ===== MASQUER LES VALEURS TEXTUELLES =====
+            // ===== MASQUER UNIQUEMENT LES VALEURS FINANCIÈRES PERSONNELLES =====
             
-            // 1. Dashboard stats
-            document.querySelectorAll('.stat-value').forEach(el => {
+            // 1. Stats du dashboard (les 4 grandes cartes en haut)
+            document.querySelectorAll('#dashboardStats .stat-value').forEach(el => {
                 el.classList.add('value-hidden');
             });
             
-            // 2. Détails des actifs (crypto, PEA, etc.)
+            // 2. Valeurs dans les détails d'actifs (sections crypto, PEA)
             document.querySelectorAll('.asset-stat-value').forEach(el => {
-                el.classList.add('value-hidden');
-            });
-            
-            // 3. Toutes les cellules de tableaux contenant des valeurs
-            document.querySelectorAll('table tbody td').forEach(td => {
-                const text = td.textContent.trim();
-                // Masquer si contient €, $, +, - suivi de chiffres, ou juste des chiffres avec virgule/point
-                if (text.match(/[€$]|^\+|^-|^\d+[.,]\d+|^\d+$/)) {
-                    td.classList.add('value-hidden');
+                // Ne masquer que si c'est une valeur monétaire, pas les noms
+                const text = el.textContent.trim();
+                if (text.match(/[$€]|^\d+[.,]\d+|^\+|^-/)) {
+                    el.classList.add('value-hidden');
                 }
             });
             
-            // 4. Performances (meilleurs/pires)
+            // 3. Tableaux - masquer seulement les colonnes de valeurs
+            document.querySelectorAll('table tbody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                cells.forEach((cell, index) => {
+                    // Ne masquer que les cellules qui contiennent vraiment des montants
+                    const text = cell.textContent.trim();
+                    if (text.match(/^[$€]\d|^\d+[.,]\d+\s*[$€]?$|^\+\d|^-\d/)) {
+                        cell.classList.add('value-hidden');
+                    }
+                });
+            });
+            
+            // 4. Section Performance - uniquement les valeurs et %
             document.querySelectorAll('#topPerformers, #worstPerformers').forEach(section => {
+                // Chercher spécifiquement les valeurs de performance
                 section.querySelectorAll('div').forEach(el => {
                     const text = el.textContent.trim();
-                    if (text.match(/[€$\+\-]\d|^\d+[.,]\d+%?$/)) {
+                    // Ne masquer que si c'est vraiment un montant ou pourcentage
+                    if (text.match(/^[€$]\d+[.,]\d+$|^[+\-]\d+[.,]\d+%$/)) {
                         el.classList.add('value-hidden');
                     }
                 });
             });
             
-            // 5. Récapitulatifs des livrets
-            document.querySelectorAll('.livret-summary').forEach(el => {
-                if (el.textContent.match(/€|\d+[.,]\d+/)) {
-                    el.classList.add('value-hidden');
-                }
-            });
-            
-            // 6. Intérêts et montants dans les sections de détails
-            document.querySelectorAll('p, span, div').forEach(el => {
+            // 5. Récapitulatif des livrets (Total épargné, Intérêts, etc.)
+            document.querySelectorAll('p, div').forEach(el => {
                 const text = el.textContent.trim();
-                // Patterns spécifiques pour les montants d'intérêts et épargne
-                if (text.match(/Total épargné|Intérêts annuels|Intérêts mensuels/)) {
-                    // Masquer juste les valeurs, pas les labels
+                // Masquer uniquement si le texte entier est un montant
+                if (text.match(/^Total épargné\s*:\s*[€$]\d|^Intérêts.*:\s*[€$]\d/)) {
+                    // Masquer seulement la partie valeur
                     const parts = text.split(':');
-                    if (parts.length > 1 && parts[1].trim().match(/€?\d/)) {
-                        el.classList.add('value-hidden');
+                    if (parts.length === 2) {
+                        el.innerHTML = parts[0] + ': <span class="value-hidden">' + parts[1] + '</span>';
                     }
                 }
             });
             
-            // ===== NE PAS MASQUER LES EXCEPTIONS =====
+            // ===== EXCEPTIONS - NE JAMAIS MASQUER =====
             
-            // Ne PAS masquer les indices Fear & Greed
-            document.querySelectorAll('#cryptoFearGreed .gauge-value, #cryptoFearGreed .gauge-label, #stockFGValue, #stockFGLabel').forEach(el => {
+            // Indices Fear & Greed
+            document.querySelectorAll('#cryptoFearGreed, #stockFearGreed').forEach(section => {
+                section.querySelectorAll('*').forEach(el => {
+                    el.classList.remove('value-hidden');
+                });
+            });
+            
+            // Score de diversification
+            document.querySelectorAll('#diversificationScore, #divScore').forEach(el => {
                 el.classList.remove('value-hidden');
             });
             
-            // Ne PAS masquer le score de diversification
-            document.querySelectorAll('#divScore, #diversificationScore .gauge-label').forEach(el => {
+            // Labels et noms (jamais masquer les noms d'actifs)
+            document.querySelectorAll('.asset-name, .asset-ticker, .stat-label, .asset-stat-label, h1, h2, h3, h4, label').forEach(el => {
                 el.classList.remove('value-hidden');
             });
             
-            // ===== MASQUER LES GRAPHIQUES =====
+            // ===== GRAPHIQUES - Flouter seulement ceux avec des valeurs personnelles =====
             
-            // Flouter le graphique d'évolution du patrimoine (contient des valeurs)
+            // Graphique d'évolution du patrimoine
             const evolutionChart = document.getElementById('evolutionChart');
-            if (evolutionChart) {
+            if (evolutionChart && evolutionChart.closest('.chart-container')) {
                 evolutionChart.closest('.chart-container').style.filter = 'blur(8px)';
             }
             
-            // Flouter le graphique du portfolio (donut chart)
-            const portfolioChart = document.getElementById('portfolioChart');
-            if (portfolioChart) {
-                portfolioChart.closest('.chart-container').style.filter = 'blur(8px)';
+            // Graphique donut de répartition
+            const assetClassChart = document.getElementById('assetClassChart');
+            if (assetClassChart) {
+                assetClassChart.style.filter = 'blur(8px)';
             }
             
-            // Flouter les graphiques dans les détails d'actifs
+            // Graphiques individuels des actifs (dans les détails)
             document.querySelectorAll('canvas[id^="chart-"]').forEach(canvas => {
                 canvas.style.filter = 'blur(8px)';
             });
+            
+            // NE PAS flouter le graphique principal (donut global)
+            const portfolioChart = document.getElementById('portfolioChart');
+            if (portfolioChart) {
+                portfolioChart.style.filter = 'blur(8px)';
+            }
         }
 
         // Charger la préférence au démarrage
