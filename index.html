@@ -706,6 +706,284 @@
             color: white;
             border-color: transparent;
         }
+        
+        /* ===== STYLES ADAPTATIFS PAR TYPE D'APPAREIL ===== */
+        
+        /* ========================================
+           MOBILE - OPTIMISATION COMPLÈTE
+           ======================================== */
+        
+        body.device-mobile {
+            overflow-x: hidden;
+        }
+        
+        /* Header mobile */
+        body.device-mobile header {
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+        }
+        
+        body.device-mobile header h1 {
+            font-size: 1.5em;
+            text-align: center;
+        }
+        
+        body.device-mobile header > div {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        body.device-mobile .privacy-btn,
+        body.device-mobile .update-btn {
+            font-size: 0.85em;
+            padding: 8px 16px;
+        }
+        
+        /* Sidebar mobile - Navigation en bas */
+        body.device-mobile .sidebar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: auto;
+            width: 100%;
+            height: auto;
+            padding: 0;
+            border-right: none;
+            border-top: 1px solid var(--border-subtle);
+            z-index: 1000;
+            background: var(--bg-secondary);
+        }
+        
+        body.device-mobile .logo {
+            display: none;
+        }
+        
+        body.device-mobile .nav-menu {
+            flex-direction: row;
+            padding: 8px;
+            gap: 4px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        body.device-mobile .nav-item {
+            flex-direction: column;
+            min-width: 70px;
+            padding: 8px 4px;
+            font-size: 0.75em;
+            gap: 4px;
+            text-align: center;
+        }
+        
+        body.device-mobile .nav-item .icon {
+            font-size: 1.4em;
+        }
+        
+        body.device-mobile .nav-item span:not(.icon) {
+            font-size: 0.9em;
+        }
+        
+        /* Main content mobile */
+        body.device-mobile .main-content {
+            margin-left: 0;
+            margin-bottom: 80px; /* Espace pour la nav en bas */
+            padding: 16px;
+        }
+        
+        /* Stats grid mobile */
+        body.device-mobile .stats-grid {
+            grid-template-columns: 1fr !important;
+            gap: 12px;
+        }
+        
+        body.device-mobile .stat-card {
+            padding: 20px;
+        }
+        
+        body.device-mobile .stat-label {
+            font-size: 0.85em;
+        }
+        
+        body.device-mobile .stat-value {
+            font-size: 1.8em;
+        }
+        
+        /* Asset stats mobile - 2 colonnes compactes */
+        body.device-mobile .asset-stats {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px;
+        }
+        
+        body.device-mobile .asset-stat {
+            padding: 8px;
+        }
+        
+        body.device-mobile .asset-stat-label {
+            font-size: 0.75em;
+        }
+        
+        body.device-mobile .asset-stat-value {
+            font-size: 0.95em;
+        }
+        
+        /* Asset header mobile */
+        body.device-mobile .asset-header {
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
+        }
+        
+        body.device-mobile .asset-header-left {
+            width: 100%;
+        }
+        
+        body.device-mobile .asset-name {
+            font-size: 1.1em;
+        }
+        
+        body.device-mobile .asset-ticker {
+            font-size: 0.8em;
+        }
+        
+        /* Tables mobile - Scroll horizontal */
+        body.device-mobile table {
+            font-size: 0.85em;
+            min-width: 600px; /* Force scroll horizontal */
+        }
+        
+        body.device-mobile table th,
+        body.device-mobile table td {
+            padding: 8px;
+            white-space: nowrap;
+        }
+        
+        body.device-mobile .asset-content {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Charts mobile */
+        body.device-mobile .chart-container {
+            height: 250px !important;
+        }
+        
+        body.device-mobile canvas {
+            max-height: 250px;
+        }
+        
+        /* Fear & Greed mobile */
+        body.device-mobile .fear-greed-card {
+            padding: 16px;
+        }
+        
+        body.device-mobile .fear-greed-gauge {
+            transform: scale(0.9);
+        }
+        
+        /* Time filters mobile - Scroll horizontal */
+        body.device-mobile .time-filter {
+            padding: 6px 16px;
+            font-size: 0.85em;
+        }
+        
+        body.device-mobile div[style*="display: flex"][style*="gap: 8px"] {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Buttons mobile */
+        body.device-mobile .btn-primary,
+        body.device-mobile .btn-secondary {
+            font-size: 0.9em;
+            padding: 10px 16px;
+        }
+        
+        /* Forms mobile */
+        body.device-mobile input,
+        body.device-mobile select,
+        body.device-mobile textarea {
+            font-size: 16px; /* Évite le zoom iOS */
+        }
+        
+        /* News section mobile */
+        body.device-mobile .news-feed {
+            grid-template-columns: 1fr !important;
+        }
+        
+        body.device-mobile .news-item {
+            padding: 12px;
+        }
+        
+        /* Performance section mobile */
+        body.device-mobile #topPerformers,
+        body.device-mobile #worstPerformers {
+            font-size: 0.9em;
+        }
+        
+        body.device-mobile #topPerformers > div,
+        body.device-mobile #worstPerformers > div {
+            padding: 10px !important;
+        }
+        
+        /* Hide less important info on mobile */
+        body.device-mobile .asset-ticker {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Improve touch targets */
+        body.device-mobile button,
+        body.device-mobile .nav-item,
+        body.device-mobile .asset-toggle {
+            min-height: 44px; /* iOS recommendation */
+            min-width: 44px;
+        }
+        
+        /* Reduce whitespace */
+        body.device-mobile h2 {
+            font-size: 1.5em;
+            margin-bottom: 16px;
+        }
+        
+        body.device-mobile h3 {
+            font-size: 1.2em;
+            margin-bottom: 12px;
+        }
+        
+        /* ========================================
+           TABLET - ÉCRANS MOYENS
+           ======================================== */
+        
+        body.device-tablet .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        body.device-tablet .asset-stats {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        body.device-tablet .sidebar {
+            width: 200px;
+        }
+        
+        body.device-tablet .main-content {
+            margin-left: 200px;
+            padding: 32px;
+        }
+        
+        /* ========================================
+           DESKTOP - GRAND ÉCRAN (PAR DÉFAUT)
+           ======================================== */
+        
+        body.device-desktop .stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
     </style>
 </head>
 <body>
@@ -1320,6 +1598,34 @@
         let tokenClient = null;
         let myChart = null;
 
+        // ===== DÉTECTION DU TYPE D'APPAREIL =====
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isTablet = /(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(navigator.userAgent);
+        const isDesktop = !isMobile && !isTablet;
+        
+        // Détection plus précise
+        const deviceInfo = {
+            isMobile: isMobile,
+            isTablet: isTablet,
+            isDesktop: isDesktop,
+            screenWidth: window.innerWidth,
+            screenHeight: window.innerHeight,
+            isTouchDevice: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+            platform: navigator.platform,
+            userAgent: navigator.userAgent
+        };
+        
+        // Fonction utilitaire pour adapter l'interface selon l'appareil
+        function getDeviceType() {
+            if (isMobile) return 'mobile';
+            if (isTablet) return 'tablet';
+            return 'desktop';
+        }
+        
+        // Log du type d'appareil au démarrage
+        console.log('📱 Type d\'appareil détecté:', getDeviceType());
+        console.log('📊 Informations:', deviceInfo);
+
         // Initialize crypto library display
         function initCryptoLibrary() {
             const container = document.getElementById('cryptoLibrary');
@@ -1857,6 +2163,10 @@ Vérifiez que votre fichier CSV est au bon format.`);
 
         // Charger la préférence au démarrage
         window.addEventListener('load', () => {
+            // Ajouter la classe CSS selon le type d'appareil
+            document.body.classList.add(`device-${getDeviceType()}`);
+            
+            // Charger la préférence de privacy
             const savedPrivacy = localStorage.getItem('privacyMode') === 'true';
             if (savedPrivacy) {
                 togglePrivacy();
@@ -3753,7 +4063,7 @@ Vérifiez que votre fichier CSV est au bon format.`);
                     </div>
                     <div style="text-align: right;">
                         <div class="positive" style="font-weight: 800;">+${p.performance.toFixed(2)}%</div>
-                        <div style="font-size: 0.85em; color: var(--text-secondary);">€${p.pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                        <div style="font-size: 0.85em; color: var(--text-secondary);">+€${p.pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
                     </div>
                 </div>
             `).join('');
@@ -3767,7 +4077,7 @@ Vérifiez que votre fichier CSV est au bon format.`);
                     </div>
                     <div style="text-align: right;">
                         <div class="${p.performance >= 0 ? 'positive' : 'negative'}" style="font-weight: 800;">${p.performance >= 0 ? '+' : ''}${p.performance.toFixed(2)}%</div>
-                        <div style="font-size: 0.85em; color: var(--text-secondary);">€${p.pnl.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                        <div style="font-size: 0.85em; color: var(--text-secondary);">${p.pnl >= 0 ? '+' : ''}€${Math.abs(p.pnl).toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
                     </div>
                 </div>
             `).join('');
