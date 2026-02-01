@@ -1695,15 +1695,15 @@ Vérifiez que votre fichier CSV est au bon format.`);
                 icon.textContent = '🙈';
                 text.textContent = 'Afficher';
                 btn.classList.add('active');
-                
-                // Ajouter la classe aux valeurs à masquer
-                applyPrivacyMode();
             } else {
                 body.classList.remove('privacy-mode');
                 icon.textContent = '👁️';
                 text.textContent = 'Masquer';
                 btn.classList.remove('active');
             }
+            
+            // Appliquer le mode privacy (que ce soit pour masquer OU afficher)
+            applyPrivacyMode();
             
             // Sauvegarder la préférence
             localStorage.setItem('privacyMode', isPrivacyMode);
