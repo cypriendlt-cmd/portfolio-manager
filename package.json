@@ -1,0 +1,14 @@
+{
+  "name": "portfolio-manager-github-actions",
+  "version": "1.0.0",
+  "description": "GitHub Actions scripts for daily market summary generation",
+  "main": "scripts/generate-summary.js",
+  "scripts": {
+    "generate": "node scripts/generate-summary.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "author": "",
+  "license": "MIT"
+}
