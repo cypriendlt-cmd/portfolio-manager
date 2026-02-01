@@ -710,254 +710,351 @@
         /* ===== STYLES ADAPTATIFS PAR TYPE D'APPAREIL ===== */
         
         /* ========================================
-           MOBILE - OPTIMISATION COMPLÈTE
+           MOBILE - DASHBOARD STYLE FINARY
            ======================================== */
         
         body.device-mobile {
             overflow-x: hidden;
         }
         
-        /* Header mobile */
-        body.device-mobile header {
+        /* === MENU HAMBURGER === */
+        body.device-mobile .hamburger-menu {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 2000;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-bottom: 24px;
-            padding: 16px;
-            background: var(--bg-secondary);
-            border-radius: 16px;
+            gap: 4px;
+            width: 40px;
+            height: 40px;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
         }
         
-        body.device-mobile header h1 {
-            font-size: 1.5em;
-            text-align: center;
+        body.device-mobile .hamburger-menu span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--orange-primary);
+            border-radius: 2px;
+            transition: all 0.3s;
         }
         
-        body.device-mobile header > div {
-            width: 100%;
-            justify-content: space-between;
+        body.device-mobile .hamburger-menu.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
         }
         
-        body.device-mobile .privacy-btn,
-        body.device-mobile .update-btn {
-            font-size: 0.85em;
-            padding: 8px 16px;
+        body.device-mobile .hamburger-menu.active span:nth-child(2) {
+            opacity: 0;
         }
         
-        /* Sidebar mobile - Navigation en bas */
+        body.device-mobile .hamburger-menu.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+        
+        /* === SIDEBAR MOBILE (OVERLAY) === */
         body.device-mobile .sidebar {
             position: fixed;
-            bottom: 0;
+            top: 0;
+            left: -100%;
+            width: 280px;
+            height: 100vh;
+            z-index: 1500;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        body.device-mobile .sidebar.open {
+            left: 0;
+        }
+        
+        /* Overlay sombre */
+        body.device-mobile .sidebar-overlay {
+            position: fixed;
+            top: 0;
             left: 0;
             right: 0;
-            top: auto;
-            width: 100%;
-            height: auto;
-            padding: 0;
-            border-right: none;
-            border-top: 1px solid var(--border-subtle);
-            z-index: 1000;
-            background: var(--bg-secondary);
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1400;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
         }
         
-        body.device-mobile .logo {
-            display: none;
+        body.device-mobile .sidebar-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
         }
         
-        body.device-mobile .nav-menu {
-            flex-direction: row;
-            padding: 8px;
-            gap: 4px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        body.device-mobile .nav-item {
-            flex-direction: column;
-            min-width: 70px;
-            padding: 8px 4px;
-            font-size: 0.75em;
-            gap: 4px;
-            text-align: center;
-        }
-        
-        body.device-mobile .nav-item .icon {
-            font-size: 1.4em;
-        }
-        
-        body.device-mobile .nav-item span:not(.icon) {
-            font-size: 0.9em;
-        }
-        
-        /* Main content mobile */
+        /* === MAIN CONTENT MOBILE === */
         body.device-mobile .main-content {
             margin-left: 0;
-            margin-bottom: 80px; /* Espace pour la nav en bas */
-            padding: 16px;
+            margin-bottom: 0;
+            padding: 70px 16px 16px 16px;
         }
         
-        /* Stats grid mobile */
-        body.device-mobile .stats-grid {
-            grid-template-columns: 1fr !important;
-            gap: 12px;
-        }
-        
-        body.device-mobile .stat-card {
-            padding: 20px;
-        }
-        
-        body.device-mobile .stat-label {
-            font-size: 0.85em;
-        }
-        
-        body.device-mobile .stat-value {
-            font-size: 1.8em;
-        }
-        
-        /* Asset stats mobile - 2 colonnes compactes */
-        body.device-mobile .asset-stats {
-            grid-template-columns: repeat(2, 1fr) !important;
+        /* === HEADER MOBILE STYLE FINARY === */
+        body.device-mobile header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-main);
+            z-index: 100;
+            padding: 16px 70px 16px 70px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             gap: 8px;
         }
         
-        body.device-mobile .asset-stat {
-            padding: 8px;
+        body.device-mobile header h1 {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
         }
         
-        body.device-mobile .asset-stat-label {
+        body.device-mobile header > div {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 8px;
+        }
+        
+        body.device-mobile .privacy-btn,
+        body.device-mobile .sync-status {
+            display: none;
+        }
+        
+        body.device-mobile .update-btn {
+            padding: 8px 12px;
+            font-size: 0.85em;
+            border-radius: 8px;
+        }
+        
+        /* === STATS GRID MOBILE FINARY STYLE === */
+        body.device-mobile .stats-grid {
+            display: block !important;
+            margin-bottom: 24px;
+        }
+        
+        /* Grande carte patrimoine total */
+        body.device-mobile .stat-card:first-child {
+            background: linear-gradient(135deg, rgba(255, 99, 71, 0.1), rgba(255, 99, 71, 0.05));
+            border: 1px solid rgba(255, 99, 71, 0.2);
+            padding: 32px 24px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        body.device-mobile .stat-card:first-child .stat-label {
             font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
         }
         
-        body.device-mobile .asset-stat-value {
-            font-size: 0.95em;
+        body.device-mobile .stat-card:first-child .stat-value {
+            font-size: 2.5em;
+            font-weight: 900;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
-        /* Asset header mobile */
+        /* Petites cartes en grille 2x2 */
+        body.device-mobile .stat-card:not(:first-child) {
+            display: inline-block;
+            width: calc(50% - 6px);
+            margin-right: 6px;
+            margin-bottom: 12px;
+            padding: 20px 16px;
+            vertical-align: top;
+        }
+        
+        body.device-mobile .stat-card:nth-child(even) {
+            margin-right: 0;
+            margin-left: 6px;
+        }
+        
+        body.device-mobile .stat-card .stat-label {
+            font-size: 0.75em;
+            margin-bottom: 8px;
+        }
+        
+        body.device-mobile .stat-card .stat-value {
+            font-size: 1.4em;
+            font-weight: 800;
+        }
+        
+        /* === GRAPHIQUES MOBILE === */
+        body.device-mobile .chart-container {
+            height: 280px !important;
+            margin-bottom: 24px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 20px 16px;
+            border: 1px solid var(--border-subtle);
+        }
+        
+        /* === TIME FILTERS MOBILE === */
+        body.device-mobile .time-filter {
+            padding: 8px 16px;
+            font-size: 0.8em;
+            border-radius: 8px;
+        }
+        
+        /* === SECTIONS MOBILE === */
+        body.device-mobile h2 {
+            font-size: 1.3em;
+            margin-bottom: 16px;
+            font-weight: 800;
+        }
+        
+        body.device-mobile h3 {
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        
+        /* === FEAR & GREED MOBILE === */
+        body.device-mobile .fear-greed-card {
+            padding: 20px 16px;
+            margin-bottom: 16px;
+        }
+        
+        body.device-mobile .fear-greed-gauge {
+            transform: scale(0.85);
+        }
+        
+        /* === ASSET CARDS MOBILE === */
+        body.device-mobile .asset-group {
+            margin-bottom: 16px;
+        }
+        
         body.device-mobile .asset-header {
             flex-direction: column;
-            gap: 12px;
-            padding: 16px;
+            gap: 16px;
+            padding: 20px 16px;
         }
         
         body.device-mobile .asset-header-left {
             width: 100%;
         }
         
-        body.device-mobile .asset-name {
-            font-size: 1.1em;
+        body.device-mobile .asset-stats {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px 8px;
+            width: 100%;
         }
         
-        body.device-mobile .asset-ticker {
-            font-size: 0.8em;
+        body.device-mobile .asset-stat {
+            padding: 12px 8px;
+            text-align: center;
         }
         
-        /* Tables mobile - Scroll horizontal */
+        body.device-mobile .asset-stat-label {
+            font-size: 0.7em;
+            margin-bottom: 4px;
+        }
+        
+        body.device-mobile .asset-stat-value {
+            font-size: 0.95em;
+            font-weight: 700;
+        }
+        
+        /* === TABLES MOBILE === */
+        body.device-mobile .asset-content {
+            padding: 16px;
+        }
+        
         body.device-mobile table {
-            font-size: 0.85em;
-            min-width: 600px; /* Force scroll horizontal */
+            font-size: 0.8em;
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
         }
         
         body.device-mobile table th,
         body.device-mobile table td {
-            padding: 8px;
-            white-space: nowrap;
+            padding: 10px 8px;
         }
         
-        body.device-mobile .asset-content {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+        /* === NEWS SECTION === */
+        body.device-mobile .news-section {
+            margin-bottom: 24px;
         }
         
-        /* Charts mobile */
-        body.device-mobile .chart-container {
-            height: 250px !important;
-        }
-        
-        body.device-mobile canvas {
-            max-height: 250px;
-        }
-        
-        /* Fear & Greed mobile */
-        body.device-mobile .fear-greed-card {
+        body.device-mobile .ai-summary-box {
             padding: 16px;
-        }
-        
-        body.device-mobile .fear-greed-gauge {
-            transform: scale(0.9);
-        }
-        
-        /* Time filters mobile - Scroll horizontal */
-        body.device-mobile .time-filter {
-            padding: 6px 16px;
-            font-size: 0.85em;
-        }
-        
-        body.device-mobile div[style*="display: flex"][style*="gap: 8px"] {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* Buttons mobile */
-        body.device-mobile .btn-primary,
-        body.device-mobile .btn-secondary {
+            margin-bottom: 16px;
             font-size: 0.9em;
-            padding: 10px 16px;
         }
         
-        /* Forms mobile */
-        body.device-mobile input,
-        body.device-mobile select,
-        body.device-mobile textarea {
-            font-size: 16px; /* Évite le zoom iOS */
-        }
-        
-        /* News section mobile */
         body.device-mobile .news-feed {
-            grid-template-columns: 1fr !important;
+            display: block !important;
         }
         
         body.device-mobile .news-item {
-            padding: 12px;
+            margin-bottom: 12px;
+            padding: 16px;
         }
         
-        /* Performance section mobile */
+        /* === PERFORMANCE SECTION === */
         body.device-mobile #topPerformers,
         body.device-mobile #worstPerformers {
-            font-size: 0.9em;
+            padding: 16px;
         }
         
         body.device-mobile #topPerformers > div,
         body.device-mobile #worstPerformers > div {
-            padding: 10px !important;
+            padding: 12px !important;
+            font-size: 0.9em;
         }
         
-        /* Hide less important info on mobile */
-        body.device-mobile .asset-ticker {
-            overflow: hidden;
-            text-overflow: ellipsis;
+        /* === BUTTONS & FORMS === */
+        body.device-mobile button {
+            min-height: 44px;
+            font-size: 0.9em;
         }
         
-        /* Improve touch targets */
-        body.device-mobile button,
-        body.device-mobile .nav-item,
-        body.device-mobile .asset-toggle {
-            min-height: 44px; /* iOS recommendation */
-            min-width: 44px;
+        body.device-mobile input,
+        body.device-mobile select,
+        body.device-mobile textarea {
+            font-size: 16px;
+            padding: 12px;
         }
         
-        /* Reduce whitespace */
-        body.device-mobile h2 {
-            font-size: 1.5em;
-            margin-bottom: 16px;
+        /* === HIDE ELEMENTS ON MOBILE === */
+        body.device-mobile .logo {
+            margin-bottom: 24px;
+            text-align: center;
         }
         
-        body.device-mobile h3 {
-            font-size: 1.2em;
-            margin-bottom: 12px;
+        /* === SMOOTH SCROLLING === */
+        body.device-mobile {
+            -webkit-overflow-scrolling: touch;
         }
         
         /* ========================================
-           TABLET - ÉCRANS MOYENS
+           TABLET - ÉCRANS MOYENS (INCHANGÉ)
            ======================================== */
         
         body.device-tablet .stats-grid {
@@ -978,15 +1075,36 @@
         }
         
         /* ========================================
-           DESKTOP - GRAND ÉCRAN (PAR DÉFAUT)
+           DESKTOP - INCHANGÉ (100% PRÉSERVÉ)
            ======================================== */
         
         body.device-desktop .stats-grid {
             grid-template-columns: repeat(4, 1fr);
         }
+        
+        /* Menu hamburger n'existe pas sur desktop */
+        .hamburger-menu,
+        .sidebar-overlay {
+            display: none;
+        }
+        
+        body.device-desktop .hamburger-menu,
+        body.device-desktop .sidebar-overlay {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
+    <!-- Menu Hamburger (mobile only) -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    
+    <!-- Overlay pour fermer le menu (mobile only) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileMenu()"></div>
+    
     <!-- Sidebar Navigation -->
     <div class="sidebar">
         <div class="logo">Portfolio Manager</div>
@@ -1971,6 +2089,34 @@ Vérifiez que votre fichier CSV est au bon format.`);
                 .map(b => b.toString(16).padStart(2, '0'))
                 .join('');
         }
+
+        // ===== MOBILE MENU TOGGLE =====
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const body = document.body;
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            body.classList.toggle('menu-open');
+        }
+        
+        // Fermer le menu quand on clique sur un lien de navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isMobile) {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        // Fermer le menu après un court délai
+                        setTimeout(() => {
+                            if (document.querySelector('.sidebar').classList.contains('open')) {
+                                toggleMobileMenu();
+                            }
+                        }, 200);
+                    });
+                });
+            }
+        });
 
         function showSection(sectionId) {
             // Update nav items - make active button RED
