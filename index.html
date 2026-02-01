@@ -1816,28 +1816,42 @@ Vérifiez que votre fichier CSV est au bon format.`);
             });
             
             // ===== GRAPHIQUES =====
-            
-            // Graphique d'évolution du patrimoine
-            const evolutionChart = document.getElementById('evolutionChart');
-            if (evolutionChart && evolutionChart.closest('.chart-container')) {
-                evolutionChart.closest('.chart-container').style.filter = 'blur(8px)';
+            applyPrivacyToCharts();
+        }
+        
+        // Fonction séparée pour gérer le flou des graphiques
+        function applyPrivacyToCharts() {
+            if (isPrivacyMode) {
+                // Graphique d'évolution du patrimoine
+                const evolutionChart = document.getElementById('evolutionChart');
+                if (evolutionChart && evolutionChart.closest('.chart-container')) {
+                    evolutionChart.closest('.chart-container').style.filter = 'blur(8px)';
+                }
+                
+                // Graphiques individuels des actifs
+                document.querySelectorAll('canvas[id^="chart-"]').forEach(canvas => {
+                    canvas.style.filter = 'blur(8px)';
+                });
+                
+                // Graphique donut principal
+                const portfolioChart = document.getElementById('portfolioChart');
+                if (portfolioChart) {
+                    portfolioChart.style.filter = 'blur(8px)';
+                }
+            } else {
+                // Mode normal - retirer tous les flous
+                document.querySelectorAll('canvas').forEach(canvas => {
+                    canvas.style.filter = 'none';
+                });
+                document.querySelectorAll('.chart-container').forEach(container => {
+                    container.style.filter = 'none';
+                });
             }
             
-            // NE PAS flouter le graphique de diversification
+            // NE JAMAIS flouter le graphique de diversification
             const assetClassChart = document.getElementById('assetClassChart');
             if (assetClassChart) {
                 assetClassChart.style.filter = 'none';
-            }
-            
-            // Graphiques individuels des actifs
-            document.querySelectorAll('canvas[id^="chart-"]').forEach(canvas => {
-                canvas.style.filter = 'blur(8px)';
-            });
-            
-            // Graphique donut principal
-            const portfolioChart = document.getElementById('portfolioChart');
-            if (portfolioChart) {
-                portfolioChart.style.filter = 'blur(8px)';
             }
         }
 
@@ -2922,6 +2936,11 @@ Vérifiez que votre fichier CSV est au bon format.`);
                     }
                 }
             });
+            
+            // Appliquer le mode privacy si activé
+            if (typeof applyPrivacyToCharts === 'function') {
+                applyPrivacyToCharts();
+            }
         }
 
         // ========================================
@@ -3643,6 +3662,11 @@ Vérifiez que votre fichier CSV est au bon format.`);
                     }
                 }
             });
+            
+            // Appliquer le mode privacy si activé
+            if (typeof applyPrivacyToCharts === 'function') {
+                applyPrivacyToCharts();
+            }
         }
         
         function setTimeRange(range) {
@@ -3859,6 +3883,11 @@ Vérifiez que votre fichier CSV est au bon format.`);
             document.getElementById('divScore').style.color = scoreColor;
             document.querySelector('#diversificationScore .gauge-label').textContent = scoreLabel;
             document.querySelector('#diversificationScore .gauge-label').style.color = scoreColor;
+            
+            // Appliquer le mode privacy si activé
+            if (typeof applyPrivacyToCharts === 'function') {
+                applyPrivacyToCharts();
+            }
         }
         
         // Transaction History
