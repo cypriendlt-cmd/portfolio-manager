@@ -886,49 +886,30 @@
                 color: var(--orange-primary) !important;
             }
             
-            /* CARTES 2-5 : Grille 2x2 */
+            /* CARTES 2-8 : TOUTES EN FULL WIDTH (comme PEA) */
             .stats-grid .stat-card:nth-child(2),
             .stats-grid .stat-card:nth-child(3),
             .stats-grid .stat-card:nth-child(4),
-            .stats-grid .stat-card:nth-child(5) {
-                width: calc(50% - 8px) !important;
-                margin: 8px 4px !important;
-                padding: 16px !important;
-                background: var(--bg-card) !important;
-                border-radius: 16px !important;
-                border: 1px solid var(--border-subtle) !important;
-            }
-            
-            .stats-grid .stat-card:nth-child(2),
-            .stats-grid .stat-card:nth-child(4) {
-                margin-left: 8px !important;
-            }
-            
-            .stats-grid .stat-card:nth-child(3),
-            .stats-grid .stat-card:nth-child(5) {
-                margin-right: 8px !important;
-            }
-            
-            /* CARTES 6-8 : Full width */
+            .stats-grid .stat-card:nth-child(5),
             .stats-grid .stat-card:nth-child(6),
             .stats-grid .stat-card:nth-child(7),
             .stats-grid .stat-card:nth-child(8) {
                 width: calc(100% - 16px) !important;
                 margin: 8px 8px !important;
-                padding: 16px !important;
+                padding: 20px !important;
                 background: var(--bg-card) !important;
                 border-radius: 16px !important;
                 border: 1px solid var(--border-subtle) !important;
             }
             
-            /* Labels et valeurs des petites cartes */
+            /* Labels et valeurs des cartes full-width */
             .stats-grid .stat-card:not(:nth-child(1)) .stat-label {
-                font-size: 0.75em !important;
-                margin-bottom: 8px !important;
+                font-size: 0.85em !important;
+                margin-bottom: 10px !important;
             }
             
             .stats-grid .stat-card:not(:nth-child(1)) .stat-value {
-                font-size: 1.3em !important;
+                font-size: 1.5em !important;
                 font-weight: 800 !important;
             }
             
@@ -1014,6 +995,99 @@
             
             .news-feed {
                 grid-template-columns: 1fr !important;
+            }
+            
+            /* === PERFORMANCE - REDESIGN COMPLET === */
+            #topPerformers,
+            #worstPerformers {
+                background: var(--bg-card) !important;
+                border-radius: 16px !important;
+                border: 1px solid var(--border-subtle) !important;
+                padding: 0 !important;
+                margin: 0 16px 16px !important;
+            }
+            
+            #topPerformers > div,
+            #worstPerformers > div {
+                padding: 16px !important;
+                border-bottom: 1px solid var(--border-subtle) !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+            }
+            
+            #topPerformers > div:last-child,
+            #worstPerformers > div:last-child {
+                border-bottom: none !important;
+            }
+            
+            #topPerformers > div > div:first-child,
+            #worstPerformers > div > div:first-child {
+                flex: 1 !important;
+            }
+            
+            #topPerformers > div > div:first-child > div:first-child,
+            #worstPerformers > div > div:first-child > div:first-child {
+                font-size: 1em !important;
+                font-weight: 700 !important;
+                margin-bottom: 4px !important;
+            }
+            
+            #topPerformers > div > div:first-child > div:last-child,
+            #worstPerformers > div > div:first-child > div:last-child {
+                font-size: 0.85em !important;
+                color: var(--text-secondary) !important;
+            }
+            
+            #topPerformers > div > div:last-child,
+            #worstPerformers > div > div:last-child {
+                text-align: right !important;
+            }
+            
+            #topPerformers > div > div:last-child > div:first-child,
+            #worstPerformers > div > div:last-child > div:first-child {
+                font-size: 1.1em !important;
+                font-weight: 800 !important;
+                margin-bottom: 4px !important;
+            }
+            
+            #topPerformers > div > div:last-child > div:last-child,
+            #worstPerformers > div > div:last-child > div:last-child {
+                font-size: 0.9em !important;
+            }
+            
+            /* === ANALYSE DE DIVERSIFICATION - REDESIGN === */
+            
+            /* Conteneur principal */
+            div[style*="display: grid"][style*="grid-template-columns: repeat(2, 1fr)"] {
+                display: block !important;
+                padding: 0 16px !important;
+            }
+            
+            /* Graphique donut de diversification */
+            #assetClassChart {
+                max-height: 200px !important;
+            }
+            
+            /* Score de diversification */
+            #diversificationScore {
+                margin: 0 16px 16px !important;
+                padding: 24px !important;
+            }
+            
+            #diversificationScore .gauge-value {
+                font-size: 3em !important;
+            }
+            
+            /* Carte "Par classe d'actifs" */
+            .fear-greed-card:has(#assetClassChart) {
+                margin: 0 16px 16px !important;
+                padding: 20px !important;
+            }
+            
+            .fear-greed-card h3 {
+                font-size: 1.1em !important;
+                margin-bottom: 16px !important;
             }
             
             /* === BUTTONS === */
