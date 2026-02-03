@@ -709,388 +709,335 @@
         
         /* ===== STYLES ADAPTATIFS PAR TYPE D'APPAREIL ===== */
         
-        /* ========================================
-           MOBILE - DASHBOARD STYLE FINARY
-           ======================================== */
-        
-        body.device-mobile {
-            overflow-x: hidden;
-        }
-        
-        /* === MENU HAMBURGER === */
-        body.device-mobile .hamburger-menu {
-            position: fixed;
-            top: 16px;
-            left: 16px;
-            z-index: 2000;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            padding: 12px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            width: 40px;
-            height: 40px;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.3s;
-        }
-        
-        body.device-mobile .hamburger-menu span {
-            display: block;
-            width: 24px;
-            height: 2px;
-            background: var(--orange-primary);
-            border-radius: 2px;
-            transition: all 0.3s;
-        }
-        
-        body.device-mobile .hamburger-menu.active span:nth-child(1) {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-        
-        body.device-mobile .hamburger-menu.active span:nth-child(2) {
-            opacity: 0;
-        }
-        
-        body.device-mobile .hamburger-menu.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(6px, -6px);
-        }
-        
-        /* === SIDEBAR MOBILE (OVERLAY) === */
-        body.device-mobile .sidebar {
-            position: fixed;
-            top: 0;
-            left: -100%;
-            width: 280px;
-            height: 100vh;
-            z-index: 1500;
-            transition: left 0.3s ease;
-            overflow-y: auto;
-        }
-        
-        body.device-mobile .sidebar.open {
-            left: 0;
-        }
-        
-        /* Overlay sombre */
-        body.device-mobile .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1400;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        
-        body.device-mobile .sidebar-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        
-        /* === MAIN CONTENT MOBILE === */
-        body.device-mobile .main-content {
-            margin-left: 0;
-            margin-bottom: 0;
-            padding: 70px 16px 16px 16px;
-        }
-        
-        /* === HEADER MOBILE STYLE FINARY === */
-        body.device-mobile header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: var(--bg-main);
-            z-index: 100;
-            padding: 16px 70px 16px 70px;
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        body.device-mobile header h1 {
-            font-size: 0.9em;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin: 0;
-        }
-        
-        body.device-mobile header > div {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            gap: 8px;
-        }
-        
-        body.device-mobile .privacy-btn,
-        body.device-mobile .sync-status {
+        /* Bouton hamburger et overlay - cachés par défaut */
+        .mobile-menu-toggle {
             display: none;
         }
         
-        body.device-mobile .update-btn {
-            padding: 8px 12px;
-            font-size: 0.85em;
-            border-radius: 8px;
-        }
-        
-        /* === STATS GRID MOBILE FINARY STYLE === */
-        body.device-mobile .stats-grid {
-            display: block !important;
-            margin-bottom: 24px;
-        }
-        
-        /* Grande carte patrimoine total */
-        body.device-mobile .stat-card:first-child {
-            background: linear-gradient(135deg, rgba(255, 99, 71, 0.1), rgba(255, 99, 71, 0.05));
-            border: 1px solid rgba(255, 99, 71, 0.2);
-            padding: 32px 24px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        
-        body.device-mobile .stat-card:first-child .stat-label {
-            font-size: 0.75em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            color: var(--text-secondary);
-        }
-        
-        body.device-mobile .stat-card:first-child .stat-value {
-            font-size: 2.5em;
-            font-weight: 900;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* Petites cartes en grille 2x2 */
-        body.device-mobile .stat-card:not(:first-child) {
-            display: inline-block;
-            width: calc(50% - 6px);
-            margin-right: 6px;
-            margin-bottom: 12px;
-            padding: 20px 16px;
-            vertical-align: top;
-        }
-        
-        body.device-mobile .stat-card:nth-child(even) {
-            margin-right: 0;
-            margin-left: 6px;
-        }
-        
-        body.device-mobile .stat-card .stat-label {
-            font-size: 0.75em;
-            margin-bottom: 8px;
-        }
-        
-        body.device-mobile .stat-card .stat-value {
-            font-size: 1.4em;
-            font-weight: 800;
-        }
-        
-        /* === GRAPHIQUES MOBILE === */
-        body.device-mobile .chart-container {
-            height: 280px !important;
-            margin-bottom: 24px;
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 20px 16px;
-            border: 1px solid var(--border-subtle);
-        }
-        
-        /* === TIME FILTERS MOBILE === */
-        body.device-mobile .time-filter {
-            padding: 8px 16px;
-            font-size: 0.8em;
-            border-radius: 8px;
-        }
-        
-        /* === SECTIONS MOBILE === */
-        body.device-mobile h2 {
-            font-size: 1.3em;
-            margin-bottom: 16px;
-            font-weight: 800;
-        }
-        
-        body.device-mobile h3 {
-            font-size: 1.1em;
-            margin-bottom: 12px;
-            font-weight: 700;
-        }
-        
-        /* === FEAR & GREED MOBILE === */
-        body.device-mobile .fear-greed-card {
-            padding: 20px 16px;
-            margin-bottom: 16px;
-        }
-        
-        body.device-mobile .fear-greed-gauge {
-            transform: scale(0.85);
-        }
-        
-        /* === ASSET CARDS MOBILE === */
-        body.device-mobile .asset-group {
-            margin-bottom: 16px;
-        }
-        
-        body.device-mobile .asset-header {
-            flex-direction: column;
-            gap: 16px;
-            padding: 20px 16px;
-        }
-        
-        body.device-mobile .asset-header-left {
-            width: 100%;
-        }
-        
-        body.device-mobile .asset-stats {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 12px 8px;
-            width: 100%;
-        }
-        
-        body.device-mobile .asset-stat {
-            padding: 12px 8px;
-            text-align: center;
-        }
-        
-        body.device-mobile .asset-stat-label {
-            font-size: 0.7em;
-            margin-bottom: 4px;
-        }
-        
-        body.device-mobile .asset-stat-value {
-            font-size: 0.95em;
-            font-weight: 700;
-        }
-        
-        /* === TABLES MOBILE === */
-        body.device-mobile .asset-content {
-            padding: 16px;
-        }
-        
-        body.device-mobile table {
-            font-size: 0.8em;
-            display: block;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            white-space: nowrap;
-        }
-        
-        body.device-mobile table th,
-        body.device-mobile table td {
-            padding: 10px 8px;
-        }
-        
-        /* === NEWS SECTION === */
-        body.device-mobile .news-section {
-            margin-bottom: 24px;
-        }
-        
-        body.device-mobile .ai-summary-box {
-            padding: 16px;
-            margin-bottom: 16px;
-            font-size: 0.9em;
-        }
-        
-        body.device-mobile .news-feed {
-            display: block !important;
-        }
-        
-        body.device-mobile .news-item {
-            margin-bottom: 12px;
-            padding: 16px;
-        }
-        
-        /* === PERFORMANCE SECTION === */
-        body.device-mobile #topPerformers,
-        body.device-mobile #worstPerformers {
-            padding: 16px;
-        }
-        
-        body.device-mobile #topPerformers > div,
-        body.device-mobile #worstPerformers > div {
-            padding: 12px !important;
-            font-size: 0.9em;
-        }
-        
-        /* === BUTTONS & FORMS === */
-        body.device-mobile button {
-            min-height: 44px;
-            font-size: 0.9em;
-        }
-        
-        body.device-mobile input,
-        body.device-mobile select,
-        body.device-mobile textarea {
-            font-size: 16px;
-            padding: 12px;
-        }
-        
-        /* === HIDE ELEMENTS ON MOBILE === */
-        body.device-mobile .logo {
-            margin-bottom: 24px;
-            text-align: center;
-        }
-        
-        /* === SMOOTH SCROLLING === */
-        body.device-mobile {
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* ========================================
-           TABLET - ÉCRANS MOYENS (INCHANGÉ)
-           ======================================== */
-        
-        body.device-tablet .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        
-        body.device-tablet .asset-stats {
-            grid-template-columns: repeat(3, 1fr);
-        }
-        
-        body.device-tablet .sidebar {
-            width: 200px;
-        }
-        
-        body.device-tablet .main-content {
-            margin-left: 200px;
-            padding: 32px;
-        }
-        
-        /* ========================================
-           DESKTOP - INCHANGÉ (100% PRÉSERVÉ)
-           ======================================== */
-        
-        body.device-desktop .stats-grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
-        
-        /* Menu hamburger n'existe pas sur desktop */
-        .hamburger-menu,
         .sidebar-overlay {
             display: none;
         }
         
-        body.device-desktop .hamburger-menu,
-        body.device-desktop .sidebar-overlay {
-            display: none !important;
+        /* ========================================
+           🔧 MEDIA QUERIES MOBILE
+           ======================================== */
+        
+        @media (max-width: 768px) {
+            /* === BOUTON HAMBURGER === */
+            .mobile-menu-toggle {
+                display: flex !important;
+                position: fixed;
+                top: 16px;
+                left: 16px;
+                z-index: 2001;
+                width: 44px;
+                height: 44px;
+                background: var(--bg-card);
+                border: 1px solid var(--border-subtle);
+                border-radius: 12px;
+                cursor: pointer;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 5px;
+                padding: 0;
+            }
+            
+            .mobile-menu-toggle span {
+                display: block;
+                width: 24px;
+                height: 2px;
+                background: var(--text-primary);
+                border-radius: 2px;
+                transition: all 0.3s ease;
+            }
+            
+            body.menu-open .mobile-menu-toggle span:nth-child(1) {
+                transform: rotate(45deg) translate(6px, 6px);
+            }
+            
+            body.menu-open .mobile-menu-toggle span:nth-child(2) {
+                opacity: 0;
+            }
+            
+            body.menu-open .mobile-menu-toggle span:nth-child(3) {
+                transform: rotate(-45deg) translate(6px, -6px);
+            }
+            
+            /* === OVERLAY === */
+            .sidebar-overlay {
+                display: block !important;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1999;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+            
+            .sidebar-overlay.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            
+            /* === SIDEBAR EN OVERLAY === */
+            .sidebar {
+                position: fixed !important;
+                left: -100% !important;
+                top: 0 !important;
+                bottom: 0 !important;
+                width: 280px !important;
+                height: 100vh !important;
+                z-index: 2000 !important;
+                transition: left 0.3s ease !important;
+                box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3) !important;
+            }
+            
+            .sidebar.open {
+                left: 0 !important;
+            }
+            
+            /* === MAIN CONTENT === */
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* === HEADER === */
+            header {
+                position: sticky !important;
+                top: 0 !important;
+                z-index: 100 !important;
+                background: var(--bg-main) !important;
+                border-bottom: 1px solid var(--border-subtle) !important;
+                padding: 16px 16px 16px 70px !important;
+                margin-bottom: 0 !important;
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+            }
+            
+            header h1 {
+                font-size: 1.2em !important;
+                margin: 0 !important;
+            }
+            
+            header > div {
+                display: flex !important;
+                gap: 8px !important;
+            }
+            
+            .sync-status {
+                display: none !important;
+            }
+            
+            .privacy-btn,
+            .update-btn {
+                font-size: 0.75em !important;
+                padding: 8px 12px !important;
+            }
+            
+            /* === DASHBOARD STYLE FINARY === */
+            
+            .stats-grid {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                gap: 0 !important;
+            }
+            
+            /* CARTE 1 - GRANDE HERO */
+            .stats-grid .stat-card:nth-child(1) {
+                width: 100% !important;
+                background: linear-gradient(180deg, rgba(255, 99, 71, 0.15) 0%, var(--bg-main) 100%) !important;
+                border: none !important;
+                border-radius: 0 !important;
+                border-bottom: 1px solid rgba(255, 99, 71, 0.3) !important;
+                padding: 48px 24px 32px !important;
+                text-align: center !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+            }
+            
+            .stats-grid .stat-card:nth-child(1)::before {
+                display: none !important;
+            }
+            
+            .stats-grid .stat-card:nth-child(1) .stat-label {
+                font-size: 0.85em !important;
+                color: var(--text-secondary) !important;
+                margin-bottom: 12px !important;
+                font-weight: 500 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+            }
+            
+            .stats-grid .stat-card:nth-child(1) .stat-value {
+                font-size: 2.8em !important;
+                font-weight: 900 !important;
+                letter-spacing: -2px !important;
+                margin: 0 !important;
+                color: var(--orange-primary) !important;
+            }
+            
+            /* CARTES 2-5 : Grille 2x2 */
+            .stats-grid .stat-card:nth-child(2),
+            .stats-grid .stat-card:nth-child(3),
+            .stats-grid .stat-card:nth-child(4),
+            .stats-grid .stat-card:nth-child(5) {
+                width: calc(50% - 8px) !important;
+                margin: 8px 4px !important;
+                padding: 16px !important;
+                background: var(--bg-card) !important;
+                border-radius: 16px !important;
+                border: 1px solid var(--border-subtle) !important;
+            }
+            
+            .stats-grid .stat-card:nth-child(2),
+            .stats-grid .stat-card:nth-child(4) {
+                margin-left: 8px !important;
+            }
+            
+            .stats-grid .stat-card:nth-child(3),
+            .stats-grid .stat-card:nth-child(5) {
+                margin-right: 8px !important;
+            }
+            
+            /* CARTES 6-8 : Full width */
+            .stats-grid .stat-card:nth-child(6),
+            .stats-grid .stat-card:nth-child(7),
+            .stats-grid .stat-card:nth-child(8) {
+                width: calc(100% - 16px) !important;
+                margin: 8px 8px !important;
+                padding: 16px !important;
+                background: var(--bg-card) !important;
+                border-radius: 16px !important;
+                border: 1px solid var(--border-subtle) !important;
+            }
+            
+            /* Labels et valeurs des petites cartes */
+            .stats-grid .stat-card:not(:nth-child(1)) .stat-label {
+                font-size: 0.75em !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .stats-grid .stat-card:not(:nth-child(1)) .stat-value {
+                font-size: 1.3em !important;
+                font-weight: 800 !important;
+            }
+            
+            /* === GRAPHIQUES === */
+            .chart-container {
+                height: 220px !important;
+                padding: 0 16px 16px !important;
+                margin: 0 !important;
+            }
+            
+            /* === TIME FILTERS === */
+            .time-filter {
+                padding: 8px 18px !important;
+                font-size: 0.85em !important;
+                border-radius: 20px !important;
+                flex-shrink: 0 !important;
+            }
+            
+            /* === SECTIONS === */
+            h2 {
+                font-size: 1.4em !important;
+                padding: 0 16px !important;
+                margin: 32px 0 16px !important;
+            }
+            
+            /* === FEAR & GREED === */
+            .fear-greed-card {
+                margin: 0 16px 16px !important;
+                padding: 20px !important;
+            }
+            
+            /* === ASSET GROUPS === */
+            .asset-group {
+                margin: 0 16px 12px !important;
+            }
+            
+            .asset-header {
+                flex-direction: column !important;
+                gap: 16px !important;
+                padding: 20px 16px !important;
+            }
+            
+            .asset-header-left {
+                width: 100% !important;
+            }
+            
+            .asset-stats {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+            
+            .asset-stat {
+                padding: 10px !important;
+            }
+            
+            .asset-stat-label {
+                font-size: 0.7em !important;
+            }
+            
+            .asset-stat-value {
+                font-size: 0.9em !important;
+            }
+            
+            /* === TABLES === */
+            table {
+                font-size: 0.85em !important;
+                display: block !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            
+            table th,
+            table td {
+                padding: 10px 8px !important;
+                white-space: nowrap !important;
+            }
+            
+            /* === NEWS === */
+            .news-section {
+                padding: 0 16px !important;
+            }
+            
+            .news-feed {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* === BUTTONS === */
+            button {
+                min-height: 44px !important;
+            }
+            
+            /* === FORMS === */
+            input,
+            select,
+            textarea {
+                font-size: 16px !important;
+            }
+        }
+        
+        /* ========================================
+           💻 DESKTOP - Cacher les éléments mobiles
+           ======================================== */
+        
+        @media (min-width: 1025px) {
+            .mobile-menu-toggle,
+            .sidebar-overlay {
+                display: none !important;
+            }
         }
     </style>
 </head>
