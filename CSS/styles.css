@@ -184,6 +184,38 @@
             color: var(--orange-primary);
         }
         
+        /* Drive Connection Button */
+        .drive-connection-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+        
+        .drive-connection-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--orange-primary);
+        }
+        
+        .drive-connection-btn.connected {
+            background: rgba(0, 212, 170, 0.12);
+            border-color: rgba(0, 212, 170, 0.3);
+            color: var(--success);
+        }
+        
+        .drive-connection-btn.connected:hover {
+            background: rgba(0, 212, 170, 0.18);
+            border-color: var(--success);
+        }
+        
         /* Privacy Mode - Blur values */
         .privacy-mode .value-hidden {
             filter: blur(8px);
@@ -885,9 +917,14 @@
             }
             
             .privacy-btn,
+            .drive-connection-btn,
             .update-btn {
                 font-size: 0.75em !important;
                 padding: 8px 12px !important;
+            }
+            
+            .drive-connection-btn span {
+                display: inline !important;
             }
             
             /* === DASHBOARD STYLE FINARY === */
