@@ -78,6 +78,9 @@
         <header>
             <h1>📊 Portfolio Manager Pro</h1>
             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <button class="quick-add-btn" onclick="openQuickAddModal()" title="Ajout rapide (Ctrl+N)">
+                    ➕ Ajouter
+                </button>
                 <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Changer de thème (Ctrl+T)">
                     <span id="themeIcon">🌙</span>
                 </button>
@@ -107,6 +110,17 @@
         <div id="dashboard" class="section active">
             <h2 style="margin-bottom: 20px;">📈 Vue d'ensemble</h2>
             <div class="stats-grid" id="dashboardStats"></div>
+            
+            <!-- Quick Stats Card -->
+            <div style="margin: 30px 0;">
+                <div class="fear-greed-card" style="background: linear-gradient(135deg, rgba(255, 99, 71, 0.05), rgba(255, 127, 102, 0.05));">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5em;">⚡</span>
+                        Statistiques rapides
+                    </h3>
+                    <div id="quickStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;"></div>
+                </div>
+            </div>
             
             <!-- Fear & Greed Indicators -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 30px 0;">
@@ -681,12 +695,14 @@
                 <div style="background: rgba(0, 212, 170, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 212, 170, 0.3);">
                     <h4 style="margin-bottom: 10px;">⌨️ Raccourcis clavier</h4>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 8px; font-size: 0.9em;">
+                        <div><kbd>Ctrl + N</kbd> → Ajout rapide</div>
                         <div><kbd>Ctrl + D</kbd> → Dashboard</div>
                         <div><kbd>Ctrl + P</kbd> → Portfolio</div>
                         <div><kbd>Ctrl + T</kbd> → Changer thème</div>
                         <div><kbd>Ctrl + H</kbd> → Masquer/Afficher valeurs</div>
                         <div><kbd>Ctrl + E</kbd> → Exporter PDF</div>
                         <div><kbd>Ctrl + S</kbd> → Sauvegarder</div>
+                        <div><kbd>Esc</kbd> → Fermer modal</div>
                     </div>
                 </div>
             </div>
@@ -3838,6 +3854,7 @@ Vérifiez que votre fichier CSV est au bon format.`);
             updateDiversificationAnalysis();
             updateTransactionHistory();
             updatePortfolio();
+            updateQuickStats();
         };
         
         // Function to handle time range selection from dropdown
@@ -4580,13 +4597,220 @@ Nouveau montant:`, goal.current));
                         e.preventDefault();
                         syncDriveData();
                         break;
+                    case 'n':
+                        e.preventDefault();
+                        openQuickAddModal();
+                        break;
                 }
             }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                closeQuickAddModal();
+                closeGoalModal();
+            }
         });
+        
+        // ========================================
+        // ⚡ QUICK WINS FEATURES
+        // ========================================
+        
+        // Quick Add Modal
+        function openQuickAddModal() {
+            document.getElementById('quickAddModal').style.display = 'flex';
+        }
+        
+        function closeQuickAddModal() {
+            document.getElementById('quickAddModal').style.display = 'none';
+        }
+        
+        function quickAddAsset(type) {
+            closeQuickAddModal();
+            
+            switch(type) {
+                case 'crypto':
+                    showSection('crypto');
+                    break;
+                case 'pea':
+                    showSection('pea');
+                    break;
+                case 'livret':
+                    showSection('livrets');
+                    break;
+                case 'fundraising':
+                    showSection('fundraising');
+                    break;
+            }
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function quickAddGoal() {
+            closeQuickAddModal();
+            showSection('goals');
+            setTimeout(() => openGoalModal(), 300);
+        }
+        
+        // Quick Stats
+        function updateQuickStats() {
+            const container = document.getElementById('quickStats');
+            if (!container) return;
+            
+            // Calculate total invested this year
+            const currentYear = new Date().getFullYear();
+            let investedThisYear = 0;
+            
+            portfolio.crypto.forEach(c => {
+                const date = new Date(c.date);
+                if (date.getFullYear() === currentYear) {
+                    investedThisYear += c.quantity * c.price;
+                }
+            });
+            
+            portfolio.pea.forEach(p => {
+                const date = new Date(p.date);
+                if (date.getFullYear() === currentYear) {
+                    investedThisYear += (p.quantity * p.price) + (p.fees || 0);
+                }
+            });
+            
+            portfolio.livrets.forEach(l => {
+                const date = new Date(l.date);
+                if (date.getFullYear() === currentYear) {
+                    investedThisYear += parseFloat(l.amount) || 0;
+                }
+            });
+            
+            portfolio.fundraising.forEach(f => {
+                const date = new Date(f.date);
+                if (date.getFullYear() === currentYear) {
+                    investedThisYear += f.amount;
+                }
+            });
+            
+            // Calculate total assets count
+            const totalAssets = portfolio.crypto.length + 
+                               portfolio.pea.length + 
+                               portfolio.livrets.length + 
+                               portfolio.fundraising.length;
+            
+            // Calculate streak (days since last update)
+            const lastUpdate = localStorage.getItem('lastUpdateDate');
+            const today = new Date().toDateString();
+            let streakDays = parseInt(localStorage.getItem('streakDays') || '0');
+            
+            if (lastUpdate === today) {
+                // Already updated today
+            } else if (lastUpdate) {
+                const lastDate = new Date(lastUpdate);
+                const diff = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
+                if (diff === 1) {
+                    streakDays++;
+                } else if (diff > 1) {
+                    streakDays = 1;
+                }
+                localStorage.setItem('streakDays', streakDays.toString());
+                localStorage.setItem('lastUpdateDate', today);
+            } else {
+                streakDays = 1;
+                localStorage.setItem('streakDays', '1');
+                localStorage.setItem('lastUpdateDate', today);
+            }
+            
+            // Calculate best day (highest single day gain - mock for now)
+            const totalValue = calculateTotalPortfolioValue();
+            const totalInvested = calculateTotalInvested();
+            const totalGain = totalValue - totalInvested;
+            
+            const html = `
+                <div class="quick-stat-item">
+                    <div class="quick-stat-label">📅 Investi ${currentYear}</div>
+                    <div class="quick-stat-value value-hidden">€${investedThisYear.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-label">💼 Total actifs</div>
+                    <div class="quick-stat-value">${totalAssets}</div>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-label">🔥 Série</div>
+                    <div class="quick-stat-value">${streakDays} jour${streakDays > 1 ? 's' : ''}</div>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-label">💚 Gain total</div>
+                    <div class="quick-stat-value ${totalGain >= 0 ? 'positive' : 'negative'} value-hidden">
+                        ${totalGain >= 0 ? '+' : ''}€${totalGain.toLocaleString('fr-FR', {maximumFractionDigits: 0})}
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            
+            // Apply privacy mode if enabled
+            if (isPrivacyMode) {
+                applyPrivacyMode();
+            }
+        }
+        
+        function calculateTotalInvested() {
+            let total = 0;
+            
+            portfolio.crypto.forEach(c => {
+                total += c.quantity * c.price;
+            });
+            
+            portfolio.pea.forEach(p => {
+                total += (p.quantity * p.price) + (p.fees || 0);
+            });
+            
+            portfolio.livrets.forEach(l => {
+                total += parseFloat(l.amount) || 0;
+            });
+            
+            portfolio.fundraising.forEach(f => {
+                total += f.amount;
+            });
+            
+            return total;
+        }
         
         // Initialize theme and currency on load
         
     </script>
+    
+    
+    <!-- Quick Add Modal -->
+    <div id="quickAddModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="margin: 0; font-size: 1.5em;">➕ Ajout rapide</h3>
+                <button onclick="closeQuickAddModal()" style="background: none; border: none; font-size: 1.5em; cursor: pointer; color: var(--text-secondary);">✕</button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                <button class="quick-add-option" onclick="quickAddAsset('crypto')">
+                    <span style="font-size: 2em;">₿</span>
+                    <span style="font-weight: 700;">Crypto</span>
+                </button>
+                <button class="quick-add-option" onclick="quickAddAsset('pea')">
+                    <span style="font-size: 2em;">📈</span>
+                    <span style="font-weight: 700;">Action</span>
+                </button>
+                <button class="quick-add-option" onclick="quickAddAsset('livret')">
+                    <span style="font-size: 2em;">💰</span>
+                    <span style="font-weight: 700;">Livret</span>
+                </button>
+                <button class="quick-add-option" onclick="quickAddAsset('fundraising')">
+                    <span style="font-size: 2em;">🚀</span>
+                    <span style="font-weight: 700;">Levée</span>
+                </button>
+                <button class="quick-add-option" onclick="quickAddGoal()">
+                    <span style="font-size: 2em;">🎯</span>
+                    <span style="font-weight: 700;">Objectif</span>
+                </button>
+            </div>
+        </div>
+    </div>
     
     <!-- Goal Modal -->
     <div id="goalModal" class="modal" style="display: none;">
