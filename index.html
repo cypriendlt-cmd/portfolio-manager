@@ -2465,9 +2465,8 @@ Vérifiez que votre fichier CSV est au bon format.`);
 
             const totalValue = cryptoValue + peaValue + livretsValue + fundraisingValue;
             
-            // Get current text color based on theme
-            const textColor = document.body.classList.contains('light-mode') ? '#1a202c' : '#ffffff';
-            const tooltipBg = document.body.classList.contains('light-mode') ? 'rgba(255, 255, 255, 0.95)' : 'rgba(26, 32, 54, 0.95)';
+            // Get current text color based on theme using the helper function
+            const colors = getChartColors();
 
             if (window.portfolioAllocationChartInstance) {
                 window.portfolioAllocationChartInstance.destroy();
@@ -2501,7 +2500,7 @@ Vérifiez que votre fichier CSV est au bon format.`);
                         legend: {
                             position: 'bottom',
                             labels: {
-                                color: textColor,
+                                color: colors.text,
                                 padding: 15,
                                 font: {
                                     size: 13,
@@ -2520,7 +2519,7 @@ Vérifiez que votre fichier CSV est au bon format.`);
                                                 text: `${label}: €${value.toLocaleString('fr-FR', {maximumFractionDigits: 0})} (${percentage}%)`,
                                                 fillStyle: data.datasets[0].backgroundColor[i],
                                                 strokeStyle: data.datasets[0].borderColor[i],
-                                                fontColor: textColor,
+                                                fontColor: colors.text,
                                                 hidden: false,
                                                 index: i
                                             };
@@ -2531,10 +2530,10 @@ Vérifiez que votre fichier CSV est au bon format.`);
                             }
                         },
                         tooltip: {
-                            backgroundColor: tooltipBg,
-                            titleColor: textColor,
-                            bodyColor: textColor,
-                            borderColor: 'rgba(255, 99, 71, 0.5)',
+                            backgroundColor: colors.tooltipBg,
+                            titleColor: colors.text,
+                            bodyColor: colors.text,
+                            borderColor: colors.tooltipBorder,
                             borderWidth: 1,
                             padding: 12,
                             displayColors: true,
@@ -4437,6 +4436,17 @@ Nouveau montant:`, goal.current));
             localStorage.setItem('theme', theme);
             
             console.log('Body classes:', body.className); // Debug
+            
+            // Recreate charts with new colors
+            setTimeout(() => {
+                updatePortfolio();
+                updateDiversificationAnalysis();
+                
+                // Recreate DCA chart if exists
+                if (window.dcaChartInstance) {
+                    calculateDCA();
+                }
+            }, 100);
         }
         
         // ========================================
