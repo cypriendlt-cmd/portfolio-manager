@@ -76,24 +76,26 @@
 <body>
     <div class="container">
         <header>
-            <h1>📊 Portfolio Manager Pro</h1>
-            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <button class="quick-add-btn" onclick="openQuickAddModal()" title="Ajout rapide (Ctrl+N)">
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; width: 100%;">
+                <h1 style="margin: 0;">📊 Portfolio Manager Pro</h1>
+                <button class="quick-add-btn" onclick="openQuickAddModal()" title="Ajout rapide (Ctrl+N)" style="margin-left: auto;">
                     ➕ Ajouter
                 </button>
-                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Changer de thème (Ctrl+T)">
-                    <span id="themeIcon">🌙</span>
-                </button>
-                <button class="privacy-btn" id="privacyToggle" onclick="togglePrivacy()">
-                    <span id="privacyIcon">👁️</span>
-                    <span id="privacyText">Masquer</span>
-                </button>
-                <button class="drive-connection-btn" id="driveConnectionBtn" onclick="toggleDriveConnection()">
-                    <span id="driveIcon">🔌</span>
-                    <span id="driveText">Connecter Drive</span>
-                </button>
-                <div class="sync-status" id="syncStatus">⏳ Non synchronisé</div>
-                <button class="update-btn" onclick="updateAll()">🔄 Actualiser les prix</button>
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Changer de thème (Ctrl+T)">
+                        <span id="themeIcon">🌙</span>
+                    </button>
+                    <button class="privacy-btn" id="privacyToggle" onclick="togglePrivacy()">
+                        <span id="privacyIcon">👁️</span>
+                        <span id="privacyText">Masquer</span>
+                    </button>
+                    <button class="drive-connection-btn" id="driveConnectionBtn" onclick="toggleDriveConnection()">
+                        <span id="driveIcon">🔌</span>
+                        <span id="driveText">Connecter Drive</span>
+                    </button>
+                    <div class="sync-status" id="syncStatus">⏳ Non synchronisé</div>
+                    <button class="update-btn" onclick="updateAll()">🔄 Actualiser les prix</button>
+                </div>
             </div>
         </header>
 
