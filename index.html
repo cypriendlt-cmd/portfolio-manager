@@ -78,6 +78,9 @@
         <header>
             <h1>📊 Portfolio Manager Pro</h1>
             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Changer de thème (Ctrl+T)">
+                    <span id="themeIcon">🌙</span>
+                </button>
                 <button class="privacy-btn" id="privacyToggle" onclick="togglePrivacy()">
                     <span id="privacyIcon">👁️</span>
                     <span id="privacyText">Masquer</span>
@@ -654,7 +657,50 @@
                 </div>
             </div>
             
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px;">🎨 Interface & Accessibilité</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Thème</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button onclick="setTheme('dark')" class="theme-option" id="theme-dark">🌙 Sombre</button>
+                        <button onclick="setTheme('light')" class="theme-option" id="theme-light">☀️ Clair</button>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Devise</label>
+                    <select id="currencySelect" onchange="changeCurrency(this.value)" style="padding: 10px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-primary); width: 200px;">
+                        <option value="EUR">€ Euro (EUR)</option>
+                        <option value="USD">$ Dollar US (USD)</option>
+                        <option value="GBP">£ Livre Sterling (GBP)</option>
+                        <option value="CHF">CHF Franc Suisse (CHF)</option>
+                    </select>
+                </div>
+                
+                <div style="background: rgba(0, 212, 170, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 212, 170, 0.3);">
+                    <h4 style="margin-bottom: 10px;">⌨️ Raccourcis clavier</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 8px; font-size: 0.9em;">
+                        <div><kbd>Ctrl + D</kbd> → Dashboard</div>
+                        <div><kbd>Ctrl + P</kbd> → Portfolio</div>
+                        <div><kbd>Ctrl + T</kbd> → Changer thème</div>
+                        <div><kbd>Ctrl + H</kbd> → Masquer/Afficher valeurs</div>
+                        <div><kbd>Ctrl + E</kbd> → Exporter PDF</div>
+                        <div><kbd>Ctrl + S</kbd> → Sauvegarder</div>
+                    </div>
+                </div>
+            </div>
+            
             <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px;">
+                <h3 style="margin-bottom: 15px;">📄 Export & Rapports</h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="exportPDF()" class="btn-secondary">📄 Exporter en PDF</button>
+                    <button onclick="printReport()" class="btn-secondary">🖨️ Imprimer rapport</button>
+                    <button onclick="exportExcel()" class="btn-secondary">📊 Exporter Excel</button>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px; margin-top: 20px;">
                 <h3 style="margin-bottom: 15px;">💾 Import / Export Local</h3>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button onclick="exportData()" class="btn-secondary">📥 Exporter JSON</button>
@@ -718,6 +764,11 @@
         let accessToken = null;
         let tokenClient = null;
         let myChart = null;
+        
+        // UX preferences
+        let currentTheme = localStorage.getItem('theme') || 'dark';
+        let currentCurrency = localStorage.getItem('currency') || 'EUR';
+        let exchangeRates = { EUR: 1, USD: 1.08, GBP: 0.86, CHF: 0.93 };
 
         // ===== DÉTECTION DU TYPE D'APPAREIL =====
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -4311,6 +4362,182 @@ Nouveau montant:`, goal.current));
             
             document.getElementById('retireResults').innerHTML = resultsHTML;
         }
+        
+        // ========================================
+        // 🎨 THEME & ACCESSIBILITY
+        // ========================================
+        
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(currentTheme);
+        }
+        
+        function setTheme(theme) {
+            currentTheme = theme;
+            applyTheme(theme);
+        }
+        
+        function applyTheme(theme) {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (theme === 'light') {
+                body.classList.add('light-mode');
+                themeIcon.textContent = '☀️';
+            } else {
+                body.classList.remove('light-mode');
+                themeIcon.textContent = '🌙';
+            }
+            
+            // Update active theme button
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById(`theme-${theme}`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            localStorage.setItem('theme', theme);
+        }
+        
+        // ========================================
+        // 💱 CURRENCY MANAGEMENT
+        // ========================================
+        
+        function changeCurrency(currency) {
+            currentCurrency = currency;
+            localStorage.setItem('currency', currency);
+            
+            // Update all displays
+            updateAll();
+            
+            console.log(`Currency changed to ${currency}`);
+        }
+        
+        function formatCurrency(amount, skipConversion = false) {
+            if (skipConversion || currentCurrency === 'EUR') {
+                return `€${amount.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }
+            
+            const converted = amount * exchangeRates[currentCurrency];
+            const symbols = { USD: '$', GBP: '£', CHF: 'CHF ' };
+            const symbol = symbols[currentCurrency] || '€';
+            
+            if (currentCurrency === 'CHF') {
+                return `${symbol}${converted.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }
+            
+            return `${symbol}${converted.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+        
+        // ========================================
+        // 📄 EXPORT & PRINT
+        // ========================================
+        
+        async function exportPDF() {
+            alert('📄 Fonctionnalité d\'export PDF en développement.\n\nPour l\'instant, utilisez Ctrl+P pour imprimer en PDF via votre navigateur.');
+            window.print();
+        }
+        
+        function printReport() {
+            window.print();
+        }
+        
+        function exportExcel() {
+            // Create workbook data
+            let csvContent = "Type,Actif,Quantité,Prix d'achat,Valeur actuelle,P&L\n";
+            
+            // Crypto
+            portfolio.crypto.forEach(c => {
+                const currentPrice = portfolio.prices[c.symbol] || 0;
+                const currentValue = c.quantity * currentPrice;
+                const invested = c.quantity * c.price;
+                const pnl = currentValue - invested;
+                csvContent += `Crypto,${c.symbol},${c.quantity},${c.price},${currentPrice},${pnl}\n`;
+            });
+            
+            // PEA
+            const peaByTicker = {};
+            portfolio.pea.forEach(p => {
+                if (!peaByTicker[p.ticker]) {
+                    peaByTicker[p.ticker] = { quantity: 0, invested: 0 };
+                }
+                peaByTicker[p.ticker].quantity += p.quantity;
+                peaByTicker[p.ticker].invested += (p.quantity * p.price) + (p.fees || 0);
+            });
+            
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const avgPrice = data.invested / data.quantity;
+                const currentPrice = portfolio.prices[ticker] || avgPrice;
+                const currentValue = data.quantity * currentPrice;
+                const pnl = currentValue - data.invested;
+                csvContent += `PEA,${ticker},${data.quantity},${avgPrice.toFixed(2)},${currentPrice},${pnl}\n`;
+            });
+            
+            // Livrets
+            portfolio.livrets.forEach(l => {
+                const amount = parseFloat(l.amount) || 0;
+                csvContent += `Livret,${l.type},1,${amount},${amount},0\n`;
+            });
+            
+            // Fundraising
+            portfolio.fundraising.forEach(f => {
+                const pnl = f.valuation - f.amount;
+                csvContent += `Levée,${f.name},1,${f.amount},${f.valuation},${pnl}\n`;
+            });
+            
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `portfolio-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // ========================================
+        // ⌨️ KEYBOARD SHORTCUTS
+        // ========================================
+        
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + shortcuts
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key.toLowerCase()) {
+                    case 'd':
+                        e.preventDefault();
+                        showSection('dashboard');
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        showSection('portfolio');
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        toggleTheme();
+                        break;
+                    case 'h':
+                        e.preventDefault();
+                        togglePrivacy();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        exportPDF();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        syncDriveData();
+                        break;
+                }
+            }
+        });
+        
+        // Initialize theme and currency on load
+        window.addEventListener('DOMContentLoaded', () => {
+            applyTheme(currentTheme);
+            document.getElementById('currencySelect').value = currentCurrency;
+        });
         
     </script>
     
