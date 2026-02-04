@@ -20,6 +20,44 @@
             --danger: #ff4757;
         }
         
+        /* Light Mode */
+        body.light-mode {
+            --bg-main: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --border-subtle: rgba(0, 0, 0, 0.1);
+        }
+        
+        body.light-mode .sidebar {
+            background: #ffffff;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        body.light-mode .nav-item:hover {
+            background: rgba(255, 99, 71, 0.1);
+        }
+        
+        body.light-mode .stat-card,
+        body.light-mode .fear-greed-card,
+        body.light-mode .news-item,
+        body.light-mode .asset-group,
+        body.light-mode .goal-card {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        body.light-mode input,
+        body.light-mode select,
+        body.light-mode textarea {
+            background: #f7fafc;
+            color: var(--text-primary);
+        }
+        
+        body.light-mode .modal {
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-main);
@@ -215,6 +253,66 @@
             background: rgba(0, 212, 170, 0.18);
             border-color: var(--success);
         }
+        
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+        }
+        
+        .theme-toggle-btn:hover {
+            background: rgba(255, 99, 71, 0.1);
+            border-color: var(--orange-primary);
+            transform: rotate(15deg);
+        }
+        
+        /* Theme Option Buttons */
+        .theme-option {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .theme-option:hover {
+            background: rgba(255, 99, 71, 0.1);
+            border-color: var(--orange-primary);
+        }
+        
+        .theme-option.active {
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+            border-color: var(--orange-primary);
+            color: white;
+        }
+        
+        /* Keyboard shortcut kbd style */
+        kbd {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            font-family: 'Inter', monospace;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
         
         /* Privacy Mode - Blur values */
         .privacy-mode .value-hidden {
@@ -1347,4 +1445,50 @@
             background: rgba(255, 71, 87, 0.15);
             border-color: var(--danger);
             color: var(--danger);
+        }
+        
+        /* ========================================
+           🖨️ PRINT STYLES
+           ======================================== */
+        
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            
+            .sidebar,
+            .mobile-menu-toggle,
+            header button,
+            .update-btn,
+            .privacy-btn,
+            .drive-connection-btn,
+            .theme-toggle-btn,
+            .nav-menu,
+            .goal-actions,
+            .modal {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .stat-card,
+            .fear-greed-card,
+            .goal-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            
+            h1, h2, h3 {
+                color: black;
+                background: none !important;
+                -webkit-text-fill-color: black !important;
+            }
+            
+            .value-hidden {
+                filter: none !important;
+            }
         }
