@@ -1202,3 +1202,149 @@
                 display: none !important;
             }
         }
+        
+        /* ========================================
+           🎯 GOALS & PLANNING STYLES
+           ======================================== */
+        
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Goal Card */
+        .goal-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 28px;
+            border: 1px solid var(--border-subtle);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .goal-card:hover {
+            border-color: var(--orange-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(255, 99, 71, 0.2);
+        }
+        
+        .goal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--orange-primary), var(--orange-light));
+        }
+        
+        .goal-progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .goal-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--orange-primary), var(--orange-light));
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        
+        .goal-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .goal-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .goal-badge.completed {
+            background: rgba(0, 212, 170, 0.15);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        
+        .goal-badge.on-track {
+            background: rgba(74, 158, 255, 0.15);
+            color: #4a9eff;
+            border: 1px solid #4a9eff;
+        }
+        
+        .goal-badge.behind {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+        
+        .goal-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .goal-action-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-subtle);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9em;
+        }
+        
+        .goal-action-btn:hover {
+            background: rgba(255, 99, 71, 0.1);
+            border-color: var(--orange-primary);
+        }
+        
+        .goal-action-btn.delete:hover {
+            background: rgba(255, 71, 87, 0.15);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
