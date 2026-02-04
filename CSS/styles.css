@@ -28,15 +28,30 @@
             --text-primary: #1a202c;
             --text-secondary: #4a5568;
             --border-subtle: rgba(0, 0, 0, 0.1);
+            background: #f5f7fa;
         }
         
         body.light-mode .sidebar {
             background: #ffffff;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        body.light-mode .main-content {
+            background: #f5f7fa;
+        }
+        
+        body.light-mode .nav-item {
+            color: #4a5568;
         }
         
         body.light-mode .nav-item:hover {
             background: rgba(255, 99, 71, 0.1);
+            color: #1a202c;
+        }
+        
+        body.light-mode .nav-item.active {
+            color: white;
         }
         
         body.light-mode .stat-card,
@@ -44,18 +59,83 @@
         body.light-mode .news-item,
         body.light-mode .asset-group,
         body.light-mode .goal-card {
+            background: #ffffff;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
         
         body.light-mode input,
         body.light-mode select,
         body.light-mode textarea {
             background: #f7fafc;
-            color: var(--text-primary);
+            color: #1a202c;
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
         
         body.light-mode .modal {
             background: rgba(0, 0, 0, 0.5);
+        }
+        
+        body.light-mode .modal-content {
+            background: #ffffff;
+            color: #1a202c;
+        }
+        
+        body.light-mode h1,
+        body.light-mode h2,
+        body.light-mode h3,
+        body.light-mode h4 {
+            color: #1a202c;
+        }
+        
+        body.light-mode .logo {
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        body.light-mode button {
+            color: #1a202c;
+        }
+        
+        body.light-mode .update-btn,
+        body.light-mode .nav-item.active {
+            color: white;
+        }
+        
+        body.light-mode .privacy-btn,
+        body.light-mode .drive-connection-btn,
+        body.light-mode .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a202c;
+        }
+        
+        body.light-mode .privacy-btn:hover,
+        body.light-mode .drive-connection-btn:hover,
+        body.light-mode .theme-toggle-btn:hover {
+            background: rgba(255, 99, 71, 0.1);
+        }
+        
+        body.light-mode table {
+            color: #1a202c;
+        }
+        
+        body.light-mode table th {
+            background: rgba(0, 0, 0, 0.03);
+            color: #1a202c;
+        }
+        
+        body.light-mode table td {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        body.light-mode .asset-header {
+            background: #ffffff;
+        }
+        
+        body.light-mode .news-section {
+            background: #ffffff;
         }
         
         body {

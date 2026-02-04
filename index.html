@@ -3855,6 +3855,13 @@ Vérifiez que votre fichier CSV est au bon format.`);
             updateDriveConnectionButton(isGoogleDriveConnected);
             updateGoalsList();
             
+            // Initialize theme and currency
+            applyTheme(currentTheme);
+            const currencySelect = document.getElementById('currencySelect');
+            if (currencySelect) {
+                currencySelect.value = currentCurrency;
+            }
+            
             // Auto-calculate current capital from portfolio
             const retireCurrentCapital = document.getElementById('retireCurrentCapital');
             if (retireCurrentCapital) {
@@ -4381,12 +4388,14 @@ Nouveau montant:`, goal.current));
             const body = document.body;
             const themeIcon = document.getElementById('themeIcon');
             
+            console.log('Applying theme:', theme); // Debug
+            
             if (theme === 'light') {
                 body.classList.add('light-mode');
-                themeIcon.textContent = '☀️';
+                if (themeIcon) themeIcon.textContent = '☀️';
             } else {
                 body.classList.remove('light-mode');
-                themeIcon.textContent = '🌙';
+                if (themeIcon) themeIcon.textContent = '🌙';
             }
             
             // Update active theme button
@@ -4397,6 +4406,8 @@ Nouveau montant:`, goal.current));
             if (activeBtn) activeBtn.classList.add('active');
             
             localStorage.setItem('theme', theme);
+            
+            console.log('Body classes:', body.className); // Debug
         }
         
         // ========================================
@@ -4534,10 +4545,6 @@ Nouveau montant:`, goal.current));
         });
         
         // Initialize theme and currency on load
-        window.addEventListener('DOMContentLoaded', () => {
-            applyTheme(currentTheme);
-            document.getElementById('currencySelect').value = currentCurrency;
-        });
         
     </script>
     
