@@ -769,6 +769,18 @@
         let currentTheme = localStorage.getItem('theme') || 'dark';
         let currentCurrency = localStorage.getItem('currency') || 'EUR';
         let exchangeRates = { EUR: 1, USD: 1.08, GBP: 0.86, CHF: 0.93 };
+        
+        // Helper function to get chart colors based on current theme
+        function getChartColors() {
+            const isLight = document.body.classList.contains('light-mode');
+            return {
+                text: isLight ? '#1a202c' : '#ffffff',
+                textSecondary: isLight ? '#4a5568' : '#8892a6',
+                grid: isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                tooltipBg: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(26, 32, 54, 0.95)',
+                tooltipBorder: isLight ? 'rgba(255, 99, 71, 0.5)' : 'rgba(255, 99, 71, 0.5)'
+            };
+        }
 
         // ===== DÉTECTION DU TYPE D'APPAREIL =====
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -2452,6 +2464,10 @@ Vérifiez que votre fichier CSV est au bon format.`);
             if (!ctx) return;
 
             const totalValue = cryptoValue + peaValue + livretsValue + fundraisingValue;
+            
+            // Get current text color based on theme
+            const textColor = document.body.classList.contains('light-mode') ? '#1a202c' : '#ffffff';
+            const tooltipBg = document.body.classList.contains('light-mode') ? 'rgba(255, 255, 255, 0.95)' : 'rgba(26, 32, 54, 0.95)';
 
             if (window.portfolioAllocationChartInstance) {
                 window.portfolioAllocationChartInstance.destroy();
@@ -2485,7 +2501,7 @@ Vérifiez que votre fichier CSV est au bon format.`);
                         legend: {
                             position: 'bottom',
                             labels: {
-                                color: '#ffffff',
+                                color: textColor,
                                 padding: 15,
                                 font: {
                                     size: 13,
@@ -2504,7 +2520,7 @@ Vérifiez que votre fichier CSV est au bon format.`);
                                                 text: `${label}: €${value.toLocaleString('fr-FR', {maximumFractionDigits: 0})} (${percentage}%)`,
                                                 fillStyle: data.datasets[0].backgroundColor[i],
                                                 strokeStyle: data.datasets[0].borderColor[i],
-                                                fontColor: '#ffffff',
+                                                fontColor: textColor,
                                                 hidden: false,
                                                 index: i
                                             };
@@ -2515,9 +2531,9 @@ Vérifiez que votre fichier CSV est au bon format.`);
                             }
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(26, 32, 54, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#ffffff',
+                            backgroundColor: tooltipBg,
+                            titleColor: textColor,
+                            bodyColor: textColor,
                             borderColor: 'rgba(255, 99, 71, 0.5)',
                             borderWidth: 1,
                             padding: 12,
@@ -3603,6 +3619,9 @@ Vérifiez que votre fichier CSV est au bon format.`);
             
             const total = cryptoValue + peaValue + livretsValue + fundraisingValue;
             
+            // Get theme colors
+            const colors = getChartColors();
+            
             // Asset Class Chart
             const ctx = document.getElementById('assetClassChart');
             if (ctx) {
@@ -3624,9 +3643,14 @@ Vérifiez que votre fichier CSV est au bon format.`);
                         plugins: {
                             legend: {
                                 position: 'bottom',
-                                labels: { color: '#ffffff', padding: 15, font: { size: 12 } }
+                                labels: { color: colors.text, padding: 15, font: { size: 12 } }
                             },
                             tooltip: {
+                                backgroundColor: colors.tooltipBg,
+                                titleColor: colors.text,
+                                bodyColor: colors.text,
+                                borderColor: colors.tooltipBorder,
+                                borderWidth: 1,
                                 callbacks: {
                                     label: function(context) {
                                         const value = context.parsed;
@@ -4169,6 +4193,9 @@ Nouveau montant:`, goal.current));
                 window.dcaChartInstance.destroy();
             }
             
+            // Get theme colors
+            const colors = getChartColors();
+            
             window.dcaChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -4200,7 +4227,7 @@ Nouveau montant:`, goal.current));
                     plugins: {
                         legend: {
                             labels: {
-                                color: '#ffffff',
+                                color: colors.text,
                                 font: {
                                     size: 12,
                                     weight: 600,
@@ -4209,9 +4236,11 @@ Nouveau montant:`, goal.current));
                             }
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(26, 32, 54, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#ffffff',
+                            backgroundColor: colors.tooltipBg,
+                            titleColor: colors.text,
+                            bodyColor: colors.text,
+                            borderColor: colors.tooltipBorder,
+                            borderWidth: 1,
                             callbacks: {
                                 label: function(context) {
                                     return `${context.dataset.label}: €${context.parsed.y.toLocaleString('fr-FR', {minimumFractionDigits: 2})}`;
@@ -4221,13 +4250,13 @@ Nouveau montant:`, goal.current));
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { color: '#8892a6' }
+                            grid: { color: colors.grid },
+                            ticks: { color: colors.textSecondary }
                         },
                         y: {
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            grid: { color: colors.grid },
                             ticks: { 
-                                color: '#8892a6',
+                                color: colors.textSecondary,
                                 callback: function(value) {
                                     return '€' + value.toLocaleString('fr-FR');
                                 }
