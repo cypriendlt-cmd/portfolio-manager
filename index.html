@@ -53,6 +53,13 @@
                 <span>Levées</span>
             </button>
             
+            <div style="margin: 32px 0 12px 20px; font-size: 0.75em; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Planning</div>
+            
+            <button class="nav-item" data-section="goals" onclick="showSection('goals')">
+                <span class="icon">🎯</span>
+                <span>Objectifs</span>
+            </button>
+            
             <div style="margin-top: auto;">
                     <button class="nav-item" data-section="settings" onclick="showSection('settings')">
                         <span class="icon">👤</span>
@@ -514,6 +521,80 @@
             <div id="fundraisingList"></div>
         </div>
 
+        <!-- Goals Section -->
+        <div id="goals" class="section">
+            <h2 style="margin-bottom: 20px;">🎯 Objectifs & Planning</h2>
+            
+            <!-- Add Goal Button -->
+            <div style="margin-bottom: 32px;">
+                <button class="update-btn" onclick="openGoalModal()" style="width: auto;">
+                    ➕ Nouvel objectif
+                </button>
+            </div>
+            
+            <!-- Goals List -->
+            <div id="goalsList" style="display: grid; gap: 20px;"></div>
+            
+            <!-- DCA Calculator -->
+            <div style="margin-top: 48px;">
+                <h3 style="font-size: 1.5em; margin-bottom: 24px;">💰 Simulateur d'investissement régulier (DCA)</h3>
+                <div class="fear-greed-card">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                        <div class="form-group">
+                            <label>Montant mensuel (€)</label>
+                            <input type="number" id="dcaMonthlyAmount" value="500" min="0" step="50">
+                        </div>
+                        <div class="form-group">
+                            <label>Durée (mois)</label>
+                            <input type="number" id="dcaDuration" value="12" min="1" max="360">
+                        </div>
+                        <div class="form-group">
+                            <label>Rendement annuel estimé (%)</label>
+                            <input type="number" id="dcaReturnRate" value="7" min="-50" max="100" step="0.5">
+                        </div>
+                    </div>
+                    <button class="update-btn" onclick="calculateDCA()" style="width: 100%;">
+                        Calculer la projection
+                    </button>
+                    <div id="dcaResults" style="margin-top: 24px;"></div>
+                    <canvas id="dcaChart" style="margin-top: 24px; max-height: 300px;"></canvas>
+                </div>
+            </div>
+            
+            <!-- Retirement Calculator -->
+            <div style="margin-top: 48px;">
+                <h3 style="font-size: 1.5em; margin-bottom: 24px;">🏖️ Calculateur d'indépendance financière</h3>
+                <div class="fear-greed-card">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                        <div class="form-group">
+                            <label>Capital actuel (€)</label>
+                            <input type="number" id="retireCurrentCapital" value="0" min="0" step="1000">
+                        </div>
+                        <div class="form-group">
+                            <label>Épargne mensuelle (€)</label>
+                            <input type="number" id="retireMonthlySavings" value="1000" min="0" step="100">
+                        </div>
+                        <div class="form-group">
+                            <label>Rendement annuel (%)</label>
+                            <input type="number" id="retireReturnRate" value="7" min="0" max="100" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label>Dépenses mensuelles visées (€)</label>
+                            <input type="number" id="retireMonthlyExpenses" value="3000" min="0" step="100">
+                        </div>
+                        <div class="form-group">
+                            <label>Taux de retrait sécurisé (%)</label>
+                            <input type="number" id="retireWithdrawalRate" value="4" min="0" max="10" step="0.5">
+                        </div>
+                    </div>
+                    <button class="update-btn" onclick="calculateRetirement()" style="width: 100%;">
+                        Calculer l'indépendance financière
+                    </button>
+                    <div id="retireResults" style="margin-top: 24px;"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Settings Section -->
         <div id="settings" class="section">
             <h2 style="margin-bottom: 20px;">⚙️ Paramètres</h2>
@@ -628,7 +709,8 @@
             fundraising: [],
             prices: {},
             priceTimestamps: {},
-            binanceCredentials: null
+            binanceCredentials: null,
+            goals: []
         };
 
         let autoSyncInterval = null;
@@ -3716,7 +3798,565 @@ Vérifiez que votre fichier CSV est au bon format.`);
         // Initialize button state on page load
         window.addEventListener('DOMContentLoaded', () => {
             updateDriveConnectionButton(isGoogleDriveConnected);
+            updateGoalsList();
+            
+            // Auto-calculate current capital from portfolio
+            const retireCurrentCapital = document.getElementById('retireCurrentCapital');
+            if (retireCurrentCapital) {
+                retireCurrentCapital.addEventListener('focus', function() {
+                    if (this.value == 0) {
+                        const totalValue = calculateTotalPortfolioValue();
+                        this.value = Math.round(totalValue);
+                    }
+                });
+            }
         });
+        
+        // ========================================
+        // 🎯 GOALS MANAGEMENT
+        // ========================================
+        
+        let editingGoalId = null;
+        
+        function openGoalModal(goalId = null) {
+            const modal = document.getElementById('goalModal');
+            modal.style.display = 'flex';
+            
+            if (goalId !== null) {
+                // Edit mode
+                editingGoalId = goalId;
+                const goal = portfolio.goals.find(g => g.id === goalId);
+                if (goal) {
+                    document.getElementById('goalName').value = goal.name;
+                    document.getElementById('goalTarget').value = goal.target;
+                    document.getElementById('goalDate').value = goal.date || '';
+                    document.getElementById('goalCurrent').value = goal.current;
+                    document.getElementById('goalCategory').value = goal.category;
+                    document.getElementById('goalNotes').value = goal.notes || '';
+                    document.querySelector('#goalModal h3').textContent = '✏️ Modifier l\'objectif';
+                }
+            } else {
+                // Create mode
+                editingGoalId = null;
+                document.getElementById('goalForm').reset();
+                document.querySelector('#goalModal h3').textContent = '🎯 Nouvel objectif';
+            }
+        }
+        
+        function closeGoalModal() {
+            document.getElementById('goalModal').style.display = 'none';
+            document.getElementById('goalForm').reset();
+            editingGoalId = null;
+        }
+        
+        function saveGoal(event) {
+            event.preventDefault();
+            
+            const goal = {
+                id: editingGoalId || Date.now(),
+                name: document.getElementById('goalName').value,
+                target: parseFloat(document.getElementById('goalTarget').value),
+                date: document.getElementById('goalDate').value || null,
+                current: parseFloat(document.getElementById('goalCurrent').value) || 0,
+                category: document.getElementById('goalCategory').value,
+                notes: document.getElementById('goalNotes').value || '',
+                createdAt: editingGoalId ? portfolio.goals.find(g => g.id === editingGoalId).createdAt : new Date().toISOString()
+            };
+            
+            if (editingGoalId) {
+                // Update existing goal
+                const index = portfolio.goals.findIndex(g => g.id === editingGoalId);
+                portfolio.goals[index] = goal;
+            } else {
+                // Add new goal
+                portfolio.goals.push(goal);
+            }
+            
+            syncDriveData();
+            updateGoalsList();
+            closeGoalModal();
+        }
+        
+        function deleteGoal(goalId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet objectif ?')) {
+                portfolio.goals = portfolio.goals.filter(g => g.id !== goalId);
+                syncDriveData();
+                updateGoalsList();
+            }
+        }
+        
+        function updateGoalProgress(goalId, amount) {
+            const goal = portfolio.goals.find(g => g.id === goalId);
+            if (goal) {
+                const newAmount = parseFloat(prompt(`Mise à jour de l'objectif "${goal.name}"
+                
+Montant actuel: €${goal.current.toLocaleString('fr-FR', {minimumFractionDigits: 2})}
+Montant cible: €${goal.target.toLocaleString('fr-FR', {minimumFractionDigits: 2})}
+
+Nouveau montant:`, goal.current));
+                
+                if (!isNaN(newAmount) && newAmount >= 0) {
+                    goal.current = newAmount;
+                    syncDriveData();
+                    updateGoalsList();
+                }
+            }
+        }
+        
+        function updateGoalsList() {
+            const container = document.getElementById('goalsList');
+            if (!container) return;
+            
+            if (!portfolio.goals || portfolio.goals.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                        <div style="font-size: 4em; margin-bottom: 16px;">🎯</div>
+                        <h3 style="margin-bottom: 12px;">Aucun objectif défini</h3>
+                        <p style="margin-bottom: 24px;">Créez votre premier objectif financier pour suivre vos progrès</p>
+                        <button class="update-btn" onclick="openGoalModal()">➕ Créer un objectif</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = portfolio.goals.map(goal => {
+                const progress = goal.target > 0 ? (goal.current / goal.target * 100) : 0;
+                const remaining = goal.target - goal.current;
+                const progressClamped = Math.min(progress, 100);
+                
+                // Calculate status
+                let status = 'on-track';
+                let statusText = 'En cours';
+                let statusIcon = '🔄';
+                
+                if (progress >= 100) {
+                    status = 'completed';
+                    statusText = 'Objectif atteint !';
+                    statusIcon = '✅';
+                } else if (goal.date) {
+                    const daysRemaining = Math.ceil((new Date(goal.date) - new Date()) / (1000 * 60 * 60 * 24));
+                    if (daysRemaining < 0) {
+                        status = 'behind';
+                        statusText = 'Échéance dépassée';
+                        statusIcon = '⚠️';
+                    } else if (daysRemaining < 90) {
+                        const requiredMonthly = remaining / (daysRemaining / 30);
+                        statusText = `${daysRemaining} jours restants`;
+                        statusIcon = '⏱️';
+                    }
+                }
+                
+                // Category emoji
+                const categoryEmojis = {
+                    savings: '💰',
+                    investment: '📈',
+                    purchase: '🏠',
+                    retirement: '🏖️',
+                    education: '🎓',
+                    travel: '✈️',
+                    other: '📌'
+                };
+                
+                const categoryEmoji = categoryEmojis[goal.category] || '📌';
+                
+                return `
+                    <div class="goal-card">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                    <span style="font-size: 1.8em;">${categoryEmoji}</span>
+                                    <h3 style="margin: 0; font-size: 1.3em; font-weight: 800;">${goal.name}</h3>
+                                </div>
+                                <span class="goal-badge ${status}">${statusIcon} ${statusText}</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-size: 0.9em; color: var(--text-secondary);">Progression</span>
+                                <span style="font-weight: 700; font-size: 1.1em; color: var(--orange-primary);">${progressClamped.toFixed(1)}%</span>
+                            </div>
+                            <div class="goal-progress-bar">
+                                <div class="goal-progress-fill" style="width: ${progressClamped}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
+                            <div>
+                                <div style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 4px;">Actuel</div>
+                                <div style="font-weight: 700; font-size: 1.2em;" class="value-hidden">€${goal.current.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 4px;">Restant</div>
+                                <div style="font-weight: 700; font-size: 1.2em; color: ${remaining > 0 ? 'var(--text-secondary)' : 'var(--success)'};" class="value-hidden">€${Math.max(0, remaining).toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 4px;">Objectif</div>
+                                <div style="font-weight: 700; font-size: 1.2em; color: var(--orange-primary);" class="value-hidden">€${goal.target.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                            </div>
+                        </div>
+                        
+                        ${goal.date ? `
+                            <div style="padding: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; margin-bottom: 16px;">
+                                <div style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 4px;">📅 Date cible</div>
+                                <div style="font-weight: 600;">${new Date(goal.date).toLocaleDateString('fr-FR', {year: 'numeric', month: 'long', day: 'numeric'})}</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${goal.notes ? `
+                            <div style="padding: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; margin-bottom: 16px;">
+                                <div style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 4px;">📝 Notes</div>
+                                <div style="font-size: 0.9em; line-height: 1.6;">${goal.notes}</div>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="goal-actions">
+                            <button class="goal-action-btn" onclick="updateGoalProgress(${goal.id})">💰 Mettre à jour</button>
+                            <button class="goal-action-btn" onclick="openGoalModal(${goal.id})">✏️ Modifier</button>
+                            <button class="goal-action-btn delete" onclick="deleteGoal(${goal.id})">🗑️ Supprimer</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+            
+            // Apply privacy mode if enabled
+            if (isPrivacyMode) {
+                applyPrivacyMode();
+            }
+        }
+        
+        // ========================================
+        // 💰 DCA CALCULATOR
+        // ========================================
+        
+        function calculateDCA() {
+            const monthlyAmount = parseFloat(document.getElementById('dcaMonthlyAmount').value) || 0;
+            const duration = parseInt(document.getElementById('dcaDuration').value) || 12;
+            const returnRate = parseFloat(document.getElementById('dcaReturnRate').value) || 7;
+            
+            const monthlyRate = returnRate / 100 / 12;
+            const totalInvested = monthlyAmount * duration;
+            
+            // Future value of annuity formula
+            let futureValue = 0;
+            if (monthlyRate === 0) {
+                futureValue = totalInvested;
+            } else {
+                futureValue = monthlyAmount * ((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate);
+            }
+            
+            const gains = futureValue - totalInvested;
+            const gainPercentage = totalInvested > 0 ? (gains / totalInvested * 100) : 0;
+            
+            // Generate chart data
+            const chartData = [];
+            const labels = [];
+            let cumulativeInvested = 0;
+            let cumulativeValue = 0;
+            
+            for (let month = 0; month <= duration; month++) {
+                labels.push(`M${month}`);
+                cumulativeInvested = monthlyAmount * month;
+                
+                if (monthlyRate === 0) {
+                    cumulativeValue = cumulativeInvested;
+                } else {
+                    cumulativeValue = month === 0 ? 0 : monthlyAmount * ((Math.pow(1 + monthlyRate, month) - 1) / monthlyRate);
+                }
+                
+                chartData.push({
+                    month: month,
+                    invested: cumulativeInvested,
+                    value: cumulativeValue
+                });
+            }
+            
+            // Display results
+            const resultsHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div style="text-align: center; padding: 20px; background: rgba(255, 99, 71, 0.1); border-radius: 12px; border: 1px solid var(--orange-primary);">
+                        <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">Total investi</div>
+                        <div style="font-size: 2em; font-weight: 900; color: var(--text-primary);">€${totalInvested.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: rgba(0, 212, 170, 0.1); border-radius: 12px; border: 1px solid var(--success);">
+                        <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">Valeur finale</div>
+                        <div style="font-size: 2em; font-weight: 900; color: var(--success);">€${futureValue.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: rgba(74, 158, 255, 0.1); border-radius: 12px; border: 1px solid #4a9eff;">
+                        <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">Gains</div>
+                        <div style="font-size: 2em; font-weight: 900; color: #4a9eff;">€${gains.toLocaleString('fr-FR', {minimumFractionDigits: 2})}</div>
+                        <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 4px;">+${gainPercentage.toFixed(2)}%</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('dcaResults').innerHTML = resultsHTML;
+            
+            // Draw chart
+            const ctx = document.getElementById('dcaChart');
+            if (window.dcaChartInstance) {
+                window.dcaChartInstance.destroy();
+            }
+            
+            window.dcaChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total investi',
+                            data: chartData.map(d => d.invested),
+                            borderColor: 'rgba(255, 99, 71, 1)',
+                            backgroundColor: 'rgba(255, 99, 71, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Valeur du portfolio',
+                            data: chartData.map(d => d.value),
+                            borderColor: 'rgba(0, 212, 170, 1)',
+                            backgroundColor: 'rgba(0, 212, 170, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff',
+                                font: {
+                                    size: 12,
+                                    weight: 600,
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 32, 54, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: €${context.parsed.y.toLocaleString('fr-FR', {minimumFractionDigits: 2})}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#8892a6' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { 
+                                color: '#8892a6',
+                                callback: function(value) {
+                                    return '€' + value.toLocaleString('fr-FR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // ========================================
+        // 🏖️ RETIREMENT CALCULATOR
+        // ========================================
+        
+        function calculateTotalPortfolioValue() {
+            let total = 0;
+            
+            // Crypto
+            portfolio.crypto.forEach(c => {
+                const currentPrice = portfolio.prices[c.symbol] || 0;
+                total += c.quantity * currentPrice;
+            });
+            
+            // PEA
+            const peaByTicker = {};
+            portfolio.pea.forEach(p => {
+                if (!peaByTicker[p.ticker]) {
+                    peaByTicker[p.ticker] = { quantity: 0, invested: 0 };
+                }
+                peaByTicker[p.ticker].quantity += p.quantity;
+                peaByTicker[p.ticker].invested += (p.quantity * p.price) + (p.fees || 0);
+            });
+            
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const avgPrice = data.invested / data.quantity;
+                const currentPrice = portfolio.prices[ticker] || avgPrice;
+                total += data.quantity * currentPrice;
+            });
+            
+            // Livrets
+            portfolio.livrets.forEach(l => {
+                total += parseFloat(l.amount) || 0;
+            });
+            
+            // Fundraising
+            portfolio.fundraising.forEach(f => {
+                total += f.valuation;
+            });
+            
+            return total;
+        }
+        
+        function calculateRetirement() {
+            const currentCapital = parseFloat(document.getElementById('retireCurrentCapital').value) || 0;
+            const monthlySavings = parseFloat(document.getElementById('retireMonthlySavings').value) || 0;
+            const returnRate = parseFloat(document.getElementById('retireReturnRate').value) || 7;
+            const monthlyExpenses = parseFloat(document.getElementById('retireMonthlyExpenses').value) || 3000;
+            const withdrawalRate = parseFloat(document.getElementById('retireWithdrawalRate').value) || 4;
+            
+            // Calculate target capital needed (using 4% rule or custom)
+            const targetCapital = (monthlyExpenses * 12) / (withdrawalRate / 100);
+            
+            // Calculate months needed to reach target
+            const monthlyRate = returnRate / 100 / 12;
+            let months = 0;
+            let capital = currentCapital;
+            
+            if (capital >= targetCapital) {
+                months = 0;
+            } else if (monthlySavings === 0) {
+                // Only growth, no contributions
+                if (monthlyRate > 0) {
+                    months = Math.log(targetCapital / currentCapital) / Math.log(1 + monthlyRate);
+                } else {
+                    months = Infinity;
+                }
+            } else {
+                // With monthly contributions
+                while (capital < targetCapital && months < 1200) { // Max 100 years
+                    capital = capital * (1 + monthlyRate) + monthlySavings;
+                    months++;
+                }
+            }
+            
+            const years = Math.floor(months / 12);
+            const remainingMonths = Math.floor(months % 12);
+            
+            // Calculate date
+            const targetDate = new Date();
+            targetDate.setMonth(targetDate.getMonth() + months);
+            
+            const resultsHTML = `
+                <div style="background: linear-gradient(135deg, rgba(255, 99, 71, 0.1), rgba(0, 212, 170, 0.1)); padding: 32px; border-radius: 20px; border: 1px solid var(--border-subtle);">
+                    <div style="text-align: center; margin-bottom: 32px;">
+                        <div style="font-size: 4em; margin-bottom: 16px;">🏖️</div>
+                        ${months === 0 ? `
+                            <h3 style="font-size: 2em; margin-bottom: 12px; color: var(--success);">Vous êtes déjà financièrement indépendant !</h3>
+                            <p style="color: var(--text-secondary);">Votre capital actuel est suffisant pour couvrir vos dépenses mensuelles.</p>
+                        ` : months < 1200 ? `
+                            <h3 style="font-size: 2em; margin-bottom: 12px;">Indépendance financière dans</h3>
+                            <div style="font-size: 3.5em; font-weight: 900; color: var(--orange-primary); margin-bottom: 8px;">
+                                ${years > 0 ? years + ' an' + (years > 1 ? 's' : '') : ''}
+                                ${years > 0 && remainingMonths > 0 ? ' et ' : ''}
+                                ${remainingMonths > 0 ? remainingMonths + ' mois' : ''}
+                            </div>
+                            <p style="font-size: 1.1em; color: var(--text-secondary);">📅 Date estimée: ${targetDate.toLocaleDateString('fr-FR', {year: 'numeric', month: 'long'})}</p>
+                        ` : `
+                            <h3 style="font-size: 2em; margin-bottom: 12px; color: var(--danger);">Objectif difficile à atteindre</h3>
+                            <p style="color: var(--text-secondary);">Avec les paramètres actuels, il faudrait plus de 100 ans. Augmentez votre épargne mensuelle ou revoyez vos dépenses.</p>
+                        `}
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div style="text-align: center; padding: 20px; background: var(--bg-card); border-radius: 12px;">
+                            <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">Capital actuel</div>
+                            <div style="font-size: 1.8em; font-weight: 900;">€${currentCapital.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: var(--bg-card); border-radius: 12px;">
+                            <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">Capital nécessaire</div>
+                            <div style="font-size: 1.8em; font-weight: 900; color: var(--orange-primary);">€${targetCapital.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: var(--bg-card); border-radius: 12px;">
+                            <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">Restant à accumuler</div>
+                            <div style="font-size: 1.8em; font-weight: 900; color: ${targetCapital > currentCapital ? 'var(--text-secondary)' : 'var(--success)'};">€${Math.max(0, targetCapital - currentCapital).toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px;">
+                        <h4 style="margin-bottom: 12px;">💡 Calculs basés sur :</h4>
+                        <ul style="list-style: none; padding: 0; margin: 0; line-height: 2;">
+                            <li>📊 Règle de retrait: ${withdrawalRate}% par an (${(monthlyExpenses * 12).toLocaleString('fr-FR')}€/an)</li>
+                            <li>💰 Épargne mensuelle: ${monthlySavings.toLocaleString('fr-FR')}€</li>
+                            <li>📈 Rendement annuel: ${returnRate}%</li>
+                            <li>💵 Dépenses mensuelles: ${monthlyExpenses.toLocaleString('fr-FR')}€</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('retireResults').innerHTML = resultsHTML;
+        }
+        
     </script>
+    
+    <!-- Goal Modal -->
+    <div id="goalModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="margin: 0; font-size: 1.5em;">🎯 Nouvel objectif</h3>
+                <button onclick="closeGoalModal()" style="background: none; border: none; font-size: 1.5em; cursor: pointer; color: var(--text-secondary);">✕</button>
+            </div>
+            
+            <form id="goalForm" onsubmit="saveGoal(event)">
+                <div class="form-group">
+                    <label>Nom de l'objectif *</label>
+                    <input type="text" id="goalName" required placeholder="Ex: Acheter une maison, Retraite anticipée">
+                </div>
+                
+                <div class="form-group">
+                    <label>Montant cible (€) *</label>
+                    <input type="number" id="goalTarget" required min="1" step="0.01" placeholder="50000">
+                </div>
+                
+                <div class="form-group">
+                    <label>Date cible</label>
+                    <input type="date" id="goalDate">
+                </div>
+                
+                <div class="form-group">
+                    <label>Montant actuel (€)</label>
+                    <input type="number" id="goalCurrent" value="0" min="0" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label>Catégorie</label>
+                    <select id="goalCategory">
+                        <option value="savings">💰 Épargne</option>
+                        <option value="investment">📈 Investissement</option>
+                        <option value="purchase">🏠 Achat</option>
+                        <option value="retirement">🏖️ Retraite</option>
+                        <option value="education">🎓 Éducation</option>
+                        <option value="travel">✈️ Voyage</option>
+                        <option value="other">📌 Autre</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="goalNotes" rows="3" placeholder="Description ou notes supplémentaires..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="submit" class="update-btn" style="flex: 1;">Enregistrer</button>
+                    <button type="button" onclick="closeGoalModal()" class="privacy-btn" style="flex: 1;">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
 </body>
 </html>
