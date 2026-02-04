@@ -146,15 +146,17 @@
             
             <!-- NEW: Evolution Chart (Line Graph) -->
             <div style="margin: 32px 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
                     <h2 style="font-size: 1.8em; font-weight: 800; letter-spacing: -1px;">📈 Évolution du patrimoine</h2>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="time-filter active" onclick="setTimeRange('1M')">1M</button>
-                        <button class="time-filter" onclick="setTimeRange('3M')">3M</button>
-                        <button class="time-filter" onclick="setTimeRange('6M')">6M</button>
-                        <button class="time-filter" onclick="setTimeRange('1Y')">1A</button>
-                        <button class="time-filter" onclick="setTimeRange('YTD')">YTD</button>
-                        <button class="time-filter" onclick="setTimeRange('ALL')">MAX</button>
+                    <div class="time-range-dropdown">
+                        <select id="timeRangeSelect" class="time-range-select" onchange="setTimeRangeFromSelect(this.value)">
+                            <option value="1M" selected>1 mois</option>
+                            <option value="3M">3 mois</option>
+                            <option value="6M">6 mois</option>
+                            <option value="1Y">1 an</option>
+                            <option value="YTD">Année en cours</option>
+                            <option value="ALL">Maximum</option>
+                        </select>
                     </div>
                 </div>
                 <div class="chart-container" style="height: 400px;">
@@ -3399,6 +3401,11 @@ Vérifiez que votre fichier CSV est au bon format.`);
             updateDiversificationAnalysis();
             updateTransactionHistory();
         };
+        
+        // Function to handle time range selection from dropdown
+        function setTimeRangeFromSelect(range) {
+            setTimeRange(range);
+        }
     </script>
 </body>
 </html>
