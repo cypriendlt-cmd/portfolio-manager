@@ -20,6 +20,42 @@
             --danger: #ff4757;
         }
         
+        /* ========================================
+           🎨 COLOR PALETTES
+           ======================================== */
+        
+        /* Palette 1: Orange/Red (Default) */
+        body[data-palette="orange"] {
+            --orange-primary: #ff6347;
+            --orange-light: #ff7f66;
+            --orange-dark: #e84a3a;
+            --success: #00d4aa;
+        }
+        
+        /* Palette 2: Blue/Cyan */
+        body[data-palette="blue"] {
+            --orange-primary: #3b82f6;
+            --orange-light: #60a5fa;
+            --orange-dark: #2563eb;
+            --success: #06b6d4;
+        }
+        
+        /* Palette 3: Purple/Pink */
+        body[data-palette="purple"] {
+            --orange-primary: #a855f7;
+            --orange-light: #c084fc;
+            --orange-dark: #9333ea;
+            --success: #ec4899;
+        }
+        
+        /* Palette 4: Green/Teal */
+        body[data-palette="green"] {
+            --orange-primary: #10b981;
+            --orange-light: #34d399;
+            --orange-dark: #059669;
+            --success: #14b8a6;
+        }
+        
         /* Light Mode */
         body.light-mode {
             --bg-main: #f5f7fa;
@@ -378,6 +414,42 @@
             background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
             border-color: var(--orange-primary);
             color: white;
+        }
+        
+        /* Palette Options */
+        .palette-option {
+            padding: 16px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-subtle);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .palette-option:hover {
+            border-color: var(--orange-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .palette-option.active {
+            border-color: var(--orange-primary);
+            border-width: 3px;
+            background: rgba(255, 99, 71, 0.05);
+            box-shadow: 0 4px 16px rgba(255, 99, 71, 0.3);
+        }
+        
+        .palette-preview {
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         
         /* Keyboard shortcut kbd style */

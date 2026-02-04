@@ -685,6 +685,28 @@
                 </div>
                 
                 <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 600;">Palette de couleurs</label>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                        <button onclick="setPalette('orange')" class="palette-option" id="palette-orange" data-palette="orange">
+                            <div class="palette-preview" style="background: linear-gradient(135deg, #ff6347, #ff7f66);"></div>
+                            <span>🔥 Orange</span>
+                        </button>
+                        <button onclick="setPalette('blue')" class="palette-option" id="palette-blue" data-palette="blue">
+                            <div class="palette-preview" style="background: linear-gradient(135deg, #3b82f6, #60a5fa);"></div>
+                            <span>💙 Bleu</span>
+                        </button>
+                        <button onclick="setPalette('purple')" class="palette-option" id="palette-purple" data-palette="purple">
+                            <div class="palette-preview" style="background: linear-gradient(135deg, #a855f7, #c084fc);"></div>
+                            <span>💜 Violet</span>
+                        </button>
+                        <button onclick="setPalette('green')" class="palette-option" id="palette-green" data-palette="green">
+                            <div class="palette-preview" style="background: linear-gradient(135deg, #10b981, #34d399);"></div>
+                            <span>💚 Vert</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Devise</label>
                     <select id="currencySelect" onchange="changeCurrency(this.value)" style="padding: 10px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-primary); width: 200px;">
                         <option value="EUR">€ Euro (EUR)</option>
@@ -786,6 +808,7 @@
         // UX preferences
         let currentTheme = localStorage.getItem('theme') || 'dark';
         let currentCurrency = localStorage.getItem('currency') || 'EUR';
+        let currentPalette = localStorage.getItem('palette') || 'orange';
         let exchangeRates = { EUR: 1, USD: 1.08, GBP: 0.86, CHF: 0.93 };
         
         // Helper function to get chart colors based on current theme
@@ -3898,8 +3921,9 @@ Vérifiez que votre fichier CSV est au bon format.`);
             updateDriveConnectionButton(isGoogleDriveConnected);
             updateGoalsList();
             
-            // Initialize theme and currency
+            // Initialize theme, palette and currency
             applyTheme(currentTheme);
+            applyPalette(currentPalette);
             const currencySelect = document.getElementById('currencySelect');
             if (currencySelect) {
                 currencySelect.value = currentCurrency;
@@ -4456,6 +4480,46 @@ Nouveau montant:`, goal.current));
             localStorage.setItem('theme', theme);
             
             console.log('Body classes:', body.className); // Debug
+            
+            // Recreate charts with new colors
+            setTimeout(() => {
+                updatePortfolio();
+                updateDiversificationAnalysis();
+                
+                // Recreate DCA chart if exists
+                if (window.dcaChartInstance) {
+                    calculateDCA();
+                }
+            }, 100);
+        }
+        
+        // ========================================
+        // 🎨 COLOR PALETTE MANAGEMENT
+        // ========================================
+        
+        function setPalette(palette) {
+            currentPalette = palette;
+            applyPalette(palette);
+        }
+        
+        function applyPalette(palette) {
+            const body = document.body;
+            
+            console.log('Applying palette:', palette); // Debug
+            
+            // Set data-palette attribute
+            body.setAttribute('data-palette', palette);
+            
+            // Update active palette button
+            document.querySelectorAll('.palette-option').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById(`palette-${palette}`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            localStorage.setItem('palette', palette);
+            
+            console.log('Palette applied:', palette); // Debug
             
             // Recreate charts with new colors
             setTimeout(() => {
