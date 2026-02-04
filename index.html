@@ -70,10 +70,14 @@
     <div class="container">
         <header>
             <h1>📊 Portfolio Manager Pro</h1>
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <button class="privacy-btn" id="privacyToggle" onclick="togglePrivacy()">
                     <span id="privacyIcon">👁️</span>
                     <span id="privacyText">Masquer</span>
+                </button>
+                <button class="drive-connection-btn" id="driveConnectionBtn" onclick="toggleDriveConnection()">
+                    <span id="driveIcon">🔌</span>
+                    <span id="driveText">Connecter Drive</span>
                 </button>
                 <div class="sync-status" id="syncStatus">⏳ Non synchronisé</div>
                 <button class="update-btn" onclick="updateAll()">🔄 Actualiser les prix</button>
@@ -2664,6 +2668,7 @@ Vérifiez que votre fichier CSV est au bon format.`);
                         isGoogleDriveConnected = true;
                         document.getElementById('syncStatus').textContent = '✓ Synchronisé';
                         document.getElementById('syncStatus').classList.add('synced');
+                        updateDriveConnectionButton(true);
                         loadFromDrive();
                     }
                 });
@@ -2693,6 +2698,20 @@ Vérifiez que votre fichier CSV est au bon format.`);
             localStorage.removeItem('portfolioFileId');
             document.getElementById('syncStatus').textContent = '⏳ Non synchronisé';
             document.getElementById('syncStatus').classList.remove('synced');
+            
+            // Clear all portfolio data
+            portfolio = {
+                crypto: [],
+                pea: [],
+                livrets: [],
+                fundraising: []
+            };
+            
+            // Update all displays to show empty state
+            updateAll();
+            
+            // Update connection button state
+            updateDriveConnectionButton(false);
         }
 
         async function syncDriveData() {
@@ -3406,6 +3425,40 @@ Vérifiez que votre fichier CSV est au bon format.`);
         function setTimeRangeFromSelect(range) {
             setTimeRange(range);
         }
+        
+        // Drive Connection Button Functions
+        function updateDriveConnectionButton(isConnected) {
+            const btn = document.getElementById('driveConnectionBtn');
+            const icon = document.getElementById('driveIcon');
+            const text = document.getElementById('driveText');
+            
+            if (isConnected) {
+                btn.classList.add('connected');
+                icon.textContent = '✓';
+                text.textContent = 'Déconnecter';
+            } else {
+                btn.classList.remove('connected');
+                icon.textContent = '🔌';
+                text.textContent = 'Connecter Drive';
+            }
+        }
+        
+        function toggleDriveConnection() {
+            if (isGoogleDriveConnected) {
+                // Disconnect
+                if (confirm('Voulez-vous vraiment vous déconnecter de Google Drive ? Toutes les données du portfolio seront effacées de l\'affichage.')) {
+                    disconnectGoogleDrive();
+                }
+            } else {
+                // Connect
+                connectGoogleDrive();
+            }
+        }
+        
+        // Initialize button state on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateDriveConnectionButton(isGoogleDriveConnected);
+        });
     </script>
 </body>
 </html>
