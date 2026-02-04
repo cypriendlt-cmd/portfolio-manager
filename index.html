@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Manager - Finary Design</title>
+    <title>Portfolio Manager Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -2321,10 +2321,12 @@ Vérifiez que votre fichier CSV est au bon format.`);
                                 color: '#ffffff',
                                 padding: 15,
                                 font: {
-                                    size: 12,
-                                    weight: 600,
+                                    size: 13,
+                                    weight: '600',
                                     family: 'Inter'
                                 },
+                                boxWidth: 15,
+                                boxHeight: 15,
                                 generateLabels: function(chart) {
                                     const data = chart.data;
                                     if (data.labels.length && data.datasets.length) {
@@ -2334,6 +2336,8 @@ Vérifiez que votre fichier CSV est au bon format.`);
                                             return {
                                                 text: `${label}: €${value.toLocaleString('fr-FR', {maximumFractionDigits: 0})} (${percentage}%)`,
                                                 fillStyle: data.datasets[0].backgroundColor[i],
+                                                strokeStyle: data.datasets[0].borderColor[i],
+                                                fontColor: '#ffffff',
                                                 hidden: false,
                                                 index: i
                                             };
