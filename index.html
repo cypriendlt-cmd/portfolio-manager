@@ -1363,6 +1363,7 @@ Vérifiez que votre fichier CSV est au bon format.`);
             if (!portfolio.prices) portfolio.prices = {};
             if (!portfolio.priceTimestamps) portfolio.priceTimestamps = {};
             if (!portfolio.binanceCredentials) portfolio.binanceCredentials = null;
+            if (!portfolio.goals) portfolio.goals = [];
         }
 
         function addCrypto() {
@@ -3043,7 +3044,8 @@ Vérifiez que votre fichier CSV est au bon format.`);
                 crypto: [],
                 pea: [],
                 livrets: [],
-                fundraising: []
+                fundraising: [],
+                goals: []
             };
             
             // Update all displays to show empty state
@@ -3154,7 +3156,8 @@ Vérifiez que votre fichier CSV est au bon format.`);
                         fundraising: importedData.fundraising || [],
                         prices: importedData.prices || {},
                         priceTimestamps: importedData.priceTimestamps || {},
-                        binanceCredentials: importedData.binanceCredentials || null
+                        binanceCredentials: importedData.binanceCredentials || null,
+                        goals: importedData.goals || []
                     };
                     
                     portfolio.pea = portfolio.pea.map(p => ({
@@ -3175,7 +3178,8 @@ Vérifiez que votre fichier CSV est au bon format.`);
 📊 PEA: ${portfolio.pea.length} ligne${portfolio.pea.length > 1 ? 's' : ''}
 ₿ Crypto: ${portfolio.crypto.length} ligne${portfolio.crypto.length > 1 ? 's' : ''}
 💰 Livrets: ${portfolio.livrets.length} livret${portfolio.livrets.length > 1 ? 's' : ''}
-🚀 Levées: ${portfolio.fundraising.length} investissement${portfolio.fundraising.length > 1 ? 's' : ''}`);
+🚀 Levées: ${portfolio.fundraising.length} investissement${portfolio.fundraising.length > 1 ? 's' : ''}
+🎯 Objectifs: ${portfolio.goals.length} objectif${portfolio.goals.length > 1 ? 's' : ''}`);
                 } else {
                     alert('❌ Erreur lors du chargement: ' + r.status);
                 }
@@ -3852,6 +3856,11 @@ Vérifiez que votre fichier CSV est au bon format.`);
         function saveGoal(event) {
             event.preventDefault();
             
+            // Ensure goals array exists
+            if (!portfolio.goals) {
+                portfolio.goals = [];
+            }
+            
             const goal = {
                 id: editingGoalId || Date.now(),
                 name: document.getElementById('goalName').value,
@@ -3860,13 +3869,15 @@ Vérifiez que votre fichier CSV est au bon format.`);
                 current: parseFloat(document.getElementById('goalCurrent').value) || 0,
                 category: document.getElementById('goalCategory').value,
                 notes: document.getElementById('goalNotes').value || '',
-                createdAt: editingGoalId ? portfolio.goals.find(g => g.id === editingGoalId).createdAt : new Date().toISOString()
+                createdAt: editingGoalId ? (portfolio.goals.find(g => g.id === editingGoalId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
             };
             
             if (editingGoalId) {
                 // Update existing goal
                 const index = portfolio.goals.findIndex(g => g.id === editingGoalId);
-                portfolio.goals[index] = goal;
+                if (index !== -1) {
+                    portfolio.goals[index] = goal;
+                }
             } else {
                 // Add new goal
                 portfolio.goals.push(goal);
