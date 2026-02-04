@@ -1169,6 +1169,19 @@ Vérifiez que votre fichier CSV est au bon format.`);
                 }
             });
             
+            // 9. Section Portfolio - Vue globale et détails
+            document.querySelectorAll('#portfolioOverview .stat-value, #portfolioOverview div[style*="font-size: 2.2em"], #portfolioOverview div[style*="font-size: 1.3em"]').forEach(el => {
+                el.classList.add('value-hidden');
+            });
+            
+            // Portfolio - Masquer aussi les valeurs dans les cartes de catégories
+            document.querySelectorAll('#portfolioOverview div[style*="font-weight: 700"]').forEach(el => {
+                const text = el.textContent.trim();
+                if (text.match(/^[€$]\d+|^[+\-]\d+[.,]\d+%$|^\d+\s*(actifs|comptes|projets)$/)) {
+                    el.classList.add('value-hidden');
+                }
+            });
+            
             // ===== EXCEPTIONS - NE JAMAIS MASQUER =====
             
             // Indices Fear & Greed
@@ -1185,6 +1198,14 @@ Vérifiez que votre fichier CSV est au bon format.`);
             
             // Labels et noms
             document.querySelectorAll('.asset-name, .asset-ticker, .stat-label, .asset-stat-label, h1, h2, h3, h4, label, th').forEach(el => {
+                el.classList.remove('value-hidden');
+            });
+            
+            // Labels spécifiques Portfolio (Valeur totale, Performance, etc.)
+            document.querySelectorAll('#portfolioOverview div[style*="font-size: 0.9em"]').forEach(el => {
+                el.classList.remove('value-hidden');
+            });
+            document.querySelectorAll('#portfolioOverview div[style*="font-size: 0.85em"]').forEach(el => {
                 el.classList.remove('value-hidden');
             });
             
@@ -1210,6 +1231,18 @@ Vérifiez que votre fichier CSV est au bon format.`);
                 const portfolioChart = document.getElementById('portfolioChart');
                 if (portfolioChart) {
                     portfolioChart.style.filter = 'blur(8px)';
+                }
+                
+                // Graphique de répartition du Portfolio
+                const portfolioAllocationChart = document.getElementById('portfolioAllocationChart');
+                if (portfolioAllocationChart) {
+                    portfolioAllocationChart.style.filter = 'blur(8px)';
+                }
+                
+                // Graphique de diversification
+                const assetClassChart = document.getElementById('assetClassChart');
+                if (assetClassChart) {
+                    assetClassChart.style.filter = 'blur(8px)';
                 }
             } else {
                 // Mode normal - retirer tous les flous
