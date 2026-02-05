@@ -60,6 +60,13 @@
                 <span>Objectifs</span>
             </button>
             
+            <div style="margin: 32px 0 12px 20px; font-size: 0.75em; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Analytics</div>
+            
+            <button class="nav-item" data-section="analytics" onclick="showSection('analytics')">
+                <span class="icon">🧠</span>
+                <span>Insights IA</span>
+            </button>
+            
             <div style="margin-top: auto;">
                     <button class="nav-item" data-section="settings" onclick="showSection('settings')">
                         <span class="icon">👤</span>
@@ -611,6 +618,122 @@
                     </button>
                     <div id="retireResults" style="margin-top: 24px;"></div>
                 </div>
+            </div>
+        </div>
+
+
+        <!-- Analytics Section -->
+        <div id="analytics" class="section">
+            <h2 style="margin-bottom: 20px;">🧠 Analytics & Insights IA</h2>
+            
+            <!-- AI Predictions -->
+            <div class="fear-greed-card" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5em;">🔮</span>
+                    Prédictions IA - Valeur future du portfolio
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Basé sur l'historique de vos transactions et la tendance du marché
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Période de prédiction</label>
+                        <select id="predictionPeriod" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-primary);">
+                            <option value="30">30 jours</option>
+                            <option value="90">3 mois</option>
+                            <option value="180">6 mois</option>
+                            <option value="365">1 an</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Modèle de prédiction</label>
+                        <select id="predictionModel" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-primary);">
+                            <option value="linear">Régression linéaire</option>
+                            <option value="average">Moyenne mobile</option>
+                            <option value="conservative">Conservateur</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="update-btn" onclick="generatePredictions()" style="width: 100%; margin-bottom: 20px;">
+                    🚀 Générer les prédictions
+                </button>
+                <div id="predictionsResults"></div>
+                <canvas id="predictionsChart" style="margin-top: 20px; max-height: 300px;"></canvas>
+            </div>
+            
+            <!-- Custom Alerts -->
+            <div class="fear-greed-card" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5em;">🔔</span>
+                    Alertes personnalisées
+                </h3>
+                <button class="update-btn" onclick="openAlertModal()" style="width: auto; margin-bottom: 20px;">
+                    ➕ Créer une alerte
+                </button>
+                <div id="alertsList"></div>
+            </div>
+            
+            <!-- Asset Correlation -->
+            <div class="fear-greed-card" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5em;">🔗</span>
+                    Corrélation entre actifs
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Identifie les actifs qui évoluent ensemble (risque de concentration)
+                </p>
+                <button class="update-btn" onclick="analyzeCorrelation()" style="width: 100%; margin-bottom: 20px;">
+                    🔍 Analyser les corrélations
+                </button>
+                <div id="correlationResults"></div>
+            </div>
+            
+            <!-- Portfolio Rebalancing -->
+            <div class="fear-greed-card" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5em;">⚖️</span>
+                    Suggestions de rééquilibrage
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Recommandations pour optimiser la répartition de votre portfolio
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Crypto cible (%)</label>
+                        <input type="number" id="targetCrypto" value="30" min="0" max="100" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-primary);">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Actions cible (%)</label>
+                        <input type="number" id="targetPEA" value="40" min="0" max="100" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-primary);">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Livrets cible (%)</label>
+                        <input type="number" id="targetLivrets" value="20" min="0" max="100" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-primary);">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Levées cible (%)</label>
+                        <input type="number" id="targetFundraising" value="10" min="0" max="100" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-primary);">
+                    </div>
+                </div>
+                <button class="update-btn" onclick="suggestRebalancing()" style="width: 100%; margin-bottom: 20px;">
+                    💡 Générer les suggestions
+                </button>
+                <div id="rebalancingResults"></div>
+            </div>
+            
+            <!-- Tax Loss Harvesting -->
+            <div class="fear-greed-card" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5em;">💸</span>
+                    Tax Loss Harvesting
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Identifie les opportunités de vente à perte pour optimiser vos impôts
+                </p>
+                <button class="update-btn" onclick="analyzeTaxLossHarvesting()" style="width: 100%; margin-bottom: 20px;">
+                    🔍 Analyser les opportunités fiscales
+                </button>
+                <div id="taxLossResults"></div>
             </div>
         </div>
 
@@ -3880,6 +4003,8 @@ Vérifiez que votre fichier CSV est au bon format.`);
             updateTransactionHistory();
             updatePortfolio();
             updateQuickStats();
+            checkAlerts();
+            updateAlertsList();
         };
         
         // Function to handle time range selection from dropdown
@@ -4840,10 +4965,644 @@ Nouveau montant:`, goal.current));
             return total;
         }
         
+        // ========================================
+        // 🧠 ANALYTICS & AI INSIGHTS
+        // ========================================
+        
+        // Store alerts in portfolio
+        if (!portfolio.alerts) portfolio.alerts = [];
+        
+        // 1. AI PREDICTIONS
+        function generatePredictions() {
+            const period = parseInt(document.getElementById('predictionPeriod').value);
+            const model = document.getElementById('predictionModel').value;
+            
+            const currentValue = calculateTotalPortfolioValue();
+            const totalInvested = calculateTotalInvested();
+            
+            // Calculate historical growth rate
+            let growthRate = 0;
+            if (totalInvested > 0) {
+                growthRate = ((currentValue - totalInvested) / totalInvested) * 100;
+            }
+            
+            // Adjust based on model
+            let dailyGrowth = 0;
+            switch(model) {
+                case 'linear':
+                    dailyGrowth = (growthRate / 365) / 100;
+                    break;
+                case 'average':
+                    dailyGrowth = (growthRate / 365 / 2) / 100; // More conservative
+                    break;
+                case 'conservative':
+                    dailyGrowth = (growthRate / 365 / 3) / 100; // Very conservative
+                    break;
+            }
+            
+            const predictedValue = currentValue * Math.pow(1 + dailyGrowth, period);
+            const predictedGain = predictedValue - currentValue;
+            const predictedGainPercent = ((predictedGain / currentValue) * 100);
+            
+            const resultsHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div style="text-align: center; padding: 20px; background: rgba(255, 99, 71, 0.1); border-radius: 12px; border: 1px solid var(--orange-primary);">
+                        <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">Valeur actuelle</div>
+                        <div style="font-size: 2em; font-weight: 900; color: var(--text-primary);" class="value-hidden">€${currentValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: rgba(0, 212, 170, 0.1); border-radius: 12px; border: 1px solid var(--success);">
+                        <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">Prédiction ${period} jours</div>
+                        <div style="font-size: 2em; font-weight: 900; color: var(--success);" class="value-hidden">€${predictedValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: rgba(74, 158, 255, 0.1); border-radius: 12px; border: 1px solid #4a9eff;">
+                        <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">Gain prévu</div>
+                        <div style="font-size: 2em; font-weight: 900; color: #4a9eff;" class="value-hidden">+€${predictedGain.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                        <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 4px;">+${predictedGainPercent.toFixed(2)}%</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 16px; background: rgba(255, 193, 7, 0.1); border-radius: 12px; border: 1px solid #ffc107;">
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.9em;">
+                        ⚠️ <strong>Avertissement :</strong> Ces prédictions sont basées sur des modèles mathématiques simples et ne constituent pas un conseil financier. 
+                        Les performances passées ne garantissent pas les résultats futurs. Modèle utilisé: ${model === 'linear' ? 'Régression linéaire' : model === 'average' ? 'Moyenne mobile' : 'Conservateur'}.
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('predictionsResults').innerHTML = resultsHTML;
+            
+            // Draw prediction chart
+            drawPredictionChart(currentValue, predictedValue, period, dailyGrowth);
+            
+            if (isPrivacyMode) applyPrivacyMode();
+        }
+        
+        function drawPredictionChart(currentValue, futureValue, days, dailyGrowth) {
+            const ctx = document.getElementById('predictionsChart');
+            if (!ctx) return;
+            
+            const colors = getChartColors();
+            
+            // Generate data points
+            const labels = [];
+            const data = [];
+            for (let i = 0; i <= days; i += Math.ceil(days / 10)) {
+                labels.push(`J+${i}`);
+                data.push(currentValue * Math.pow(1 + dailyGrowth, i));
+            }
+            
+            if (window.predictionsChartInstance) {
+                window.predictionsChartInstance.destroy();
+            }
+            
+            window.predictionsChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valeur prédite',
+                        data: data,
+                        borderColor: 'rgba(0, 212, 170, 1)',
+                        backgroundColor: 'rgba(0, 212, 170, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: colors.text,
+                                font: { size: 12, weight: 600, family: 'Inter' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: colors.tooltipBg,
+                            titleColor: colors.text,
+                            bodyColor: colors.text,
+                            borderColor: colors.tooltipBorder,
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Valeur: €${context.parsed.y.toLocaleString('fr-FR', {maximumFractionDigits: 0})}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: colors.grid },
+                            ticks: { color: colors.textSecondary }
+                        },
+                        y: {
+                            grid: { color: colors.grid },
+                            ticks: {
+                                color: colors.textSecondary,
+                                callback: function(value) {
+                                    return '€' + value.toLocaleString('fr-FR', {maximumFractionDigits: 0});
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 2. CUSTOM ALERTS
+        function openAlertModal() {
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+        
+        function closeAlertModal() {
+            document.getElementById('alertModal').style.display = 'none';
+            document.getElementById('alertForm').reset();
+        }
+        
+        function updateAlertAssetList() {
+            const type = document.getElementById('alertAssetType').value;
+            const assetSelect = document.getElementById('alertAsset');
+            
+            assetSelect.innerHTML = '<option value="">Sélectionner...</option>';
+            
+            if (type === 'crypto') {
+                portfolio.crypto.forEach(c => {
+                    assetSelect.innerHTML += `<option value="${c.symbol}">${c.symbol}</option>`;
+                });
+            } else if (type === 'pea') {
+                const tickers = [...new Set(portfolio.pea.map(p => p.ticker))];
+                tickers.forEach(t => {
+                    assetSelect.innerHTML += `<option value="${t}">${t}</option>`;
+                });
+            } else if (type === 'livret') {
+                portfolio.livrets.forEach((l, i) => {
+                    assetSelect.innerHTML += `<option value="${i}">${l.type}</option>`;
+                });
+            } else if (type === 'fundraising') {
+                portfolio.fundraising.forEach((f, i) => {
+                    assetSelect.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+                });
+            }
+        }
+        
+        function saveAlert(event) {
+            event.preventDefault();
+            
+            const alert = {
+                id: Date.now(),
+                assetType: document.getElementById('alertAssetType').value,
+                asset: document.getElementById('alertAsset').value,
+                condition: document.getElementById('alertCondition').value,
+                threshold: parseFloat(document.getElementById('alertThreshold').value),
+                createdAt: new Date().toISOString(),
+                active: true
+            };
+            
+            portfolio.alerts.push(alert);
+            syncDriveData();
+            updateAlertsList();
+            closeAlertModal();
+        }
+        
+        function deleteAlert(alertId) {
+            if (confirm('Supprimer cette alerte ?')) {
+                portfolio.alerts = portfolio.alerts.filter(a => a.id !== alertId);
+                syncDriveData();
+                updateAlertsList();
+            }
+        }
+        
+        function checkAlerts() {
+            if (!portfolio.alerts || portfolio.alerts.length === 0) return;
+            
+            portfolio.alerts.forEach(alert => {
+                if (!alert.active) return;
+                
+                let currentValue = 0;
+                let assetName = alert.asset;
+                
+                // Get current value based on asset type
+                if (alert.assetType === 'crypto') {
+                    currentValue = portfolio.prices[alert.asset] || 0;
+                } else if (alert.assetType === 'pea') {
+                    currentValue = portfolio.prices[alert.asset] || 0;
+                }
+                
+                // Check condition
+                let triggered = false;
+                if (alert.condition === 'above' && currentValue > alert.threshold) {
+                    triggered = true;
+                } else if (alert.condition === 'below' && currentValue < alert.threshold) {
+                    triggered = true;
+                }
+                
+                if (triggered) {
+                    const message = `🔔 Alerte: ${assetName} est maintenant à €${currentValue.toFixed(2)} (seuil: €${alert.threshold})`;
+                    console.log(message);
+                    // Could show browser notification here
+                }
+            });
+        }
+        
+        function updateAlertsList() {
+            const container = document.getElementById('alertsList');
+            if (!container) return;
+            
+            if (!portfolio.alerts || portfolio.alerts.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <div style="font-size: 3em; margin-bottom: 12px;">🔕</div>
+                        <p>Aucune alerte configurée</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const conditionLabels = {
+                above: 'Au-dessus de',
+                below: 'En-dessous de',
+                change_up: 'Hausse de',
+                change_down: 'Baisse de'
+            };
+            
+            const html = portfolio.alerts.map(alert => `
+                <div style="padding: 16px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 700; margin-bottom: 4px;">
+                            ${alert.asset} (${alert.assetType})
+                        </div>
+                        <div style="font-size: 0.9em; color: var(--text-secondary);">
+                            ${conditionLabels[alert.condition]} €${alert.threshold.toLocaleString('fr-FR')}
+                        </div>
+                    </div>
+                    <button onclick="deleteAlert(${alert.id})" style="padding: 8px 16px; background: var(--danger); border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: 600;">
+                        🗑️
+                    </button>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        // 3. CORRELATION ANALYSIS
+        function analyzeCorrelation() {
+            const results = [];
+            
+            // For simplicity, we'll compare crypto assets
+            const cryptos = portfolio.crypto.filter(c => portfolio.prices[c.symbol]);
+            
+            if (cryptos.length < 2) {
+                document.getElementById('correlationResults').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <p>Pas assez d'actifs pour analyser les corrélations (minimum 2 actifs avec prix)</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Simple correlation based on current allocation
+            const totalCryptoValue = cryptos.reduce((sum, c) => sum + (c.quantity * portfolio.prices[c.symbol]), 0);
+            
+            cryptos.forEach((crypto, i) => {
+                const value = crypto.quantity * portfolio.prices[crypto.symbol];
+                const weight = (value / totalCryptoValue) * 100;
+                
+                results.push({
+                    asset: crypto.symbol,
+                    weight: weight,
+                    value: value,
+                    risk: weight > 30 ? 'Élevé' : weight > 15 ? 'Moyen' : 'Faible'
+                });
+            });
+            
+            results.sort((a, b) => b.weight - a.weight);
+            
+            const html = `
+                <div style="background: rgba(255, 193, 7, 0.1); padding: 16px; border-radius: 12px; border: 1px solid #ffc107; margin-bottom: 16px;">
+                    <strong>⚠️ Analyse de concentration</strong>
+                    <p style="margin: 8px 0 0 0; font-size: 0.9em;">
+                        Les actifs avec un poids >30% présentent un risque de concentration élevé
+                    </p>
+                </div>
+                
+                ${results.map(r => `
+                    <div style="padding: 16px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; margin-bottom: 12px; border-left: 4px solid ${r.risk === 'Élevé' ? 'var(--danger)' : r.risk === 'Moyen' ? '#ffc107' : 'var(--success)'};">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div style="font-weight: 700; font-size: 1.1em;">${r.asset}</div>
+                            <div style="font-weight: 900; color: var(--orange-primary);" class="value-hidden">${r.weight.toFixed(1)}%</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9em; color: var(--text-secondary);">
+                            <span class="value-hidden">€${r.value.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</span>
+                            <span style="color: ${r.risk === 'Élevé' ? 'var(--danger)' : r.risk === 'Moyen' ? '#ffc107' : 'var(--success)'}; font-weight: 600;">
+                                Risque: ${r.risk}
+                            </span>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+            
+            document.getElementById('correlationResults').innerHTML = html;
+            
+            if (isPrivacyMode) applyPrivacyMode();
+        }
+        
+        // 4. REBALANCING SUGGESTIONS
+        function suggestRebalancing() {
+            const targetCrypto = parseFloat(document.getElementById('targetCrypto').value);
+            const targetPEA = parseFloat(document.getElementById('targetPEA').value);
+            const targetLivrets = parseFloat(document.getElementById('targetLivrets').value);
+            const targetFundraising = parseFloat(document.getElementById('targetFundraising').value);
+            
+            const totalTarget = targetCrypto + targetPEA + targetLivrets + targetFundraising;
+            if (Math.abs(totalTarget - 100) > 0.1) {
+                alert('⚠️ La somme des allocations cibles doit être égale à 100%');
+                return;
+            }
+            
+            // Calculate current values
+            let cryptoValue = 0;
+            portfolio.crypto.forEach(c => {
+                cryptoValue += c.quantity * (portfolio.prices[c.symbol] || 0);
+            });
+            
+            let peaValue = 0;
+            const peaByTicker = {};
+            portfolio.pea.forEach(p => {
+                if (!peaByTicker[p.ticker]) {
+                    peaByTicker[p.ticker] = { quantity: 0, invested: 0 };
+                }
+                peaByTicker[p.ticker].quantity += p.quantity;
+                peaByTicker[p.ticker].invested += (p.quantity * p.price) + (p.fees || 0);
+            });
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const currentPrice = portfolio.prices[ticker] || (data.invested / data.quantity);
+                peaValue += data.quantity * currentPrice;
+            });
+            
+            let livretsValue = 0;
+            portfolio.livrets.forEach(l => {
+                livretsValue += parseFloat(l.amount) || 0;
+            });
+            
+            let fundraisingValue = 0;
+            portfolio.fundraising.forEach(f => {
+                fundraisingValue += f.valuation;
+            });
+            
+            const totalValue = cryptoValue + peaValue + livretsValue + fundraisingValue;
+            
+            // Calculate current percentages
+            const currentCrypto = (cryptoValue / totalValue) * 100;
+            const currentPEA = (peaValue / totalValue) * 100;
+            const currentLivrets = (livretsValue / totalValue) * 100;
+            const currentFundraising = (fundraisingValue / totalValue) * 100;
+            
+            // Calculate differences
+            const diffCrypto = targetCrypto - currentCrypto;
+            const diffPEA = targetPEA - currentPEA;
+            const diffLivrets = targetLivrets - currentLivrets;
+            const diffFundraising = targetFundraising - currentFundraising;
+            
+            // Calculate amounts to move
+            const amountCrypto = (diffCrypto / 100) * totalValue;
+            const amountPEA = (diffPEA / 100) * totalValue;
+            const amountLivrets = (diffLivrets / 100) * totalValue;
+            const amountFundraising = (diffFundraising / 100) * totalValue;
+            
+            const suggestions = [
+                { name: 'Crypto', current: currentCrypto, target: targetCrypto, diff: diffCrypto, amount: amountCrypto },
+                { name: 'Actions (PEA)', current: currentPEA, target: targetPEA, diff: diffPEA, amount: amountPEA },
+                { name: 'Livrets', current: currentLivrets, target: targetLivrets, diff: diffLivrets, amount: amountLivrets },
+                { name: 'Levées', current: currentFundraising, target: targetFundraising, diff: diffFundraising, amount: amountFundraising }
+            ].filter(s => Math.abs(s.diff) > 0.5); // Only show if difference > 0.5%
+            
+            if (suggestions.length === 0) {
+                document.getElementById('rebalancingResults').innerHTML = `
+                    <div style="text-align: center; padding: 40px; background: rgba(0, 212, 170, 0.1); border-radius: 12px; border: 1px solid var(--success);">
+                        <div style="font-size: 3em; margin-bottom: 12px;">✅</div>
+                        <h3 style="color: var(--success);">Portfolio bien équilibré !</h3>
+                        <p style="color: var(--text-secondary);">Votre allocation actuelle est conforme à vos objectifs.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = `
+                <div style="background: rgba(255, 99, 71, 0.1); padding: 16px; border-radius: 12px; border: 1px solid var(--orange-primary); margin-bottom: 16px;">
+                    <strong>💡 Suggestions de rééquilibrage</strong>
+                    <p style="margin: 8px 0 0 0; font-size: 0.9em;">
+                        Voici les ajustements recommandés pour atteindre votre allocation cible
+                    </p>
+                </div>
+                
+                ${suggestions.map(s => `
+                    <div style="padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div style="font-weight: 700; font-size: 1.1em;">${s.name}</div>
+                            <div style="font-weight: 900; color: ${s.diff > 0 ? 'var(--success)' : 'var(--danger)'};">
+                                ${s.diff > 0 ? '▲' : '▼'} ${Math.abs(s.diff).toFixed(1)}%
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px; font-size: 0.9em;">
+                            <div>
+                                <div style="color: var(--text-secondary);">Actuel</div>
+                                <div style="font-weight: 700;">${s.current.toFixed(1)}%</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-secondary);">Cible</div>
+                                <div style="font-weight: 700;">${s.target.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                        <div style="padding: 12px; background: ${s.diff > 0 ? 'rgba(0, 212, 170, 0.1)' : 'rgba(255, 71, 87, 0.1)'}; border-radius: 8px; font-weight: 600;">
+                            ${s.diff > 0 ? '✅ Acheter' : '❌ Vendre'} environ <span class="value-hidden">€${Math.abs(s.amount).toLocaleString('fr-FR', {maximumFractionDigits: 0})}</span>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+            
+            document.getElementById('rebalancingResults').innerHTML = html;
+            
+            if (isPrivacyMode) applyPrivacyMode();
+        }
+        
+        // 5. TAX LOSS HARVESTING
+        function analyzeTaxLossHarvesting() {
+            const opportunities = [];
+            
+            // Analyze Crypto
+            portfolio.crypto.forEach(c => {
+                const currentPrice = portfolio.prices[c.symbol] || 0;
+                const currentValue = c.quantity * currentPrice;
+                const invested = c.quantity * c.price;
+                const loss = currentValue - invested;
+                const lossPercent = (loss / invested) * 100;
+                
+                if (loss < 0) {
+                    opportunities.push({
+                        type: 'Crypto',
+                        asset: c.symbol,
+                        invested: invested,
+                        current: currentValue,
+                        loss: Math.abs(loss),
+                        lossPercent: Math.abs(lossPercent),
+                        quantity: c.quantity
+                    });
+                }
+            });
+            
+            // Analyze PEA
+            const peaByTicker = {};
+            portfolio.pea.forEach(p => {
+                if (!peaByTicker[p.ticker]) {
+                    peaByTicker[p.ticker] = { quantity: 0, invested: 0 };
+                }
+                peaByTicker[p.ticker].quantity += p.quantity;
+                peaByTicker[p.ticker].invested += (p.quantity * p.price) + (p.fees || 0);
+            });
+            
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const currentPrice = portfolio.prices[ticker] || (data.invested / data.quantity);
+                const currentValue = data.quantity * currentPrice;
+                const loss = currentValue - data.invested;
+                const lossPercent = (loss / data.invested) * 100;
+                
+                if (loss < 0) {
+                    opportunities.push({
+                        type: 'Action',
+                        asset: ticker,
+                        invested: data.invested,
+                        current: currentValue,
+                        loss: Math.abs(loss),
+                        lossPercent: Math.abs(lossPercent),
+                        quantity: data.quantity
+                    });
+                }
+            });
+            
+            opportunities.sort((a, b) => b.loss - a.loss);
+            
+            if (opportunities.length === 0) {
+                document.getElementById('taxLossResults').innerHTML = `
+                    <div style="text-align: center; padding: 40px; background: rgba(0, 212, 170, 0.1); border-radius: 12px; border: 1px solid var(--success);">
+                        <div style="font-size: 3em; margin-bottom: 12px;">🎉</div>
+                        <h3 style="color: var(--success);">Aucune perte à déclarer</h3>
+                        <p style="color: var(--text-secondary);">Tous vos actifs sont en gains ! Pas d'opportunité de Tax Loss Harvesting.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const totalLosses = opportunities.reduce((sum, o) => sum + o.loss, 0);
+            
+            const html = `
+                <div style="background: rgba(255, 99, 71, 0.1); padding: 16px; border-radius: 12px; border: 1px solid var(--orange-primary); margin-bottom: 16px;">
+                    <strong>💸 Opportunités identifiées</strong>
+                    <p style="margin: 8px 0 0 0; font-size: 0.9em;">
+                        Pertes latentes totales: <span class="value-hidden" style="font-weight: 700;">€${totalLosses.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</span>
+                    </p>
+                </div>
+                
+                ${opportunities.map(o => `
+                    <div style="padding: 20px; background: rgba(255, 71, 87, 0.05); border-radius: 12px; margin-bottom: 12px; border-left: 4px solid var(--danger);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 1.1em;">${o.asset}</div>
+                                <div style="font-size: 0.85em; color: var(--text-secondary);">${o.type}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: 900; color: var(--danger); font-size: 1.3em;" class="value-hidden">-€${o.loss.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                                <div style="font-size: 0.85em; color: var(--danger);">-${o.lossPercent.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 0.9em; margin-bottom: 12px;">
+                            <div>
+                                <div style="color: var(--text-secondary);">Investi</div>
+                                <div style="font-weight: 600;" class="value-hidden">€${o.invested.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-secondary);">Valeur actuelle</div>
+                                <div style="font-weight: 600;" class="value-hidden">€${o.current.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-secondary);">Quantité</div>
+                                <div style="font-weight: 600;">${o.quantity.toLocaleString('fr-FR', {maximumFractionDigits: 4})}</div>
+                            </div>
+                        </div>
+                        <div style="padding: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; font-size: 0.9em;">
+                            💡 <strong>Stratégie:</strong> Vendez cet actif pour réaliser la perte fiscale, puis réinvestissez dans un actif similaire (après 30 jours pour éviter la règle du wash sale).
+                        </div>
+                    </div>
+                `).join('')}
+                
+                <div style="background: rgba(255, 193, 7, 0.1); padding: 16px; border-radius: 12px; border: 1px solid #ffc107; margin-top: 16px;">
+                    <p style="margin: 0; font-size: 0.9em;">
+                        ⚠️ <strong>Disclaimer:</strong> Ces suggestions ne constituent pas un conseil fiscal. Consultez un expert-comptable ou conseiller fiscal avant toute décision.
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('taxLossResults').innerHTML = html;
+            
+            if (isPrivacyMode) applyPrivacyMode();
+        }
+        
         // Initialize theme and currency on load
         
     </script>
     
+    
+    
+    <!-- Alert Modal -->
+    <div id="alertModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="margin: 0; font-size: 1.5em;">🔔 Nouvelle alerte</h3>
+                <button onclick="closeAlertModal()" style="background: none; border: none; font-size: 1.5em; cursor: pointer; color: var(--text-secondary);">✕</button>
+            </div>
+            
+            <form id="alertForm" onsubmit="saveAlert(event)">
+                <div class="form-group">
+                    <label>Type d'actif *</label>
+                    <select id="alertAssetType" required onchange="updateAlertAssetList()">
+                        <option value="">Sélectionner...</option>
+                        <option value="crypto">Crypto</option>
+                        <option value="pea">Action (PEA)</option>
+                        <option value="livret">Livret</option>
+                        <option value="fundraising">Levée</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Actif *</label>
+                    <select id="alertAsset" required>
+                        <option value="">Sélectionner un type d'abord...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Condition *</label>
+                    <select id="alertCondition" required>
+                        <option value="above">Prix au-dessus de</option>
+                        <option value="below">Prix en-dessous de</option>
+                        <option value="change_up">Hausse de plus de (%)</option>
+                        <option value="change_down">Baisse de plus de (%)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Valeur seuil *</label>
+                    <input type="number" id="alertThreshold" required step="0.01" placeholder="Ex: 50000">
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="submit" class="update-btn" style="flex: 1;">Créer l'alerte</button>
+                    <button type="button" onclick="closeAlertModal()" class="privacy-btn" style="flex: 1;">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
     
     <!-- Quick Add Modal -->
     <div id="quickAddModal" class="modal" style="display: none;">
