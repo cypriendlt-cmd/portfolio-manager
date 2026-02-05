@@ -804,19 +804,21 @@
                 <canvas id="benchmarkChart" style="margin-top: 20px; max-height: 300px;"></canvas>
             </div>
             
-            <!-- Sankey Diagram -->
-            <div class="fear-greed-card" style="margin-bottom: 30px;">
-                <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.5em;">🌊</span>
-                    Diagramme de Sankey - Flux d'argent
-                </h3>
-                <p style="color: var(--text-secondary); margin-bottom: 20px;">
-                    Visualisation des flux entre catégories d'actifs
-                </p>
-                <button class="update-btn" onclick="generateSankey()" style="width: 100%; margin-bottom: 20px;">
+            <!-- Sankey Diagram - UPDATED -->
+            <div class="sankey-card">
+                <div class="sankey-header">
+                    <h3>
+                        <span class="sankey-icon">🌊</span>
+                        Diagramme de Sankey - Flux d'argent
+                    </h3>
+                    <p class="sankey-subtitle">Visualisation des flux entre catégories d'actifs</p>
+                </div>
+                
+                <button class="sankey-generate-btn" onclick="generateSankey()">
                     🌀 Générer le diagramme de flux
                 </button>
-                <div id="sankeyContainer" style="height: 500px;"></div>
+                
+                <div id="sankeyContainer" class="sankey-container"></div>
             </div>
             
             <!-- Waterfall Chart -->
@@ -5979,6 +5981,7 @@ Nouveau montant:`, goal.current));
         }
         
         // 4. SANKEY DIAGRAM
+        // 4. SANKEY DIAGRAM - UPDATED
         function generateSankey() {
             const container = document.getElementById('sankeyContainer');
             if (!container) return;
@@ -6016,73 +6019,81 @@ Nouveau montant:`, goal.current));
             const totalValue = cryptoValue + peaValue + livretsValue + fundraisingValue;
             
             if (totalValue === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🌊</div><p>Aucune donnée à visualiser</p></div>';
+                container.innerHTML = `
+                    <div class="sankey-empty">
+                        <div class="sankey-empty-icon">🌊</div>
+                        <p>Aucune donnée à visualiser</p>
+                    </div>
+                `;
                 return;
             }
             
-            // Simple Sankey representation (visual approximation)
+            // Generate modern Sankey diagram
             const html = `
-                <div style="padding: 40px 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-                        <div style="text-align: center; flex: 1;">
-                            <div style="font-weight: 700; font-size: 1.2em; margin-bottom: 16px;">📥 Investissement</div>
-                            <div style="padding: 20px; background: rgba(255, 99, 71, 0.1); border-radius: 12px; border: 2px solid var(--orange-primary);">
-                                <div style="font-size: 2em; font-weight: 900; color: var(--orange-primary);" class="value-hidden">
-                                    €${totalValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}
-                                </div>
+                <div class="sankey-flow">
+                    <div class="sankey-source">
+                        <div class="sankey-source-label">💼 Investissement</div>
+                        <div class="sankey-source-box">
+                            <div class="sankey-source-amount value-hidden">
+                                €${totalValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}
                             </div>
                         </div>
+                    </div>
+                    
+                    <div class="sankey-arrow">→</div>
+                    
+                    <div class="sankey-targets">
+                        ${peaValue > 0 ? `
+                            <div class="sankey-target" style="--flow-height: ${(peaValue / totalValue * 100)}%;">
+                                <div class="sankey-target-bar sankey-target-actions">
+                                    <div class="sankey-target-content">
+                                        <div class="sankey-target-icon">📈</div>
+                                        <div class="sankey-target-label">Actions</div>
+                                        <div class="sankey-target-amount value-hidden">€${peaValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                                        <div class="sankey-target-percent">${((peaValue / totalValue) * 100).toFixed(1)}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
                         
-                        <div style="flex: 0 0 100px; display: flex; justify-content: center;">
-                            <div style="font-size: 3em; color: var(--text-secondary);">→</div>
-                        </div>
+                        ${livretsValue > 0 ? `
+                            <div class="sankey-target" style="--flow-height: ${(livretsValue / totalValue * 100)}%;">
+                                <div class="sankey-target-bar sankey-target-livrets">
+                                    <div class="sankey-target-content">
+                                        <div class="sankey-target-icon">💰</div>
+                                        <div class="sankey-target-label">Livrets</div>
+                                        <div class="sankey-target-amount value-hidden">€${livretsValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                                        <div class="sankey-target-percent">${((livretsValue / totalValue) * 100).toFixed(1)}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
                         
-                        <div style="flex: 2; display: flex; flex-direction: column; gap: 12px;">
-                            ${cryptoValue > 0 ? `
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <div style="flex: 1; height: ${(cryptoValue / totalValue * 200)}px; background: linear-gradient(90deg, rgba(255, 99, 71, 0.3), rgba(255, 99, 71, 0.8)); border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 12px;">
-                                        <div>
-                                            <div style="font-weight: 700; color: white;">🪙 Crypto</div>
-                                            <div style="font-weight: 900; color: white;" class="value-hidden">€${cryptoValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
-                                            <div style="font-size: 0.85em; color: rgba(255,255,255,0.9);">${((cryptoValue / totalValue) * 100).toFixed(1)}%</div>
-                                        </div>
+                        ${fundraisingValue > 0 ? `
+                            <div class="sankey-target" style="--flow-height: ${(fundraisingValue / totalValue * 100)}%;">
+                                <div class="sankey-target-bar sankey-target-levees">
+                                    <div class="sankey-target-content">
+                                        <div class="sankey-target-icon">🚀</div>
+                                        <div class="sankey-target-label">Levées</div>
+                                        <div class="sankey-target-amount value-hidden">€${fundraisingValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                                        <div class="sankey-target-percent">${((fundraisingValue / totalValue) * 100).toFixed(1)}%</div>
                                     </div>
                                 </div>
-                            ` : ''}
-                            ${peaValue > 0 ? `
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <div style="flex: 1; height: ${(peaValue / totalValue * 200)}px; background: linear-gradient(90deg, rgba(74, 158, 255, 0.3), rgba(74, 158, 255, 0.8)); border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 12px;">
-                                        <div>
-                                            <div style="font-weight: 700; color: white;">📈 Actions</div>
-                                            <div style="font-weight: 900; color: white;" class="value-hidden">€${peaValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
-                                            <div style="font-size: 0.85em; color: rgba(255,255,255,0.9);">${((peaValue / totalValue) * 100).toFixed(1)}%</div>
-                                        </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${cryptoValue > 0 ? `
+                            <div class="sankey-target" style="--flow-height: ${(cryptoValue / totalValue * 100)}%;">
+                                <div class="sankey-target-bar sankey-target-crypto">
+                                    <div class="sankey-target-content">
+                                        <div class="sankey-target-icon">🪙</div>
+                                        <div class="sankey-target-label">Crypto</div>
+                                        <div class="sankey-target-amount value-hidden">€${cryptoValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                                        <div class="sankey-target-percent">${((cryptoValue / totalValue) * 100).toFixed(1)}%</div>
                                     </div>
                                 </div>
-                            ` : ''}
-                            ${livretsValue > 0 ? `
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <div style="flex: 1; height: ${(livretsValue / totalValue * 200)}px; background: linear-gradient(90deg, rgba(0, 212, 170, 0.3), rgba(0, 212, 170, 0.8)); border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 12px;">
-                                        <div>
-                                            <div style="font-weight: 700; color: white;">💰 Livrets</div>
-                                            <div style="font-weight: 900; color: white;" class="value-hidden">€${livretsValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
-                                            <div style="font-size: 0.85em; color: rgba(255,255,255,0.9);">${((livretsValue / totalValue) * 100).toFixed(1)}%</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ` : ''}
-                            ${fundraisingValue > 0 ? `
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <div style="flex: 1; height: ${(fundraisingValue / totalValue * 200)}px; background: linear-gradient(90deg, rgba(155, 89, 182, 0.3), rgba(155, 89, 182, 0.8)); border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 12px;">
-                                        <div>
-                                            <div style="font-weight: 700; color: white;">🚀 Levées</div>
-                                            <div style="font-weight: 900; color: white;" class="value-hidden">€${fundraisingValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
-                                            <div style="font-size: 0.85em; color: rgba(255,255,255,0.9);">${((fundraisingValue / totalValue) * 100).toFixed(1)}%</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ` : ''}
-                        </div>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -6090,6 +6101,7 @@ Nouveau montant:`, goal.current));
             container.innerHTML = html;
             if (isPrivacyMode) applyPrivacyMode();
         }
+        
         
         // 5. WATERFALL CHART
         function generateWaterfall() {
