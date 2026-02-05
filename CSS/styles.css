@@ -807,6 +807,105 @@
             }
         }
         
+        /* ========================================
+           📊 VISUALIZATIONS STYLES
+           ======================================== */
+        
+        /* Heatmap cells */
+        .heatmap-cell {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .heatmap-cell:hover {
+            border-color: var(--orange-primary);
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        
+        /* Treemap cells */
+        .treemap-cell {
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .treemap-cell:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Benchmark cards */
+        .benchmark-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.2s;
+        }
+        
+        .benchmark-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .benchmark-portfolio {
+            background: rgba(255, 99, 71, 0.1);
+            border-color: var(--orange-primary);
+        }
+        
+        /* Sankey flow bars */
+        .sankey-bar {
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            transition: all 0.3s;
+        }
+        
+        .sankey-bar:hover {
+            transform: translateX(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Waterfall specific */
+        .waterfall-container {
+            position: relative;
+        }
+        
+        /* Visualization containers */
+        #heatmapContainer,
+        #treemapContainer,
+        #sankeyContainer {
+            min-height: 200px;
+        }
+        
+        /* Performance indicators */
+        .perf-positive {
+            color: var(--success);
+        }
+        
+        .perf-negative {
+            color: var(--danger);
+        }
+        
+        .perf-neutral {
+            color: var(--text-secondary);
+        }
+        
         
         /* Privacy Mode - Blur values */
         .privacy-mode .value-hidden {

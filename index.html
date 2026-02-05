@@ -67,6 +67,11 @@
                 <span>Insights IA</span>
             </button>
             
+            <button class="nav-item" data-section="visualizations" onclick="showSection('visualizations')">
+                <span class="icon">📊</span>
+                <span>Visualisations</span>
+            </button>
+            
             <div style="margin-top: auto;">
                     <button class="nav-item" data-section="settings" onclick="showSection('settings')">
                         <span class="icon">👤</span>
@@ -734,6 +739,99 @@
                     🔍 Analyser les opportunités fiscales
                 </button>
                 <div id="taxLossResults"></div>
+            </div>
+        </div>
+
+
+        <!-- Visualizations Section -->
+        <div id="visualizations" class="section">
+            <h2 style="margin-bottom: 20px;">📊 Graphiques & Visualisations</h2>
+            
+            <!-- Heatmap -->
+            <div class="fear-greed-card" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5em;">🔥</span>
+                    Heatmap - Performance des actifs
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Visualisation des performances relatives de chaque actif
+                </p>
+                <button class="update-btn" onclick="generateHeatmap()" style="width: 100%; margin-bottom: 20px;">
+                    🎨 Générer la heatmap
+                </button>
+                <div id="heatmapContainer"></div>
+            </div>
+            
+            <!-- Treemap -->
+            <div class="fear-greed-card" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5em;">🗺️</span>
+                    Treemap - Répartition du portfolio
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Taille de chaque actif proportionnelle à sa valeur
+                </p>
+                <button class="update-btn" onclick="generateTreemap()" style="width: 100%; margin-bottom: 20px;">
+                    🌳 Générer le treemap
+                </button>
+                <div id="treemapContainer" style="height: 400px;"></div>
+            </div>
+            
+            <!-- Benchmark Comparison -->
+            <div class="fear-greed-card" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5em;">📈</span>
+                    Comparaison avec les benchmarks
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Comparez votre performance vs S&P500, CAC40, Bitcoin
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Période</label>
+                        <select id="benchmarkPeriod" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-primary);">
+                            <option value="7">7 jours</option>
+                            <option value="30">1 mois</option>
+                            <option value="90">3 mois</option>
+                            <option value="365">1 an</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="update-btn" onclick="generateBenchmarkComparison()" style="width: 100%; margin-bottom: 20px;">
+                    📊 Comparer avec les benchmarks
+                </button>
+                <div id="benchmarkResults"></div>
+                <canvas id="benchmarkChart" style="margin-top: 20px; max-height: 300px;"></canvas>
+            </div>
+            
+            <!-- Sankey Diagram -->
+            <div class="fear-greed-card" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5em;">🌊</span>
+                    Diagramme de Sankey - Flux d'argent
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Visualisation des flux entre catégories d'actifs
+                </p>
+                <button class="update-btn" onclick="generateSankey()" style="width: 100%; margin-bottom: 20px;">
+                    🌀 Générer le diagramme de flux
+                </button>
+                <div id="sankeyContainer" style="height: 500px;"></div>
+            </div>
+            
+            <!-- Waterfall Chart -->
+            <div class="fear-greed-card" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5em;">💧</span>
+                    Waterfall - Contribution à la performance
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Impact de chaque actif sur votre performance globale
+                </p>
+                <button class="update-btn" onclick="generateWaterfall()" style="width: 100%; margin-bottom: 20px;">
+                    💦 Générer le waterfall
+                </button>
+                <canvas id="waterfallChart" style="max-height: 400px;"></canvas>
             </div>
         </div>
 
@@ -5546,6 +5644,588 @@ Nouveau montant:`, goal.current));
             document.getElementById('taxLossResults').innerHTML = html;
             
             if (isPrivacyMode) applyPrivacyMode();
+        }
+        
+        // ========================================
+        // 📊 ADVANCED VISUALIZATIONS
+        // ========================================
+        
+        // 1. HEATMAP - Performance des actifs
+        function generateHeatmap() {
+            const container = document.getElementById('heatmapContainer');
+            if (!container) return;
+            
+            const assets = [];
+            
+            // Collect all assets with performance
+            portfolio.crypto.forEach(c => {
+                const currentPrice = portfolio.prices[c.symbol] || 0;
+                const invested = c.price;
+                const performance = invested > 0 ? ((currentPrice - invested) / invested * 100) : 0;
+                
+                assets.push({
+                    name: c.symbol,
+                    type: 'Crypto',
+                    performance: performance,
+                    value: c.quantity * currentPrice
+                });
+            });
+            
+            // PEA
+            const peaByTicker = {};
+            portfolio.pea.forEach(p => {
+                if (!peaByTicker[p.ticker]) {
+                    peaByTicker[p.ticker] = { quantity: 0, invested: 0 };
+                }
+                peaByTicker[p.ticker].quantity += p.quantity;
+                peaByTicker[p.ticker].invested += (p.quantity * p.price) + (p.fees || 0);
+            });
+            
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const avgPrice = data.invested / data.quantity;
+                const currentPrice = portfolio.prices[ticker] || avgPrice;
+                const performance = avgPrice > 0 ? ((currentPrice - avgPrice) / avgPrice * 100) : 0;
+                
+                assets.push({
+                    name: ticker,
+                    type: 'Action',
+                    performance: performance,
+                    value: data.quantity * currentPrice
+                });
+            });
+            
+            if (assets.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><p>Aucun actif avec prix disponible</p></div>';
+                return;
+            }
+            
+            // Sort by performance
+            assets.sort((a, b) => b.performance - a.performance);
+            
+            // Generate heatmap HTML
+            const html = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;">
+                    ${assets.map(asset => {
+                        const perfAbs = Math.abs(asset.performance);
+                        const intensity = Math.min(perfAbs / 50, 1); // Cap at 50%
+                        
+                        let bgColor, textColor;
+                        if (asset.performance > 0) {
+                            bgColor = `rgba(0, 212, 170, ${0.2 + intensity * 0.6})`;
+                            textColor = asset.performance > 20 ? '#ffffff' : 'var(--success)';
+                        } else if (asset.performance < 0) {
+                            bgColor = `rgba(255, 71, 87, ${0.2 + intensity * 0.6})`;
+                            textColor = asset.performance < -20 ? '#ffffff' : 'var(--danger)';
+                        } else {
+                            bgColor = 'rgba(136, 146, 166, 0.2)';
+                            textColor = 'var(--text-secondary)';
+                        }
+                        
+                        return `
+                            <div style="
+                                padding: 16px;
+                                background: ${bgColor};
+                                border-radius: 12px;
+                                text-align: center;
+                                transition: all 0.2s;
+                                cursor: pointer;
+                                border: 2px solid transparent;
+                            " onmouseover="this.style.borderColor='var(--orange-primary)'; this.style.transform='scale(1.05)';" 
+                               onmouseout="this.style.borderColor='transparent'; this.style.transform='scale(1)';">
+                                <div style="font-weight: 900; font-size: 1.1em; margin-bottom: 4px; color: var(--text-primary);">
+                                    ${asset.name}
+                                </div>
+                                <div style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 8px;">
+                                    ${asset.type}
+                                </div>
+                                <div style="font-weight: 900; font-size: 1.4em; color: ${textColor};">
+                                    ${asset.performance > 0 ? '+' : ''}${asset.performance.toFixed(1)}%
+                                </div>
+                                <div style="font-size: 0.8em; color: var(--text-secondary); margin-top: 4px;" class="value-hidden">
+                                    €${asset.value.toLocaleString('fr-FR', {maximumFractionDigits: 0})}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            if (isPrivacyMode) applyPrivacyMode();
+        }
+        
+        // 2. TREEMAP - Répartition du portfolio
+        function generateTreemap() {
+            const container = document.getElementById('treemapContainer');
+            if (!container) return;
+            
+            const data = [];
+            let totalValue = 0;
+            
+            // Crypto
+            let cryptoTotal = 0;
+            portfolio.crypto.forEach(c => {
+                const value = c.quantity * (portfolio.prices[c.symbol] || 0);
+                cryptoTotal += value;
+                data.push({ name: c.symbol, value: value, category: 'Crypto', color: '#ff6347' });
+            });
+            totalValue += cryptoTotal;
+            
+            // PEA
+            let peaTotal = 0;
+            const peaByTicker = {};
+            portfolio.pea.forEach(p => {
+                if (!peaByTicker[p.ticker]) {
+                    peaByTicker[p.ticker] = { quantity: 0, invested: 0 };
+                }
+                peaByTicker[p.ticker].quantity += p.quantity;
+                peaByTicker[p.ticker].invested += (p.quantity * p.price) + (p.fees || 0);
+            });
+            Object.entries(peaByTicker).forEach(([ticker, d]) => {
+                const currentPrice = portfolio.prices[ticker] || (d.invested / d.quantity);
+                const value = d.quantity * currentPrice;
+                peaTotal += value;
+                data.push({ name: ticker, value: value, category: 'Action', color: '#4a9eff' });
+            });
+            totalValue += peaTotal;
+            
+            // Livrets
+            let livretsTotal = 0;
+            portfolio.livrets.forEach((l, i) => {
+                const value = parseFloat(l.amount) || 0;
+                livretsTotal += value;
+                data.push({ name: l.type, value: value, category: 'Livret', color: '#00d4aa' });
+            });
+            totalValue += livretsTotal;
+            
+            // Fundraising
+            let fundraisingTotal = 0;
+            portfolio.fundraising.forEach(f => {
+                fundraisingTotal += f.valuation;
+                data.push({ name: f.name, value: f.valuation, category: 'Levée', color: '#9b59b6' });
+            });
+            totalValue += fundraisingTotal;
+            
+            if (data.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🗺️</div><p>Aucun actif à afficher</p></div>';
+                return;
+            }
+            
+            // Sort by value
+            data.sort((a, b) => b.value - a.value);
+            
+            // Simple treemap layout (not perfect but functional)
+            const html = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; height: 100%;">
+                    ${data.map(item => {
+                        const percentage = (item.value / totalValue * 100);
+                        const size = Math.max(100, percentage * 4); // Minimum 100px
+                        
+                        return `
+                            <div style="
+                                background: ${item.color};
+                                border-radius: 8px;
+                                padding: 12px;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                align-items: center;
+                                min-height: ${size}px;
+                                transition: all 0.2s;
+                                cursor: pointer;
+                                position: relative;
+                                overflow: hidden;
+                            " onmouseover="this.style.transform='scale(1.05)'; this.style.zIndex='10';" 
+                               onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1';">
+                                <div style="font-weight: 900; font-size: 0.95em; color: white; text-align: center; margin-bottom: 4px;">
+                                    ${item.name}
+                                </div>
+                                <div style="font-size: 0.75em; color: rgba(255,255,255,0.8); margin-bottom: 8px;">
+                                    ${item.category}
+                                </div>
+                                <div style="font-weight: 700; font-size: 1.1em; color: white;" class="value-hidden">
+                                    €${item.value.toLocaleString('fr-FR', {maximumFractionDigits: 0})}
+                                </div>
+                                <div style="font-size: 0.85em; color: rgba(255,255,255,0.9); margin-top: 4px;">
+                                    ${percentage.toFixed(1)}%
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            if (isPrivacyMode) applyPrivacyMode();
+        }
+        
+        // 3. BENCHMARK COMPARISON
+        function generateBenchmarkComparison() {
+            const period = parseInt(document.getElementById('benchmarkPeriod').value);
+            
+            // Calculate portfolio performance
+            const currentValue = calculateTotalPortfolioValue();
+            const totalInvested = calculateTotalInvested();
+            const portfolioPerf = totalInvested > 0 ? ((currentValue - totalInvested) / totalInvested * 100) : 0;
+            
+            // Mock benchmark data (in real app, would fetch from API)
+            const benchmarks = {
+                'S&P 500': { 7: 0.5, 30: 2.1, 90: 8.5, 365: 26.3 },
+                'CAC 40': { 7: 0.3, 30: 1.8, 90: 7.2, 365: 18.7 },
+                'Bitcoin': { 7: 2.5, 30: 8.3, 90: 45.2, 365: 128.5 },
+                'Or': { 7: 0.1, 30: 0.5, 90: 2.1, 365: 8.4 }
+            };
+            
+            const results = [];
+            Object.entries(benchmarks).forEach(([name, perfs]) => {
+                const benchPerf = perfs[period];
+                const diff = portfolioPerf - benchPerf;
+                results.push({ name, performance: benchPerf, diff });
+            });
+            
+            const html = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                    <div style="text-align: center; padding: 20px; background: rgba(255, 99, 71, 0.1); border-radius: 12px; border: 1px solid var(--orange-primary);">
+                        <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">Votre portfolio</div>
+                        <div style="font-size: 2em; font-weight: 900; color: var(--orange-primary);">
+                            ${portfolioPerf > 0 ? '+' : ''}${portfolioPerf.toFixed(2)}%
+                        </div>
+                    </div>
+                    ${results.map(r => `
+                        <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 1px solid var(--border-subtle);">
+                            <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">${r.name}</div>
+                            <div style="font-size: 2em; font-weight: 900; color: ${r.performance > 0 ? 'var(--success)' : 'var(--danger)'};">
+                                ${r.performance > 0 ? '+' : ''}${r.performance.toFixed(2)}%
+                            </div>
+                            <div style="font-size: 0.85em; margin-top: 8px; color: ${r.diff > 0 ? 'var(--success)' : 'var(--danger)'}; font-weight: 600;">
+                                ${r.diff > 0 ? '▲' : '▼'} ${Math.abs(r.diff).toFixed(2)}% vs vous
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.getElementById('benchmarkResults').innerHTML = html;
+            
+            // Draw chart
+            const ctx = document.getElementById('benchmarkChart');
+            if (!ctx) return;
+            
+            const colors = getChartColors();
+            
+            if (window.benchmarkChartInstance) {
+                window.benchmarkChartInstance.destroy();
+            }
+            
+            window.benchmarkChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Votre Portfolio', ...results.map(r => r.name)],
+                    datasets: [{
+                        label: 'Performance (%)',
+                        data: [portfolioPerf, ...results.map(r => r.performance)],
+                        backgroundColor: [
+                            'rgba(255, 99, 71, 0.8)',
+                            'rgba(74, 158, 255, 0.8)',
+                            'rgba(74, 158, 255, 0.8)',
+                            'rgba(255, 193, 7, 0.8)',
+                            'rgba(255, 215, 0, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 71, 1)',
+                            'rgba(74, 158, 255, 1)',
+                            'rgba(74, 158, 255, 1)',
+                            'rgba(255, 193, 7, 1)',
+                            'rgba(255, 215, 0, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: colors.tooltipBg,
+                            titleColor: colors.text,
+                            bodyColor: colors.text,
+                            borderColor: colors.tooltipBorder,
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Performance: ${context.parsed.y > 0 ? '+' : ''}${context.parsed.y.toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: colors.grid },
+                            ticks: { color: colors.textSecondary }
+                        },
+                        y: {
+                            grid: { color: colors.grid },
+                            ticks: {
+                                color: colors.textSecondary,
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 4. SANKEY DIAGRAM
+        function generateSankey() {
+            const container = document.getElementById('sankeyContainer');
+            if (!container) return;
+            
+            // Calculate values
+            let cryptoValue = 0;
+            portfolio.crypto.forEach(c => {
+                cryptoValue += c.quantity * (portfolio.prices[c.symbol] || 0);
+            });
+            
+            let peaValue = 0;
+            const peaByTicker = {};
+            portfolio.pea.forEach(p => {
+                if (!peaByTicker[p.ticker]) {
+                    peaByTicker[p.ticker] = { quantity: 0, invested: 0 };
+                }
+                peaByTicker[p.ticker].quantity += p.quantity;
+                peaByTicker[p.ticker].invested += (p.quantity * p.price) + (p.fees || 0);
+            });
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const currentPrice = portfolio.prices[ticker] || (data.invested / data.quantity);
+                peaValue += data.quantity * currentPrice;
+            });
+            
+            let livretsValue = 0;
+            portfolio.livrets.forEach(l => {
+                livretsValue += parseFloat(l.amount) || 0;
+            });
+            
+            let fundraisingValue = 0;
+            portfolio.fundraising.forEach(f => {
+                fundraisingValue += f.valuation;
+            });
+            
+            const totalValue = cryptoValue + peaValue + livretsValue + fundraisingValue;
+            
+            if (totalValue === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🌊</div><p>Aucune donnée à visualiser</p></div>';
+                return;
+            }
+            
+            // Simple Sankey representation (visual approximation)
+            const html = `
+                <div style="padding: 40px 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                        <div style="text-align: center; flex: 1;">
+                            <div style="font-weight: 700; font-size: 1.2em; margin-bottom: 16px;">📥 Investissement</div>
+                            <div style="padding: 20px; background: rgba(255, 99, 71, 0.1); border-radius: 12px; border: 2px solid var(--orange-primary);">
+                                <div style="font-size: 2em; font-weight: 900; color: var(--orange-primary);" class="value-hidden">
+                                    €${totalValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="flex: 0 0 100px; display: flex; justify-content: center;">
+                            <div style="font-size: 3em; color: var(--text-secondary);">→</div>
+                        </div>
+                        
+                        <div style="flex: 2; display: flex; flex-direction: column; gap: 12px;">
+                            ${cryptoValue > 0 ? `
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="flex: 1; height: ${(cryptoValue / totalValue * 200)}px; background: linear-gradient(90deg, rgba(255, 99, 71, 0.3), rgba(255, 99, 71, 0.8)); border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 12px;">
+                                        <div>
+                                            <div style="font-weight: 700; color: white;">🪙 Crypto</div>
+                                            <div style="font-weight: 900; color: white;" class="value-hidden">€${cryptoValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                                            <div style="font-size: 0.85em; color: rgba(255,255,255,0.9);">${((cryptoValue / totalValue) * 100).toFixed(1)}%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${peaValue > 0 ? `
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="flex: 1; height: ${(peaValue / totalValue * 200)}px; background: linear-gradient(90deg, rgba(74, 158, 255, 0.3), rgba(74, 158, 255, 0.8)); border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 12px;">
+                                        <div>
+                                            <div style="font-weight: 700; color: white;">📈 Actions</div>
+                                            <div style="font-weight: 900; color: white;" class="value-hidden">€${peaValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                                            <div style="font-size: 0.85em; color: rgba(255,255,255,0.9);">${((peaValue / totalValue) * 100).toFixed(1)}%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${livretsValue > 0 ? `
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="flex: 1; height: ${(livretsValue / totalValue * 200)}px; background: linear-gradient(90deg, rgba(0, 212, 170, 0.3), rgba(0, 212, 170, 0.8)); border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 12px;">
+                                        <div>
+                                            <div style="font-weight: 700; color: white;">💰 Livrets</div>
+                                            <div style="font-weight: 900; color: white;" class="value-hidden">€${livretsValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                                            <div style="font-size: 0.85em; color: rgba(255,255,255,0.9);">${((livretsValue / totalValue) * 100).toFixed(1)}%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${fundraisingValue > 0 ? `
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="flex: 1; height: ${(fundraisingValue / totalValue * 200)}px; background: linear-gradient(90deg, rgba(155, 89, 182, 0.3), rgba(155, 89, 182, 0.8)); border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 12px;">
+                                        <div>
+                                            <div style="font-weight: 700; color: white;">🚀 Levées</div>
+                                            <div style="font-weight: 900; color: white;" class="value-hidden">€${fundraisingValue.toLocaleString('fr-FR', {maximumFractionDigits: 0})}</div>
+                                            <div style="font-size: 0.85em; color: rgba(255,255,255,0.9);">${((fundraisingValue / totalValue) * 100).toFixed(1)}%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            if (isPrivacyMode) applyPrivacyMode();
+        }
+        
+        // 5. WATERFALL CHART
+        function generateWaterfall() {
+            const ctx = document.getElementById('waterfallChart');
+            if (!ctx) return;
+            
+            const colors = getChartColors();
+            const contributions = [];
+            
+            // Calculate contribution of each category
+            let cryptoContribution = 0;
+            portfolio.crypto.forEach(c => {
+                const currentValue = c.quantity * (portfolio.prices[c.symbol] || 0);
+                const invested = c.quantity * c.price;
+                cryptoContribution += (currentValue - invested);
+            });
+            
+            let peaContribution = 0;
+            const peaByTicker = {};
+            portfolio.pea.forEach(p => {
+                if (!peaByTicker[p.ticker]) {
+                    peaByTicker[p.ticker] = { quantity: 0, invested: 0 };
+                }
+                peaByTicker[p.ticker].quantity += p.quantity;
+                peaByTicker[p.ticker].invested += (p.quantity * p.price) + (p.fees || 0);
+            });
+            Object.entries(peaByTicker).forEach(([ticker, data]) => {
+                const currentPrice = portfolio.prices[ticker] || (data.invested / data.quantity);
+                const currentValue = data.quantity * currentPrice;
+                peaContribution += (currentValue - data.invested);
+            });
+            
+            // Livrets and fundraising don't have gains typically, but include for completeness
+            let livretsContribution = 0;
+            let fundraisingContribution = 0;
+            portfolio.fundraising.forEach(f => {
+                fundraisingContribution += (f.valuation - f.amount);
+            });
+            
+            const totalContribution = cryptoContribution + peaContribution + livretsContribution + fundraisingContribution;
+            
+            contributions.push(
+                { label: 'Crypto', value: cryptoContribution },
+                { label: 'Actions', value: peaContribution },
+                { label: 'Levées', value: fundraisingContribution }
+            );
+            
+            // Create cumulative values for waterfall
+            let cumulative = 0;
+            const waterfallData = [];
+            const backgroundColors = [];
+            const borderColors = [];
+            
+            contributions.forEach((c, i) => {
+                waterfallData.push(cumulative);
+                cumulative += c.value;
+                
+                if (c.value >= 0) {
+                    backgroundColors.push('rgba(0, 212, 170, 0.8)');
+                    borderColors.push('rgba(0, 212, 170, 1)');
+                } else {
+                    backgroundColors.push('rgba(255, 71, 87, 0.8)');
+                    borderColors.push('rgba(255, 71, 87, 1)');
+                }
+            });
+            
+            // Add total
+            waterfallData.push(0);
+            backgroundColors.push('rgba(255, 99, 71, 0.8)');
+            borderColors.push('rgba(255, 99, 71, 1)');
+            
+            if (window.waterfallChartInstance) {
+                window.waterfallChartInstance.destroy();
+            }
+            
+            window.waterfallChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [...contributions.map(c => c.label), 'Total'],
+                    datasets: [
+                        {
+                            label: 'Base',
+                            data: waterfallData,
+                            backgroundColor: 'transparent',
+                            borderColor: 'transparent'
+                        },
+                        {
+                            label: 'Contribution',
+                            data: [...contributions.map(c => Math.abs(c.value)), totalContribution],
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColors,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: colors.tooltipBg,
+                            titleColor: colors.text,
+                            bodyColor: colors.text,
+                            borderColor: colors.tooltipBorder,
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 1) {
+                                        const value = contributions[context.dataIndex]?.value || totalContribution;
+                                        return `Contribution: ${value >= 0 ? '+' : ''}€${value.toLocaleString('fr-FR', {maximumFractionDigits: 0})}`;
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { color: colors.grid },
+                            ticks: { color: colors.textSecondary }
+                        },
+                        y: {
+                            stacked: true,
+                            grid: { color: colors.grid },
+                            ticks: {
+                                color: colors.textSecondary,
+                                callback: function(value) {
+                                    return '€' + value.toLocaleString('fr-FR', {maximumFractionDigits: 0});
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         // Initialize theme and currency on load
