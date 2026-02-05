@@ -540,6 +540,273 @@
             color: var(--orange-primary);
         }
         
+        /* ========================================
+           🧠 ANALYTICS STYLES
+           ======================================== */
+        
+        /* Alert items */
+        .alert-item {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--orange-primary);
+            transition: all 0.2s;
+        }
+        
+        .alert-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(4px);
+        }
+        
+        /* Correlation risk indicators */
+        .risk-high {
+            border-left-color: var(--danger) !important;
+        }
+        
+        .risk-medium {
+            border-left-color: #ffc107 !important;
+        }
+        
+        .risk-low {
+            border-left-color: var(--success) !important;
+        }
+        
+        /* Prediction results */
+        .prediction-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid;
+            transition: all 0.2s;
+        }
+        
+        .prediction-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .prediction-current {
+            background: rgba(255, 99, 71, 0.1);
+            border-color: var(--orange-primary);
+        }
+        
+        .prediction-future {
+            background: rgba(0, 212, 170, 0.1);
+            border-color: var(--success);
+        }
+        
+        .prediction-gain {
+            background: rgba(74, 158, 255, 0.1);
+            border-color: #4a9eff;
+        }
+        
+        /* Rebalancing suggestions */
+        .rebalance-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+        
+        .rebalance-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .rebalance-action {
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        
+        .rebalance-buy {
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+        
+        .rebalance-sell {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+        
+        /* Tax loss cards */
+        .tax-loss-card {
+            padding: 20px;
+            background: rgba(255, 71, 87, 0.05);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--danger);
+            transition: all 0.2s;
+        }
+        
+        .tax-loss-card:hover {
+            background: rgba(255, 71, 87, 0.08);
+            transform: translateX(4px);
+        }
+        
+        /* Info boxes */
+        .info-box {
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid;
+            margin-bottom: 16px;
+        }
+        
+        .info-box-warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: #ffc107;
+        }
+        
+        .info-box-success {
+            background: rgba(0, 212, 170, 0.1);
+            border-color: var(--success);
+        }
+        
+        .info-box-primary {
+            background: rgba(255, 99, 71, 0.1);
+            border-color: var(--orange-primary);
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        /* Analytics grid */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        /* Value badge */
+        .value-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .value-badge-positive {
+            background: rgba(0, 212, 170, 0.15);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        
+        .value-badge-negative {
+            background: rgba(255, 71, 87, 0.15);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        
+        .value-badge-neutral {
+            background: rgba(136, 146, 166, 0.15);
+            color: var(--text-secondary);
+            border: 1px solid var(--text-secondary);
+        }
+        
+        /* Analytics form elements */
+        #analytics input[type="number"],
+        #analytics select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em;
+            transition: all 0.2s;
+        }
+        
+        #analytics input[type="number"]:focus,
+        #analytics select:focus {
+            outline: none;
+            border-color: var(--orange-primary);
+            background: rgba(255, 99, 71, 0.05);
+        }
+        
+        #analytics label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9em;
+        }
+        
+        /* Analytics button hover states */
+        #analytics .update-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 99, 71, 0.4);
+        }
+        
+        #analytics .update-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Analytics animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .analytics-card-enter {
+            animation: fadeInUp 0.4s ease-out;
+        }
+        
+        /* Pulse animation for alerts */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        .alert-active {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        /* Glow effect for high priority items */
+        .high-priority {
+            box-shadow: 0 0 20px rgba(255, 99, 71, 0.3);
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(255, 99, 71, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(255, 99, 71, 0.5);
+            }
+        }
+        
         
         /* Privacy Mode - Blur values */
         .privacy-mode .value-hidden {
